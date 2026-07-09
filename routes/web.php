@@ -8,6 +8,7 @@ use App\Http\Controllers\PicController;
 use App\Http\Controllers\SemakController;
 use App\Http\Controllers\TweakController;
 use App\Http\Controllers\WizardController;
+use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -59,9 +60,15 @@ Route::prefix('/b/{token}')->middleware('resolve.invitation')->name('pic.')->gro
     Route::get('/lulus', [ApprovalController::class, 'show'])->name('lulus');
     Route::post('/lulus', [ApprovalController::class, 'store'])->name('lulus.store');
 
-    // P10 Status (placeholder — dilengkapkan Fasa 9).
+    // P10 Status + thread nota (§5.2 P10/P11).
     Route::get('/status', function (Request $request) {
-        return view('pic.status', ['token' => $request->route('token')]);
+        /** @var Project $project */
+        $project = $request->attributes->get('project');
+
+        return view('pic.status', [
+            'token' => $request->route('token'),
+            'notes' => $project->notes()->oldest()->get(),
+        ]);
     })->name('status');
     Route::post('/nota', [PicController::class, 'storeNote'])->name('nota');
 });

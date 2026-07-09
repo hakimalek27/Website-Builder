@@ -1,81 +1,111 @@
 @extends('layouts.pic')
 
-@section('title', 'Semak & Hantar — '.$project->mosque_name)
+@section('title', 'Semak & Hantar — ' . $project->mosque_name)
 
 @section('content')
-    <div class="mb-6 flex items-center justify-between">
+    <div class="mb-6 flex items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-[#0F3D27]">Semak &amp; Hantar</h1>
-            <p class="mt-1 text-sm text-[#1A1A1A]/70">Semak ringkasan sebelum menghantar untuk penjanaan draf.</p>
+            <h1 class="font-display text-3xl font-bold text-brand-800">Semak &amp; Hantar</h1>
+            <p class="mt-1 text-sm text-ink/60">Semak ringkasan sebelum menghantar untuk penjanaan draf.</p>
         </div>
-        <a href="{{ route('pic.home', ['token' => $token]) }}" class="text-sm text-[#1B5E3F] hover:underline">&larr; Senarai langkah</a>
+        <a href="{{ route('pic.home', ['token' => $token]) }}" class="flex shrink-0 items-center gap-1 text-sm font-medium text-brand-600 hover:text-brand-700">
+            {!! \App\Support\Lucide::svg('ArrowLeft', 2, 'h-4 w-4') !!} Senarai langkah
+        </a>
     </div>
 
     @if (session('success'))
-        <div class="mb-4 rounded-lg border border-[#1B5E3F]/30 bg-[#1B5E3F]/5 p-4 text-sm text-[#0F3D27]">{{ session('success') }}</div>
+        <div class="mb-4 flex items-center gap-3 rounded-xl border border-brand-600/20 bg-brand-50 p-4 text-sm text-brand-800">
+            <span class="text-brand-600">{!! \App\Support\Lucide::svg('CircleCheck', 2, 'h-5 w-5') !!}</span>{{ session('success') }}
+        </div>
     @endif
     @if (session('error'))
-        <div class="mb-4 rounded-lg border border-red-300 bg-red-50 p-4 text-sm text-red-800">{{ session('error') }}</div>
+        <div class="mb-4 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+            <span class="text-red-500">{!! \App\Support\Lucide::svg('TriangleAlert', 2, 'h-5 w-5') !!}</span>{{ session('error') }}
+        </div>
     @endif
     @if ($alreadySubmitted)
-        <div class="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-800">
+        <div class="mb-4 flex items-center gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-800">
+            <span class="text-amber-500">{!! \App\Support\Lucide::svg('Info', 2, 'h-5 w-5') !!}</span>
             Telah dihantar — anda masih boleh edit sehingga draf diluluskan.
         </div>
     @endif
 
     {{-- Skor kelengkapan --}}
-    <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-[#EFE8DC]">
-        <div class="flex items-center justify-between text-sm">
-            <span class="font-medium text-[#0F3D27]">Skor kelengkapan</span>
-            <span class="font-semibold {{ $result['score'] === 100 ? 'text-[#1B5E3F]' : 'text-[#8C6D2F]' }}">{{ $result['score'] }}% ({{ $result['filled'] }}/{{ $result['total'] }})</span>
-        </div>
-        <div class="mt-2 h-3 w-full overflow-hidden rounded-full bg-[#EFE8DC]">
-            <div class="h-full rounded-full {{ $result['score'] === 100 ? 'bg-[#1B5E3F]' : 'bg-[#C9A961]' }} transition-all" style="width: {{ $result['score'] }}%"></div>
-        </div>
+    <div class="rounded-3xl bg-white p-6 shadow-soft ring-1 ring-sand sm:p-8">
+        <div class="flex flex-col items-center gap-6 sm:flex-row sm:gap-8">
+            <x-ui.progress-ring :value="$result['score']" class="shrink-0 text-brand-600">
+                <span class="mt-0.5 text-[11px] font-medium text-ink/50">lengkap</span>
+            </x-ui.progress-ring>
+            <div class="flex-1 text-center sm:text-left">
+                <p class="font-display text-xl font-bold {{ $result['score'] === 100 ? 'text-brand-700' : 'text-gold-600' }}">
+                    {{ $result['filled'] }} / {{ $result['total'] }} medan wajib terisi
+                </p>
+                @if ($result['score'] === 100)
+                    <p class="mt-1 text-sm text-ink/60">Semua medan wajib lengkap — anda sedia untuk menghantar.</p>
+                @else
+                    <p class="mt-1 text-sm text-ink/60">Lengkapkan medan di bawah untuk membuka butang hantar.</p>
+                @endif
 
-        @if (! empty($result['missing']))
-            <div class="mt-4">
-                <p class="text-sm font-medium text-[#1A1A1A]">Medan wajib belum lengkap:</p>
-                <ul class="mt-2 space-y-1 text-sm">
-                    @foreach ($result['missing'] as $m)
-                        <li>
-                            <a href="{{ route('pic.step', ['token' => $token, 'step' => $m['step']]) }}" class="text-[#1B5E3F] hover:underline">
-                                • {{ $m['label'] }} <span class="text-xs text-[#1A1A1A]/40">(Langkah {{ $m['step'] }})</span>
-                            </a>
-                        </li>
-                    @endforeach
-                </ul>
+                @if (! empty($result['missing']))
+                    <div class="mt-4">
+                        <p class="mb-2 text-xs font-semibold tracking-wide text-ink/45 uppercase">Medan wajib belum lengkap</p>
+                        <div class="flex flex-wrap gap-2">
+                            @foreach ($result['missing'] as $m)
+                                <a href="{{ route('pic.step', ['token' => $token, 'step' => $m['step']]) }}"
+                                    class="chip bg-gold-400/15 text-gold-700 ring-1 ring-gold-400/25 transition hover:bg-gold-400/25">
+                                    {{ $m['label'] }}
+                                    <span class="text-gold-600/70">· L{{ $m['step'] }}</span>
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
             </div>
-        @endif
+        </div>
     </div>
 
     {{-- Ringkasan per langkah --}}
-    <div class="mt-6 space-y-2">
+    <div class="mt-6 grid gap-2 sm:grid-cols-2">
         @foreach ($steps as $s)
-            @php $has = ! empty($sections['step_'.$s['index']] ?? []); @endphp
-            <div class="flex items-center gap-3 rounded-xl bg-white px-4 py-3 ring-1 ring-[#EFE8DC]">
+            @php $has = ! empty($sections['step_' . $s['index']] ?? []); @endphp
+            <div class="flex items-center gap-3 rounded-2xl bg-white px-4 py-3 shadow-xs ring-1 ring-sand">
                 <span @class([
-                    'flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold',
-                    'bg-[#1B5E3F] text-white' => $has, 'bg-[#EFE8DC] text-[#1A1A1A]/50' => ! $has,
-                ])>{{ $has ? '✓' : $s['index'] }}</span>
-                <span class="flex-1 text-sm font-medium">{{ $s['title'] }}</span>
-                <a href="{{ route('pic.step', ['token' => $token, 'step' => $s['index']]) }}" class="text-xs font-medium text-[#1B5E3F] hover:underline">Edit</a>
+                    'grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-semibold',
+                    'bg-brand-600 text-white' => $has,
+                    'bg-sand text-ink/45' => ! $has,
+                ])>
+                    @if ($has)
+                        {!! \App\Support\Lucide::svg('Check', 2.5, 'h-3.5 w-3.5') !!}
+                    @else
+                        {{ $s['index'] }}
+                    @endif
+                </span>
+                <span class="flex-1 text-sm font-medium text-ink">{{ $s['title'] }}</span>
+                <a href="{{ route('pic.step', ['token' => $token, 'step' => $s['index']]) }}"
+                    class="flex items-center gap-1 text-xs font-medium text-brand-600 hover:text-brand-700">
+                    {!! \App\Support\Lucide::svg('Pencil', 2, 'h-3.5 w-3.5') !!} Edit
+                </a>
             </div>
         @endforeach
     </div>
 
     @if ($maskedBank)
-        <p class="mt-4 text-xs text-[#1A1A1A]/50">Nombor akaun infaq: {{ $maskedBank }} (dipaparkan penuh dalam pakej serahan sahaja).</p>
+        <p class="mt-4 flex items-center gap-2 text-xs text-ink/50">
+            {!! \App\Support\Lucide::svg('Lock', 2, 'h-3.5 w-3.5') !!}
+            Nombor akaun infaq: {{ $maskedBank }} (dipaparkan penuh dalam pakej serahan sahaja).
+        </p>
     @endif
 
-    {{-- Hantar --}}
-    <div class="mt-6">
-        <form method="POST" action="{{ route('pic.submit', ['token' => $token]) }}">
+    {{-- Bar hantar melekit --}}
+    <div class="sticky bottom-4 z-10 mt-6">
+        <form method="POST" action="{{ route('pic.submit', ['token' => $token]) }}"
+            class="rounded-2xl border border-sand bg-white/85 p-3 shadow-lift backdrop-blur-md">
             @csrf
             <button type="submit" @disabled($result['score'] !== 100)
-                    class="w-full rounded-xl bg-[#1B5E3F] px-6 py-3.5 text-base font-semibold text-white hover:bg-[#0F3D27] disabled:opacity-40 disabled:cursor-not-allowed transition">
+                class="btn btn-primary btn-lg btn-block disabled:opacity-40">
                 @if ($result['score'] === 100)
                     Hantar Maklumat
+                    {!! \App\Support\Lucide::svg('ArrowRight', 2, 'h-5 w-5') !!}
                 @else
                     Lengkapkan semua medan wajib untuk hantar
                 @endif

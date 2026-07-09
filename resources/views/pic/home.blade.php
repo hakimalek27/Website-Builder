@@ -1,75 +1,92 @@
 @extends('layouts.pic')
 
-@section('title', 'Borang laman — '.$project->mosque_name)
+@section('title', 'Borang laman — ' . $project->mosque_name)
 
 @section('content')
     <div class="mb-6">
-        <h1 class="text-2xl font-bold text-[#0F3D27]">Assalamualaikum &amp; Selamat Datang</h1>
-        <p class="mt-1 text-[#1A1A1A]/70">
-            Borang untuk laman web <strong>{{ $project->mosque_name }}</strong>. Anda boleh isi mengikut
+        <span class="eyebrow">Ruang kerja PIC</span>
+        <h1 class="mt-3 font-display text-3xl font-bold text-brand-800">Assalamualaikum &amp; Selamat Datang</h1>
+        <p class="mt-2 text-ink/65">
+            Borang untuk laman web <strong class="text-ink/80">{{ $project->mosque_name }}</strong>. Isi mengikut
             keselesaan — setiap langkah disimpan automatik dan boleh disambung bila-bila.
         </p>
     </div>
 
-    {{-- Bar progres keseluruhan --}}
-    <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-[#EFE8DC]">
-        <div class="flex items-center justify-between text-sm">
-            <span class="font-medium text-[#0F3D27]">Kemajuan keseluruhan</span>
-            <span class="text-[#1A1A1A]/60">{{ $progress['completed'] }}/{{ $progress['total'] }} langkah selesai</span>
-        </div>
-        <div class="mt-2 h-3 w-full overflow-hidden rounded-full bg-[#EFE8DC]">
-            <div class="h-full rounded-full bg-[#1B5E3F] transition-all" style="width: {{ $progress['percent'] }}%"></div>
-        </div>
-        <div class="mt-5 flex flex-wrap gap-3">
-            <a href="{{ route('pic.step', ['token' => $token, 'step' => $progress['resume_step']]) }}"
-               class="inline-block rounded-xl bg-[#1B5E3F] px-6 py-3 text-sm font-semibold text-white hover:bg-[#0F3D27] transition">
-                @if ($progress['completed'] === 0)
-                    Mula Isi Borang
-                @else
-                    Sambung di Langkah {{ $progress['resume_step'] }}
-                @endif
-            </a>
-            <a href="{{ route('pic.semak', ['token' => $token]) }}"
-               class="inline-block rounded-xl border border-[#1B5E3F]/30 px-6 py-3 text-sm font-semibold text-[#0F3D27] hover:bg-[#EFE8DC] transition">
-                Semak &amp; Hantar
-            </a>
+    {{-- Kad kemajuan --}}
+    <div class="overflow-hidden rounded-3xl bg-white shadow-soft ring-1 ring-sand">
+        <div class="flex flex-col items-center gap-6 p-6 sm:flex-row sm:gap-8 sm:p-8">
+            <x-ui.progress-ring :value="$progress['percent']" class="shrink-0 text-brand-600">
+                <span class="mt-0.5 text-[11px] font-medium text-ink/50">selesai</span>
+            </x-ui.progress-ring>
+            <div class="flex-1 text-center sm:text-left">
+                <p class="text-sm text-ink/60">
+                    <strong class="font-semibold text-brand-800">{{ $progress['completed'] }}</strong> daripada
+                    {{ $progress['total'] }} langkah selesai
+                </p>
+                <h2 class="mt-1 font-display text-2xl font-bold text-brand-800">
+                    @if ($progress['completed'] === 0)
+                        Jom mulakan borang anda
+                    @elseif ($progress['percent'] === 100)
+                        Semua langkah selesai! 🎉
+                    @else
+                        Teruskan di mana anda berhenti
+                    @endif
+                </h2>
+                <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-start">
+                    <x-ui.button :href="route('pic.step', ['token' => $token, 'step' => $progress['resume_step']])" variant="primary">
+                        @if ($progress['completed'] === 0)
+                            Mula Isi Borang
+                        @else
+                            Sambung di Langkah {{ $progress['resume_step'] }}
+                        @endif
+                        {!! \App\Support\Lucide::svg('ArrowRight', 2, 'h-4 w-4') !!}
+                    </x-ui.button>
+                    <x-ui.button :href="route('pic.semak', ['token' => $token])" variant="outline">Semak &amp; Hantar</x-ui.button>
+                </div>
+            </div>
         </div>
     </div>
 
-    {{-- Senarai 10 langkah dengan status --}}
-    <div class="mt-6 space-y-2">
-        @foreach ($progress['steps'] as $step)
-            <a href="{{ route('pic.step', ['token' => $token, 'step' => $step['index']]) }}"
-               class="flex items-center gap-4 rounded-xl bg-white px-4 py-3 ring-1 ring-[#EFE8DC] hover:ring-[#1B5E3F]/40 transition">
-                <span @class([
-                    'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold',
-                    'bg-[#1B5E3F] text-white' => $step['status'] === 'complete',
-                    'bg-[#C9A961]/30 text-[#8C6D2F]' => $step['status'] === 'partial',
-                    'bg-[#EFE8DC] text-[#1A1A1A]/50' => $step['status'] === 'empty',
-                ])>
-                    @if ($step['status'] === 'complete')
-                        ✓
-                    @else
-                        {{ $step['index'] }}
-                    @endif
-                </span>
-                <span class="flex-1">
-                    <span class="block font-medium text-[#1A1A1A]">{{ $step['title'] }}</span>
-                    <span class="block text-xs text-[#1A1A1A]/55">{{ $step['subtitle'] }}</span>
-                </span>
-                <span @class([
-                    'text-xs font-medium',
-                    'text-[#1B5E3F]' => $step['status'] === 'complete',
-                    'text-[#8C6D2F]' => $step['status'] === 'partial',
-                    'text-[#1A1A1A]/40' => $step['status'] === 'empty',
-                ])>
-                    @switch($step['status'])
-                        @case('complete') Selesai @break
-                        @case('partial') Separa @break
-                        @default Belum
-                    @endswitch
-                </span>
-            </a>
-        @endforeach
+    {{-- Senarai 10 langkah --}}
+    <div class="mt-8">
+        <h3 class="mb-3 px-1 text-xs font-semibold tracking-wider text-ink/45 uppercase">Langkah-langkah</h3>
+        <div class="space-y-2">
+            @foreach ($progress['steps'] as $step)
+                <a href="{{ route('pic.step', ['token' => $token, 'step' => $step['index']]) }}"
+                    class="group flex items-center gap-4 rounded-2xl bg-white px-4 py-3.5 shadow-xs ring-1 ring-sand transition-all hover:-translate-y-0.5 hover:shadow-soft hover:ring-brand-600/30">
+                    <span @class([
+                        'grid h-9 w-9 shrink-0 place-items-center rounded-full text-sm font-semibold transition',
+                        'bg-brand-600 text-white' => $step['status'] === 'complete',
+                        'bg-gold-400/25 text-gold-700' => $step['status'] === 'partial',
+                        'bg-sand text-ink/45' => $step['status'] === 'empty',
+                    ])>
+                        @if ($step['status'] === 'complete')
+                            {!! \App\Support\Lucide::svg('Check', 2.5, 'h-4 w-4') !!}
+                        @else
+                            {{ $step['index'] }}
+                        @endif
+                    </span>
+                    <span class="flex-1">
+                        <span class="block font-medium text-ink">{{ $step['title'] }}</span>
+                        <span class="block text-xs text-ink/50">{{ $step['subtitle'] }}</span>
+                    </span>
+                    <span @class([
+                        'chip shrink-0',
+                        'bg-brand-50 text-brand-700' => $step['status'] === 'complete',
+                        'bg-gold-400/15 text-gold-700' => $step['status'] === 'partial',
+                        'bg-sand/60 text-ink/45' => $step['status'] === 'empty',
+                    ])>
+                        @switch($step['status'])
+                            @case('complete') Selesai @break
+                            @case('partial') Separa @break
+                            @default Belum
+                        @endswitch
+                    </span>
+                    <span class="text-ink/25 transition group-hover:translate-x-0.5 group-hover:text-brand-600">
+                        {!! \App\Support\Lucide::svg('ChevronRight', 2, 'h-4 w-4') !!}
+                    </span>
+                </a>
+            @endforeach
+        </div>
     </div>
 @endsection

@@ -1,5 +1,5 @@
 {{-- Langkah 9 — Nota, Perakuan & Persetujuan (§6 L9) --}}
-@php $inp = 'mt-1 w-full rounded-lg border border-[#EFE8DC] bg-white px-3 py-2 text-sm focus:border-[#1B5E3F] focus:ring-1 focus:ring-[#1B5E3F] outline-none'; @endphp
+@php $inp = 'mt-1 w-full rounded-xl border border-sand bg-white px-3 py-2 text-sm focus:border-brand-500 focus:ring-4 focus:ring-brand-500/12 focus:outline-none'; @endphp
 <div class="space-y-6">
     <div>
         <label class="block text-sm font-medium">Nota bebas (pilihan)</label>
@@ -36,24 +36,24 @@
         </div>
     </div>
 
-    <div class="space-y-3 rounded-xl border border-[#EFE8DC] bg-[#FAF7F2] p-4">
+    <div class="space-y-3 rounded-xl border border-sand bg-cream p-4">
         <label class="flex items-start gap-2.5 text-sm">
-            <input type="checkbox" wire:model.live="data.consent_pdpa" class="mt-0.5 text-[#1B5E3F] focus:ring-[#1B5E3F]">
+            <input type="checkbox" wire:model.live="data.consent_pdpa" class="mt-0.5 h-4 w-4 accent-brand-600">
             <span>
                 {{ __('reka.consent_pdpa', ['business' => config('reka.business_name')]) }}
-                <a href="{{ route('privasi') }}" target="_blank" class="text-[#1B5E3F] underline">Notis Privasi</a>.
+                <a href="{{ route('privasi') }}" target="_blank" class="text-brand-600 underline">Notis Privasi</a>.
             </span>
         </label>
         @error('data.consent_pdpa') <p class="text-xs text-red-600">{{ $message }}</p> @enderror
 
         <label class="flex items-start gap-2.5 text-sm">
-            <input type="checkbox" wire:model.live="data.declare_truth_authority" class="mt-0.5 text-[#1B5E3F] focus:ring-[#1B5E3F]">
+            <input type="checkbox" wire:model.live="data.declare_truth_authority" class="mt-0.5 h-4 w-4 accent-brand-600">
             <span>{{ __('reka.declare_authority') }}</span>
         </label>
         @error('data.declare_truth_authority') <p class="text-xs text-red-600">{{ $message }}</p> @enderror
     </div>
 
-    <p class="text-center text-sm text-[#1A1A1A]/60">
-        Setelah semua langkah lengkap, pergi ke halaman <a href="{{ route('pic.semak', ['token' => $token]) }}" class="text-[#1B5E3F] underline">Semak &amp; Hantar</a>.
+    <p class="text-center text-sm text-ink/60">
+        Setelah semua langkah lengkap, pergi ke halaman <a href="{{ route('pic.semak', ['token' => $token]) }}" class="text-brand-600 underline">Semak &amp; Hantar</a>.
     </p>
 </div>

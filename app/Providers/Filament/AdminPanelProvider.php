@@ -29,6 +29,9 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->brandName('REKA')
+            ->brandLogo(asset('logo-reka.svg'))
+            ->brandLogoHeight('2.1rem')
+            ->favicon(asset('favicon.svg'))
             ->login()
             // §3 & §11.5: 2FA (app authenticator) WAJIB — dipaksa semasa login pertama.
             ->multiFactorAuthentication([
@@ -37,7 +40,7 @@ class AdminPanelProvider extends PanelProvider
                     ->recoverable(),
             ], isRequired: true)
             ->colors([
-                'primary' => Color::Emerald,
+                'primary' => Color::hex('#1B5E3F'),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

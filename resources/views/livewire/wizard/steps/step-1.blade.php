@@ -1,5 +1,5 @@
 {{-- Langkah 1 — Maklumat Asas Masjid (§6 L1) --}}
-@php $inp = 'mt-1 w-full rounded-lg border border-[#EFE8DC] bg-white px-3 py-2.5 text-sm focus:border-[#1B5E3F] focus:ring-1 focus:ring-[#1B5E3F] outline-none'; @endphp
+@php $inp = 'mt-1 w-full rounded-xl border border-sand bg-white px-3 py-2.5 text-sm focus:border-brand-500 focus:ring-4 focus:ring-brand-500/12 focus:outline-none'; @endphp
 <div class="space-y-5">
     <div class="grid gap-4 sm:grid-cols-2">
         <div class="sm:col-span-2">
@@ -52,7 +52,7 @@
                     <option value="{{ $code }}">{{ $label }}</option>
                 @endforeach
             </select>
-            <p class="mt-1 text-xs text-[#1A1A1A]/55">Zon menentukan waktu solat rasmi JAKIM di laman anda.</p>
+            <p class="mt-1 text-xs text-ink/55">Zon menentukan waktu solat rasmi JAKIM di laman anda.</p>
             @error('data.jakim_zone') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
         </div>
     </div>
@@ -84,7 +84,7 @@
     <div>
         <label class="block text-sm font-medium">Koordinat GPS <span class="text-red-600">*</span></label>
         <input type="text" wire:model.blur="data.gps" placeholder="3.1985, 101.7308" class="{{ $inp }}">
-        <p class="mt-1 text-xs text-[#1A1A1A]/55">Buka Google Maps → tekan lama pada masjid → salin koordinat (cth: 3.1985, 101.7308).</p>
+        <p class="mt-1 text-xs text-ink/55">Buka Google Maps → tekan lama pada masjid → salin koordinat (cth: 3.1985, 101.7308).</p>
         @error('data.gps') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
     </div>
 
@@ -122,7 +122,7 @@
                 'teks_sahaja' => 'Guna nama masjid bergaya sebagai logo',
             ] as $val => $label)
                 <label class="flex items-center gap-2 text-sm">
-                    <input type="radio" wire:model.live="data.logo_status" value="{{ $val }}" class="text-[#1B5E3F] focus:ring-[#1B5E3F]">
+                    <input type="radio" wire:model.live="data.logo_status" value="{{ $val }}" class="h-4 w-4 accent-brand-600">
                     {{ $label }}
                 </label>
             @endforeach
@@ -130,12 +130,12 @@
         @if (($data['logo_status'] ?? null) === 'ada')
             <div class="mt-2">
                 <input type="file" wire:model="files.logo" accept="image/png,image/jpeg,image/webp,image/svg+xml"
-                       class="w-full rounded-lg border border-[#EFE8DC] bg-white px-3 py-2 text-xs">
-                <p class="mt-1 text-xs text-[#1A1A1A]/55">png/svg/jpg, ≤4MB.</p>
+                       class="w-full rounded-xl border border-sand bg-white px-3 py-2 text-xs">
+                <p class="mt-1 text-xs text-ink/55">png/svg/jpg, ≤4MB.</p>
                 @if (! empty($data['logo_file']['name'] ?? null))
-                    <p class="mt-1 text-xs text-[#1B5E3F]">✓ {{ $data['logo_file']['name'] }}</p>
+                    <p class="mt-1 text-xs text-brand-600">✓ {{ $data['logo_file']['name'] }}</p>
                 @endif
-                <div wire:loading wire:target="files.logo" class="mt-1 text-xs text-[#8C6D2F]">Memuat naik…</div>
+                <div wire:loading wire:target="files.logo" class="mt-1 text-xs text-gold-700">Memuat naik…</div>
                 @error('files.logo') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
             </div>
         @endif

@@ -51,11 +51,50 @@ class SecurityHeaders
 
     protected function cspFor(Request $request): string
     {
-        if ($request->is('admin', 'admin/*') || $request->is('b/*') || $request->is('livewire/*')) {
-            return $this->interactiveCsp;
+        $csp = $this->isInteractive($request) ? $this->interactiveCsp : $this->baseCsp;
+
+        // DEV SAHAJA: benarkan pelayan Vite (`npm run dev`) di localhost supaya
+        // hot-reload berfungsi dalam browser. Di production (APP_ENV != local)
+        // string ketat di atas dikembalikan tanpa SEBARANG perubahan.
+        if (app()->environment('local')) {
+            return $this->withViteDevHosts($csp);
         }
 
-        return $this->baseCsp;
+        return $csp;
+    }
+
+    protected function isInteractive(Request $request): bool
+    {
+        return $request->is('admin', 'admin/*') || $request->is('b/*') || $request->is('livewire/*');
+    }
+
+    /**
+     * Sisip origin pelayan Vite dev (localhost, sebarang port) ke arahan berkaitan.
+     * Wildcard port kerana Vite boleh guna 5173/5174/… bergantung ketersediaan.
+     */
+    protected function withViteDevHosts(string $csp): string
+    {
+        $hosts = 'http://localhost:* http://127.0.0.1:* http://[::1]:*';
+        $ws = 'ws://localhost:* ws://127.0.0.1:* ws://[::1]:*';
+
+        // Pecah string CSP kepada peta arahan (kekal susunan asal).
+        $directives = [];
+        foreach (array_filter(array_map('trim', explode(';', $csp))) as $part) {
+            [$name, $value] = array_pad(explode(' ', $part, 2), 2, '');
+            $directives[$name] = $value;
+        }
+
+        // Suntik host Vite (tambah arahan jika belum wujud pada CSP asas).
+        $directives['script-src'] = trim(($directives['script-src'] ?? "'self'").' '.$hosts);
+        $directives['style-src'] = trim(($directives['style-src'] ?? "'self'").' '.$hosts);
+        $directives['font-src'] = trim(($directives['font-src'] ?? "'self' data:").' '.$hosts);
+        $directives['connect-src'] = trim(($directives['connect-src'] ?? "'self'").' '.$hosts.' '.$ws);
+
+        return implode('; ', array_map(
+            static fn ($name, $value) => trim("$name $value"),
+            array_keys($directives),
+            array_values($directives),
+        ));
     }
 
     protected function setIfAbsent(Response $response, string $name, string $value): void

@@ -9,16 +9,16 @@
                 @foreach ($designPackages as $pkg)
                     <label class="relative cursor-pointer">
                         <input type="radio" wire:model.live="data.design_package" value="{{ $pkg->key }}" class="peer sr-only">
-                        <div class="rounded-xl border-2 border-[#EFE8DC] bg-white p-3 transition peer-checked:border-[#1B5E3F] peer-checked:bg-[#1B5E3F]/5 hover:border-[#1B5E3F]/40">
+                        <div class="rounded-xl border-2 border-sand bg-white p-3 transition peer-checked:border-brand-600 peer-checked:bg-brand-50 peer-checked:ring-1 peer-checked:ring-brand-600/20 hover:border-brand-600/40">
                             <div class="flex items-center justify-between">
-                                <span class="font-semibold text-[#0F3D27]" style="font-family: '{{ $pkg->fonts['display'] ?? 'serif' }}', serif;">{{ $pkg->name }}</span>
+                                <span class="font-semibold text-brand-800" style="font-family: '{{ $pkg->fonts['display'] ?? 'serif' }}', serif;">{{ $pkg->name }}</span>
                                 <span class="flex gap-1">
                                     <span class="h-4 w-4 rounded-full" style="background: {{ $pkg->tokens['primary'] }}"></span>
                                     <span class="h-4 w-4 rounded-full" style="background: {{ $pkg->tokens['accent'] }}"></span>
                                     <span class="h-4 w-4 rounded-full border" style="background: {{ $pkg->tokens['bg'] }}"></span>
                                 </span>
                             </div>
-                            <p class="mt-1 text-xs text-[#1A1A1A]/55">Sesuai untuk: {{ $pkg->preview_meta['suitable_for'] ?? '—' }}</p>
+                            <p class="mt-1 text-xs text-ink/55">Sesuai untuk: {{ $pkg->preview_meta['suitable_for'] ?? '—' }}</p>
                         </div>
                     </label>
                 @endforeach
@@ -33,13 +33,13 @@
                 @foreach (['A' => 'Jakarta + Cormorant', 'B' => 'Inter + Playfair', 'C' => 'Figtree + Lora', 'D' => 'IBM Plex'] as $key => $label)
                     <label class="cursor-pointer">
                         <input type="radio" wire:model.live="data.font_pair" value="{{ $key }}" class="peer sr-only">
-                        <div class="rounded-lg border border-[#EFE8DC] px-2 py-2 text-center text-xs transition peer-checked:border-[#1B5E3F] peer-checked:bg-[#1B5E3F]/5">{{ $label }}</div>
+                        <div class="rounded-xl border border-sand px-2 py-2 text-center text-xs transition peer-checked:border-brand-600 peer-checked:bg-brand-50 peer-checked:ring-1 peer-checked:ring-brand-600/20">{{ $label }}</div>
                     </label>
                 @endforeach
             </div>
             <div class="mt-2">
-                <label class="text-xs text-[#1A1A1A]/60">Font Arab</label>
-                <select wire:model.live="data.arabic_font" class="ml-2 rounded-lg border border-[#EFE8DC] px-2 py-1 text-xs">
+                <label class="text-xs text-ink/60">Font Arab</label>
+                <select wire:model.live="data.arabic_font" class="ml-2 rounded-xl border border-sand px-2 py-1 text-xs">
                     <option value="Amiri">Amiri</option>
                     <option value="Scheherazade New">Scheherazade New</option>
                 </select>
@@ -51,23 +51,23 @@
             <label class="block text-sm font-semibold">Gaya ikon</label>
             <div class="mt-2 grid grid-cols-2 gap-4">
                 <div>
-                    <span class="text-xs text-[#1A1A1A]/60">Berat garisan</span>
+                    <span class="text-xs text-ink/60">Berat garisan</span>
                     <div class="mt-1 flex gap-2">
                         @foreach (['halus' => 'Halus', 'sederhana' => 'Sederhana', 'tebal' => 'Tebal'] as $w => $lbl)
                             <label class="cursor-pointer">
                                 <input type="radio" wire:model.live="data.icon_style.weight" value="{{ $w }}" class="peer sr-only">
-                                <span class="block rounded-lg border border-[#EFE8DC] px-2 py-1 text-xs transition peer-checked:border-[#1B5E3F] peer-checked:bg-[#1B5E3F]/5">{{ $lbl }}</span>
+                                <span class="block rounded-xl border border-sand px-2 py-1 text-xs transition peer-checked:border-brand-600 peer-checked:bg-brand-50 peer-checked:ring-1 peer-checked:ring-brand-600/20">{{ $lbl }}</span>
                             </label>
                         @endforeach
                     </div>
                 </div>
                 <div>
-                    <span class="text-xs text-[#1A1A1A]/60">Bekas</span>
+                    <span class="text-xs text-ink/60">Bekas</span>
                     <div class="mt-1 flex flex-wrap gap-2">
                         @foreach (['bulat-penuh' => 'Bulat penuh', 'bulat-cair' => 'Bulat cair', 'kotak-lembut' => 'Kotak lembut', 'tanpa-bekas' => 'Tanpa bekas'] as $c => $lbl)
                             <label class="cursor-pointer">
                                 <input type="radio" wire:model.live="data.icon_style.container" value="{{ $c }}" class="peer sr-only">
-                                <span class="block rounded-lg border border-[#EFE8DC] px-2 py-1 text-xs transition peer-checked:border-[#1B5E3F] peer-checked:bg-[#1B5E3F]/5">{{ $lbl }}</span>
+                                <span class="block rounded-xl border border-sand px-2 py-1 text-xs transition peer-checked:border-brand-600 peer-checked:bg-brand-50 peer-checked:ring-1 peer-checked:ring-brand-600/20">{{ $lbl }}</span>
                             </label>
                         @endforeach
                     </div>
@@ -82,7 +82,7 @@
                 @foreach (['hero-tengah' => 'Hero tengah', 'hero-belah' => 'Hero belah', 'grid-kad' => 'Grid kad', 'klasik-formal' => 'Klasik formal'] as $l => $lbl)
                     <label class="cursor-pointer">
                         <input type="radio" wire:model.live="data.layout_home" value="{{ $l }}" class="peer sr-only">
-                        <div class="rounded-lg border border-[#EFE8DC] px-2 py-2 text-center text-xs transition peer-checked:border-[#1B5E3F] peer-checked:bg-[#1B5E3F]/5">{{ $lbl }}</div>
+                        <div class="rounded-xl border border-sand px-2 py-2 text-center text-xs transition peer-checked:border-brand-600 peer-checked:bg-brand-50 peer-checked:ring-1 peer-checked:ring-brand-600/20">{{ $lbl }}</div>
                     </label>
                 @endforeach
             </div>
@@ -92,9 +92,9 @@
         <div>
             <label class="block text-sm font-semibold">Elemen Islamik</label>
             <div class="mt-2 space-y-1.5 text-sm">
-                <label class="flex items-center gap-2"><input type="checkbox" wire:model.live="data.islamic_elements.corak_geometri" class="text-[#1B5E3F]"> Corak geometri (latar seksyen)</label>
-                <label class="flex items-center gap-2"><input type="checkbox" wire:model.live="data.islamic_elements.pembatas_arabesque" class="text-[#1B5E3F]"> Pembatas arabesque (divider)</label>
-                <p class="text-xs text-[#1A1A1A]/55">Khat/kaligrafi khas — rekaan tambahan, akan dibincang.</p>
+                <label class="flex items-center gap-2"><input type="checkbox" wire:model.live="data.islamic_elements.corak_geometri" class="h-4 w-4 accent-brand-600"> Corak geometri (latar seksyen)</label>
+                <label class="flex items-center gap-2"><input type="checkbox" wire:model.live="data.islamic_elements.pembatas_arabesque" class="h-4 w-4 accent-brand-600"> Pembatas arabesque (divider)</label>
+                <p class="text-xs text-ink/55">Khat/kaligrafi khas — rekaan tambahan, akan dibincang.</p>
             </div>
         </div>
 
@@ -105,18 +105,18 @@
                 @foreach (['tenang_khusyuk' => 'Tenang & khusyuk', 'mesra_keluarga' => 'Mesra keluarga', 'megah_berwibawa' => 'Megah & berwibawa'] as $m => $lbl)
                     <label class="cursor-pointer">
                         <input type="radio" wire:model.live="data.mood" value="{{ $m }}" class="peer sr-only">
-                        <div class="rounded-lg border border-[#EFE8DC] px-3 py-2 text-center text-sm transition peer-checked:border-[#1B5E3F] peer-checked:bg-[#1B5E3F]/5">{{ $lbl }}</div>
+                        <div class="rounded-xl border border-sand px-3 py-2 text-center text-sm transition peer-checked:border-brand-600 peer-checked:bg-brand-50 peer-checked:ring-1 peer-checked:ring-brand-600/20">{{ $lbl }}</div>
                     </label>
                 @endforeach
             </div>
-            <p class="mt-1 text-xs text-[#1A1A1A]/55">Ini menentukan nada penulisan draf.</p>
+            <p class="mt-1 text-xs text-ink/55">Ini menentukan nada penulisan draf.</p>
             @error('data.mood') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
         </div>
     </div>
 
     {{-- Pratonton hidup (kanan) — §7.5 --}}
     <div class="lg:sticky lg:top-20 lg:self-start">
-        <p class="mb-2 text-xs font-medium text-[#1A1A1A]/50">Pratonton langsung</p>
+        <p class="mb-2 text-xs font-medium text-ink/50">Pratonton langsung</p>
         <x-design-preview
             :tokens="$this->previewTokens()"
             :fonts="$this->previewFonts()"

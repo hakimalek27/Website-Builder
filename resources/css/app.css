@@ -1,3 +1,13 @@
+/*
+ | REKA — Sistem reka premium (Tailwind v4, CSS-config).
+ | Font di-hos-sendiri (fontsource) supaya patuh CSP `default-src 'self'` di halaman awam.
+ | Token jenama = pakej flagship "Warisan Hijau": zamrud + emas.
+ */
+@import '@fontsource-variable/plus-jakarta-sans/index.css';
+@import '@fontsource/cormorant-garamond/500.css';
+@import '@fontsource/cormorant-garamond/600.css';
+@import '@fontsource/cormorant-garamond/700.css';
+
 @import 'tailwindcss';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
@@ -6,6 +16,231 @@
 @source '../**/*.js';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    /* Tipografi */
+    --font-sans: 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+        'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-display: 'Cormorant Garamond', ui-serif, Georgia, serif;
+
+    /* Zamrud jenama — primary=600 (#1B5E3F), header gelap=800 (#0F3D27) */
+    --color-brand-50: #eef7f1;
+    --color-brand-100: #d3e9dd;
+    --color-brand-200: #a6d3bc;
+    --color-brand-300: #6fb794;
+    --color-brand-400: #3e9a6e;
+    --color-brand-500: #237a51;
+    --color-brand-600: #1b5e3f;
+    --color-brand-700: #154d33;
+    --color-brand-800: #0f3d27;
+    --color-brand-900: #0b2a1b;
+    --color-brand-950: #061810;
+
+    /* Emas aksen — accent=400 (#C9A961). WCAG: jangan jadi teks badan atas latar cerah. */
+    --color-gold-50: #fbf7ed;
+    --color-gold-100: #f4e9cc;
+    --color-gold-200: #e9d29b;
+    --color-gold-300: #dbbb78;
+    --color-gold-400: #c9a961;
+    --color-gold-500: #b4914a;
+    --color-gold-600: #94743a;
+    --color-gold-700: #6f5730;
+
+    /* Neutral hangat */
+    --color-cream: #faf7f2;
+    --color-sand: #efe8dc;
+    --color-ink: #1a1a1a;
+
+    /* Bayang berlapis premium (bayang jatuh warna zamrud) */
+    --shadow-xs: 0 1px 2px rgb(15 61 39 / 0.05);
+    --shadow-soft: 0 4px 22px -8px rgb(15 61 39 / 0.14), 0 2px 6px -3px rgb(15 61 39 / 0.08);
+    --shadow-lift: 0 22px 48px -14px rgb(15 61 39 / 0.26), 0 8px 18px -10px rgb(15 61 39 / 0.16);
+    --shadow-glow: 0 0 70px -14px rgb(201 169 97 / 0.5);
+
+    /* Animasi */
+    --animate-float: float 7s ease-in-out infinite;
+    --animate-float-slow: float 11s ease-in-out infinite;
+    --animate-shimmer: shimmer 2.6s linear infinite;
+    --animate-scale-in: scale-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    --animate-fade-up: fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-14px); }
+}
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+@keyframes scale-in {
+    from { opacity: 0; transform: scale(0.94); }
+    to { opacity: 1; transform: none; }
+}
+@keyframes fade-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: none; }
+}
+
+/* ── Asas ─────────────────────────────────────────────── */
+@layer base {
+    html {
+        scroll-behavior: smooth;
+        -webkit-text-size-adjust: 100%;
+    }
+    body {
+        @apply bg-cream font-sans text-ink antialiased;
+    }
+    ::selection {
+        @apply bg-brand-600 text-white;
+    }
+    h1, h2, h3, h4 {
+        text-wrap: balance;
+    }
+    p {
+        text-wrap: pretty;
+    }
+    :focus-visible {
+        outline: 2px solid var(--color-brand-500);
+        outline-offset: 2px;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+    }
+}
+
+/* ── Komponen kongsi (guna @apply supaya kekal DRY) ───── */
+@layer components {
+    /* Butang */
+    .btn {
+        @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all duration-200 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50;
+    }
+    .btn-primary {
+        @apply bg-brand-600 text-white shadow-soft hover:-translate-y-0.5 hover:bg-brand-700 hover:shadow-lift;
+    }
+    .btn-gold {
+        @apply bg-gold-400 text-brand-900 shadow-soft hover:-translate-y-0.5 hover:bg-gold-300 hover:shadow-lift;
+    }
+    .btn-outline {
+        @apply border border-brand-600/25 bg-white/70 text-brand-700 hover:border-brand-600/50 hover:bg-brand-50;
+    }
+    .btn-ghost {
+        @apply text-brand-700 hover:bg-brand-50;
+    }
+    .btn-on-dark {
+        @apply border border-white/20 bg-white/5 text-cream backdrop-blur-sm hover:border-white/40 hover:bg-white/10;
+    }
+    .btn-lg {
+        @apply rounded-2xl px-7 py-3.5 text-base;
+    }
+    .btn-sm {
+        @apply px-3.5 py-2 text-xs;
+    }
+    .btn-block {
+        @apply w-full;
+    }
+
+    /* Kad */
+    .card {
+        @apply rounded-2xl bg-white p-6 shadow-soft ring-1 ring-sand;
+    }
+    .card-glass {
+        @apply rounded-2xl border border-white/15 bg-white/10 p-6 backdrop-blur-md;
+    }
+    .card-dark {
+        @apply rounded-2xl bg-brand-900 p-6 text-cream ring-1 ring-white/10;
+    }
+
+    /* Medan borang */
+    .label {
+        @apply mb-1.5 block text-sm font-medium text-ink/80;
+    }
+    .input {
+        @apply w-full rounded-xl border border-sand bg-white px-4 py-2.5 text-sm text-ink shadow-xs transition placeholder:text-ink/35 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/12 focus:outline-none;
+    }
+    textarea.input {
+        @apply leading-relaxed;
+    }
+    .field-hint {
+        @apply mt-1 text-xs text-ink/50;
+    }
+    .field-error {
+        @apply mt-1 text-xs font-medium text-red-600;
+    }
+
+    /* Pil, lencana, cip */
+    .eyebrow {
+        @apply inline-flex items-center gap-2 rounded-full border border-gold-400/30 bg-gold-400/10 px-3.5 py-1 text-xs font-semibold tracking-wide text-gold-700 uppercase;
+    }
+    .eyebrow-dark {
+        @apply inline-flex items-center gap-2 rounded-full border border-gold-400/30 bg-white/5 px-3.5 py-1 text-xs font-semibold tracking-wide text-gold-200 uppercase backdrop-blur-sm;
+    }
+    .badge {
+        @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold;
+    }
+    .chip {
+        @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium;
+    }
+
+    /* Teks bergradien emas (hanya atas latar gelap) */
+    .text-gradient-gold {
+        @apply bg-gradient-to-br from-gold-200 via-gold-100 to-gold-400 bg-clip-text text-transparent;
+    }
+
+    /* Reveal-on-scroll — hanya sembunyi bila JS aktif (html.js), supaya kandungan sentiasa nampak tanpa-JS */
+    .js .reveal {
+        opacity: 0;
+        transform: translateY(26px);
+        transition:
+            opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+            transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        will-change: opacity, transform;
+    }
+    .js .reveal.is-revealed {
+        opacity: 1;
+        transform: none;
+    }
+    .reveal-d1 { transition-delay: 0.08s; }
+    .reveal-d2 { transition-delay: 0.16s; }
+    .reveal-d3 { transition-delay: 0.24s; }
+    .reveal-d4 { transition-delay: 0.32s; }
+    .reveal-d5 { transition-delay: 0.4s; }
+
+    /* Header jadi lebih pekat + berbayang selepas skrol */
+    [data-site-header].is-scrolled {
+        @apply bg-brand-950/90 shadow-[0_10px_34px_-14px_rgb(0_0_0/0.55)];
+    }
+}
+
+/* ── Utiliti corak & tekstur ──────────────────────────── */
+@layer utilities {
+    /* Corak geometri Islamik (Rub el Hizb — dua segi empat bertindih) */
+    .bg-pattern-islamic {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='%23C9A961' stroke-opacity='0.18' stroke-width='1'%3E%3Crect x='12' y='12' width='24' height='24'/%3E%3Crect x='12' y='12' width='24' height='24' transform='rotate(45 24 24)'/%3E%3C/g%3E%3C/svg%3E");
+        background-size: 48px 48px;
+    }
+    .bg-pattern-islamic-lg {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='84' height='84' viewBox='0 0 84 84'%3E%3Cg fill='none' stroke='%23C9A961' stroke-opacity='0.16' stroke-width='1'%3E%3Crect x='21' y='21' width='42' height='42'/%3E%3Crect x='21' y='21' width='42' height='42' transform='rotate(45 42 42)'/%3E%3Ccircle cx='42' cy='42' r='7'/%3E%3C/g%3E%3C/svg%3E");
+        background-size: 84px 84px;
+    }
+    /* Grain halus untuk hero gelap */
+    .bg-noise {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    /* Cahaya berkilau untuk elemen loading */
+    .shimmer {
+        background: linear-gradient(110deg, transparent 30%, rgb(255 255 255 / 0.35) 50%, transparent 70%);
+        background-size: 200% 100%;
+        animation: var(--animate-shimmer);
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .reveal {
+            opacity: 1 !important;
+            transform: none !important;
+            transition: none !important;
+        }
+        .animate-float,
+        .animate-float-slow,
+        .shimmer {
+            animation: none !important;
+        }
+    }
 }

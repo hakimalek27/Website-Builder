@@ -3,20 +3,18 @@
 @section('title', 'Pautan tidak sah — REKA')
 
 @section('content')
-    <div class="mx-auto max-w-lg text-center py-16">
-        <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
-            <svg class="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-            </svg>
+    <div class="mx-auto max-w-lg py-16 text-center">
+        <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-red-100 text-red-600">
+            {!! \App\Support\Lucide::svg('TriangleAlert', 1.75, 'h-10 w-10') !!}
         </div>
-        <h1 class="mt-6 text-2xl font-bold text-[#0F3D27]">Pautan tidak sah atau telah luput</h1>
-        <p class="mt-4 text-[#1A1A1A]/70">
+        <h1 class="mt-8 font-display text-3xl font-bold text-brand-800">Pautan tidak sah atau telah luput</h1>
+        <p class="mx-auto mt-4 max-w-md text-ink/65">
             Maaf, pautan ini tidak dapat digunakan. Ia mungkin telah luput atau tidak lagi sah.
             Sila hubungi kami untuk pautan baharu.
         </p>
-        <a href="{{ route('landing') }}"
-           class="mt-8 inline-block rounded-xl border border-[#1B5E3F]/30 px-6 py-3 text-sm font-semibold text-[#0F3D27] hover:bg-[#EFE8DC] transition">
+        <x-ui.button :href="route('landing')" variant="outline" class="mt-8">
+            {!! \App\Support\Lucide::svg('ArrowLeft', 2, 'h-4 w-4') !!}
             Ke laman utama
-        </a>
+        </x-ui.button>
     </div>
 @endsection
