@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\GenerationType;
 use App\Enums\ProjectStatus;
+use App\Exceptions\GateException;
 use App\Models\AuditLog;
 use App\Models\Project;
 use App\Services\CompletenessService;
+use App\Services\DraftGenerationService;
 use App\Services\Notifier;
 use App\Support\WizardSteps;
 use Illuminate\Http\RedirectResponse;
@@ -59,12 +62,19 @@ class SemakController extends Controller
             $project->transitionTo(ProjectStatus::Submitted, 'pic');
         }
 
-        // Notifikasi admin (§13).
+        // Notifikasi admin (§13) — mel + WA (draf dijana automatik).
         app(Notifier::class)->submitted($project);
 
         AuditLog::record('pic', null, 'project.submitted', $project);
 
-        return redirect()->route('pic.semak', ['token' => $request->route('token')])
-            ->with('success', 'Maklumat anda telah dihantar. Anda masih boleh mengedit sehingga draf diluluskan.');
+        // Auto-jana draf pertama (Fasa 11). Kes logo/hero belum dimuat naik → jana manual kemudian.
+        $redirect = redirect()->route('pic.semak', ['token' => $request->route('token')]);
+        try {
+            app(DraftGenerationService::class)->request($project, GenerationType::Initial, 'pic');
+
+            return $redirect->with('success', 'Maklumat dihantar. Draf contoh sedang dijana secara automatik — anda akan dimaklumkan sebaik siap.');
+        } catch (GateException $e) {
+            return $redirect->with('warning', 'Borang dihantar. '.$e->getMessage().' Jana draf di halaman Jana Draf apabila sedia.');
+        }
     }
 }

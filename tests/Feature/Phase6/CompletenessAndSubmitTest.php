@@ -2,10 +2,12 @@
 
 use App\Enums\ProjectStatus;
 use App\Enums\Tier;
+use App\Jobs\GenerateDraftJob;
 use App\Mail\SubmittedMail;
 use App\Models\ProjectSection;
 use App\Services\CompletenessService;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Queue;
 
 // Fasa 6 — CompletenessService §6.12, gate Hantar, mask akaun bank §11.1.
 
@@ -73,8 +75,9 @@ it('blocks submit below 100% (§6.12)', function () {
     expect($project->fresh()->status)->toBe(ProjectStatus::InProgress);
 });
 
-it('submits and notifies admin when complete (§4.4/§13)', function () {
+it('submits, notifies admin, and auto-queues the first draft when complete (§4.4/§13/Fasa 11)', function () {
     Mail::fake();
+    Queue::fake();
     [$project, $token] = fillCompleteSurau();
     $project->update(['status' => ProjectStatus::InProgress]);
 
@@ -85,6 +88,7 @@ it('submits and notifies admin when complete (§4.4/§13)', function () {
     expect($project->fresh()->status)->toBe(ProjectStatus::Submitted);
     expect($project->fresh()->submitted_at)->not->toBeNull();
     Mail::assertQueued(SubmittedMail::class);
+    Queue::assertPushed(GenerateDraftJob::class);   // draf dijana automatik
 });
 
 it('masks the bank account on the review page (§11.1)', function () {

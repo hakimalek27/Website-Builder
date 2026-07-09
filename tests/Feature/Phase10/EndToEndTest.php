@@ -2,7 +2,6 @@
 
 use App\Enums\AiDriver;
 use App\Enums\GenerationStatus;
-use App\Enums\GenerationType;
 use App\Enums\ProjectStatus;
 use App\Models\AiProvider;
 use App\Models\AuditLog;
@@ -11,7 +10,6 @@ use App\Models\NotificationLog;
 use App\Models\ProjectSection;
 use App\Services\ApprovalService;
 use App\Services\DesignRerenderService;
-use App\Services\DraftGenerationService;
 use App\Services\HandoverExporter;
 use App\Services\LeadQualifier;
 use Database\Seeders\DesignPackageSeeder;
@@ -65,17 +63,14 @@ it('runs the full funnel end to end and exports a valid handover package', funct
     }
     $project->update(['status' => ProjectStatus::InProgress]);
 
-    // 5. Hantar (P3 gate 100%).
-    $this->post("/b/{$token}/hantar")->assertSessionHas('success');
-    expect($project->fresh()->status)->toBe(ProjectStatus::Submitted);
-
-    // 6. Jana draf (AI Http::fake).
+    // 5. Sedia AI (Http::fake) SEBELUM hantar — draf dijana AUTOMATIK selepas hantar (Fasa 11).
     AiProvider::factory()->default()->create(['driver' => AiDriver::Anthropic]);
     $content = validContent();
     $content['infaq'] = ['heading' => 'Infaq', 'paragraph' => 'Sumbangan anda.'];
     fakeAnthropic($content);
-    app(DraftGenerationService::class)->request($project, GenerationType::Initial);
-    expect($project->fresh()->status)->toBe(ProjectStatus::DraftReady);
+
+    $this->post("/b/{$token}/hantar")->assertSessionHas('success');
+    expect($project->fresh()->status)->toBe(ProjectStatus::DraftReady);   // auto-jana (queue sync)
     $gen = $project->fresh()->generations()->where('status', GenerationStatus::Succeeded)->first();
 
     // 7. Lihat draf (P5) + watermark.

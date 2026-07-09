@@ -6,16 +6,9 @@
         <textarea wire:model.blur="data.free_notes" rows="3" maxlength="2000" placeholder="Apa-apa lagi yang anda mahu kami tahu — gaya, ciri, harapan" class="{{ $inp }}"></textarea>
     </div>
 
-    <div>
-        <label class="block text-sm font-medium">Anggaran bajet (membantu kami mencadang pakej)</label>
-        <select wire:model.blur="data.budget_hint" class="{{ $inp }}">
-            <option value="">— Pilih —</option>
-            <option value="<RM1k">Kurang RM1,000</option>
-            <option value="RM1-3k">RM1,000 – RM3,000</option>
-            <option value="RM3-5k">RM3,000 – RM5,000</option>
-            <option value=">RM5k">Lebih RM5,000</option>
-            <option value="bincang">Bincang</option>
-        </select>
+    <div class="rounded-xl border border-brand-600/20 bg-brand-50 px-4 py-3 text-sm text-brand-800">
+        <span class="font-semibold">Pelaburan:</span> RM3,000 sekali bina (tidak termasuk domain &amp; hosting).
+        Penyelenggaraan tahunan dari RM1,000/tahun (pilihan).
     </div>
 
     <div class="grid gap-3 sm:grid-cols-3">

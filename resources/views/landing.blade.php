@@ -31,7 +31,7 @@
             <div class="reveal">
                 <span class="eyebrow-dark">
                     {!! \App\Support\Lucide::svg('Sparkles', 1.75, 'h-3.5 w-3.5') !!}
-                    Untuk masjid &amp; surau di Malaysia
+                    Untuk masjid, surau &amp; pertubuhan Islam di Malaysia
                 </span>
                 <h1 class="mt-6 font-display text-5xl leading-[1.02] font-bold tracking-tight sm:text-6xl lg:text-[4.25rem]">
                     Laman web masjid anda —<br>
@@ -311,7 +311,7 @@
 
         <div class="mt-12 space-y-3">
             @foreach ([
-                ['Berapa kos dan bagaimana bayaran?', 'Caj perkhidmatan diuruskan di luar platform melalui invois manual selepas perbincangan. Pendaftaran minat adalah percuma dan tiada komitmen.'],
+                ['Berapa kos dan bagaimana bayaran?', 'Pelaburan RM3,000 sekali bina (tidak termasuk domain & hosting). Penyelenggaraan tahunan pilihan dari RM1,000/tahun. Bayaran diuruskan melalui invois selepas perbincangan. Pendaftaran minat percuma & tiada komitmen.'],
                 ['Berapa lama proses sehingga laman siap?', 'Selepas anda melengkapkan wizard dan meluluskan draf, kami membina laman sebenar. Draf sampel pula dijana dalam beberapa minit sahaja.'],
                 ['Adakah saya perlu tahu teknikal?', 'Tidak. Wizard 10 langkah memandu anda dengan contoh dan pilihan visual — anda hanya perlu maklumat masjid.'],
                 ['Bolehkah guna domain sendiri?', 'Ya. Laman REKA menggunakan domain & jenama masjid anda sendiri, bukan subdomain kongsi.'],

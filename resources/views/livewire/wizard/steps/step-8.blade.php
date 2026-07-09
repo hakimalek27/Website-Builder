@@ -55,9 +55,9 @@
         <div>
             <label class="block text-sm font-medium">Penyelenggaraan</label>
             <div class="mt-1 space-y-1 text-sm">
-                <label class="flex items-center gap-2"><input type="radio" wire:model.live="data.maintenance" value="pakej_bulanan" class="h-4 w-4 accent-brand-600"> Pakej bulanan</label>
-                <label class="flex items-center gap-2"><input type="radio" wire:model.live="data.maintenance" value="sendiri" class="h-4 w-4 accent-brand-600"> Sendiri</label>
-                <label class="flex items-center gap-2"><input type="radio" wire:model.live="data.maintenance" value="bincang" class="h-4 w-4 accent-brand-600"> Bincang</label>
+                <label class="flex items-center gap-2"><input type="radio" wire:model.live="data.maintenance" value="pakej_bulanan" class="h-4 w-4 accent-brand-600"> Pakej penyelenggaraan tahunan (dari RM1,000/tahun)</label>
+                <label class="flex items-center gap-2"><input type="radio" wire:model.live="data.maintenance" value="sendiri" class="h-4 w-4 accent-brand-600"> Urus sendiri</label>
+                <label class="flex items-center gap-2"><input type="radio" wire:model.live="data.maintenance" value="bincang" class="h-4 w-4 accent-brand-600"> Bincang dahulu</label>
             </div>
         </div>
     </div>
