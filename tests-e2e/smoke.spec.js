@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const { token, generation } = JSON.parse(
+const { token, generation, ngoToken, ngoGeneration } = JSON.parse(
     readFileSync(join(__dirname, '.smoke-target.json'), 'utf-8'),
 );
 
@@ -28,6 +28,12 @@ const PAGES = [
     { name: 'pic-lulus', path: `/b/${token}/lulus` },
     // Wizard 0–9
     ...Array.from({ length: 10 }, (_, i) => ({ name: `wizard-langkah-${i}`, path: `/b/${token}/langkah/${i}` })),
+    // NGO / pertubuhan (Fasa 11) — sesi demo berasingan
+    { name: 'ngo-pic-home', path: `/b/${ngoToken}` },
+    { name: 'ngo-wizard-langkah-0', path: `/b/${ngoToken}/langkah/0` },
+    { name: 'ngo-wizard-langkah-4', path: `/b/${ngoToken}/langkah/4` },
+    { name: 'ngo-semak', path: `/b/${ngoToken}/semak` },
+    { name: 'ngo-draf', path: `/b/${ngoToken}/draf/${ngoGeneration}` },
 ];
 
 // Bunyi console yang boleh diabaikan (bukan pepijat aplikasi):

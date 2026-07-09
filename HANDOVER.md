@@ -2,87 +2,72 @@
 
 Kemas kini terakhir: **10 Julai 2026** · Branch: `main` · Remote: `github.com/hakimalek27/Website-Builder`
 
-REKA — platform tempahan & penjanaan draf laman web masjid.
+REKA — platform tempahan & penjanaan draf laman web **masjid, surau & NGO/pertubuhan Islam**.
 Stack: **Laravel 13.19 · PHP 8.4 · Filament v4.11 · Livewire 3 · Tailwind 4 · Pest** (dev: SQLite).
 
 ---
 
 ## Status semasa
 
-- **Fasa 0–10 siap** (spek `docs/SPEK-REKA-v1.1.md`) + **rombakan UI/UX "Premium Islamik-Moden"** (`2fed894`) + **ujian smoke Playwright** (`fb108eb`) + **preset penyedia AI** (`a964fb7`).
-- **103 ujian Pest hijau** (344 assertions) + **72 ujian smoke Playwright hijau** · `pint` bersih · `npm run build` bersih · `migrate:fresh --seed` bersih.
-- Semua kerja **di-push ke `main`** (commit terkini `a964fb7`).
+- **Fasa 0–10 siap** + **rombakan UI/UX Premium Islamik-Moden** + **Fasa 11** (11 commit: pepijat, NGO, pelbagaian design, auto-jana, WhatsApp Wehdah).
+- **144 ujian Pest hijau** (529 assertions) · `pint` bersih · `npm run build` bersih · `migrate:fresh --seed` bersih.
+- Semua kerja **di-push ke `main`**.
 
-## Sesi terakhir — Rombakan UI/UX (commit `2fed894`)
+---
 
-Rombakan menyeluruh semua halaman custom kepada gaya premium (hijau zamrud + emas, hero gelap, glassmorphism, corak Islamik, tipografi display serif).
+## Fasa 11 — 11 commit (Julai 2026)
 
-**Sistem reka (`resources/css/app.css`):**
-- Token `@theme` Tailwind 4: ramp `brand-*` (zamrud, 600=#1B5E3F) + `gold-*` (400=#C9A961) + `cream/sand/ink`.
-- Kelas komponen: `.btn`(+varian) `.card` `.input` `.label` `.eyebrow` `.chip` `.badge`.
-- Corak `.bg-pattern-islamic` (Rub el Hizb SVG data-URI), `.bg-noise`, animasi (float/shimmer/scale-in/fade-up).
-- Reveal-on-scroll: `.js .reveal` + IntersectionObserver dalam `resources/js/app.js` (**selamat tanpa-JS** — kandungan nampak jika JS mati).
-- **Font di-hos-sendiri** (`@fontsource-variable/plus-jakarta-sans` + `@fontsource/cormorant-garamond`) — WAJIB kerana CSP awam `'self'`.
+Semua ujian hijau selepas setiap commit. Laluan **masjid kekal byte-identik** sepanjang.
 
-**Komponen Blade guna-semula:** `resources/views/components/ui/` → button, card, badge, progress, progress-ring, section-heading, logo.
+1. **fix(admin+wizard)** — `ProjectStatus`/`Tier` implement Filament `HasLabel`(+`HasColor`) → betulkan **500 `/admin/projects`** (dulu closure `fn (ProjectStatus $s)` cuba instantiate enum). `WizardStep::next()` langkah terakhir → `pic.semak` (butang "Seterusnya" langkah 9 tak lagi mati). Un-orphan tetapan (LeadsTable/DesignRerenderService baca Settings).
+2. **feat(wizard) autosave skipRender** — betulkan **dropdown L4 tertutup sendiri**: `updated()` `skipRender()` untuk simpanan skalar/select; hanya radio/checkbox (pemacu showIf) & langkah reaktif render. Chip "Disimpan" via event Alpine (`wizard-saved`) + `wire:key` per medan.
+3. **feat(design) FontPairs + palet custom** — `app/Support/FontPairs.php` (10 pasangan A–J, satu sumber); **18 font @fontsource di-hos-sendiri** (B/C/D dulu hilang → jatuh serif; kini pratonton bertindak balas). Fix `design-preview` guna font body. `app/Support/PaletteDeriver.php` — mod "Pilih sendiri" (HSL + gelap-auto WCAG ≥ 4.5:1).
+4. **feat(design) 14 pakej + varian** — kolum `design_packages.variants` (header/footer/card/divider); seeder 5→**14 pakej** (semua token disahkan WCAG); `Moods` 3→5; container 4→6 (+kotak-tegas/heksagon); layout 4→6 (+hero-penuh/hero-mihrab); mini-mockup pratonton bertindak balas layout + nada.
+5. **feat(draft) varian shell** — punca "semua laman sama": `shell.blade.php` kini bercabang `layout/header/footer/card/divider/animasi/ikon` (allowlist `DesignResolver` → tak boleh pecah). Default = rupa produksi. `<body data-layout data-header>`.
+6. **feat(wizard) hero berbilang** — step-6 `multiple` + thumbnail + buang + maks 3; route bertoken `/b/{token}/aset/{asset}`.
+7. **feat(ngo) tier + wizard** — migration `projects.tier` enum→string(40); `Tier` +2 case (isNgo/isMosque/orgNoun/values); `PageCatalog::clustersFor/metaFor/panelsFor($tier)`; panel NGO (profil/program/sukarelawan/keahlian/derma) + jawatan ROS; PresetMatrix NGO; step-0 5 kad 2 kumpulan; minat `org_type`; CompletenessService kecuali zon NGO.
+8. **feat(ngo) AI + shell + spec** — `draft-system-ngo.txt`; PromptBuilder requestedKeys/schemaFor/minimizedNgoData (PII-min); Validator +4 kunci; shell seksyen NGO; `showPrayer = tier->isMosque()`; SpecBuilder content NGO.
+9. **feat(notify) wehdah** — `WhatsappGateway` → `POST {base}/v1/messages/send` + `X-API-Key` + `{to,message,session_id?}`; kunci Settings baharu (api_key encrypted/session_id/admin_notify_phone); 3 event WA→admin (lead/submitted/nota) + AdminAlertMail; ManageSettings 3 seksyen + "Uji Hantar".
+10. **feat(flow) auto-jana + harga** — `SemakController::submit()` auto-jana draf (GateException → amaran mesra); buang soalan bajet step-9; harga RM3,000 + RM1,000/thn (landing FAQ + step-8/9).
+11. **test(e2e)+docs** — `reka:demo-token --ngo`; smoke Playwright +5 skrin NGO; HANDOVER/README.
 
-**Aset jenama (`public/`):** `favicon.svg`, `favicon.ico`, `apple-touch-icon.png`, `logo-reka.svg` (mihrab + bintang 8-penjuru). Ikon Lucide utiliti ditambah ke `resources/icons/lucide/` (guna `App\Support\Lucide::svg()`).
+## Preset penyedia AI (Julai 2026)
 
-**Halaman:**
-- **Awam:** landing 8 seksyen (hero gelap + mockup browser + jalur trust + pameran 5 pakej + perbandingan + proses + FAQ + CTA), minat (split pitch+borang), terima-kasih, privasi/terma, layout header-kaca + footer bercorak.
-- **PIC:** layout chrome ruang kerja; home (ring progres), semak (bar-hantar melekit), jana-hub (meter kuota + stepper), draf (bingkai browser-chrome), tweak-reka/kandungan, lulus (istiadat), **status (timeline pencapaian + thread nota)** — route `pic.status` kini hantar `notes`.
-- **Wizard:** shell (bar progres + nav melekit), 10 langkah (palet token, kad radio naik taraf), enjin `_field` (dropzone/repeater/cip). **Semua `wire:model`/`wire:key`/binding dikekalkan.**
-- **Admin Filament:** `brandLogo` + `favicon` + `Color::hex('#1B5E3F')`.
-
-**LUAR skop (kekal sistem token draf sendiri):** `resources/views/draft/shell.blade.php` + `resources/views/components/design-preview.blade.php`.
+Admin pilih vendor → base URL + driver auto → API key + model. OpenAI/Anthropic/OpenRouter/DeepSeek/GLM·Z.ai/Groq/Mistral/Gemini/Ollama/Custom (`app/Enums/AiVendor.php`).
 
 ## Ujian smoke (Playwright) — `tests-e2e/`
 
-Ujian visual **boleh-ulang** merentas 3 saiz skrin (mobile 393 / tablet 768 / desktop 1440) untuk **24 halaman** (awam + PIC + wizard + admin). Setiap halaman: semak render, tiada ralat console/CSP, + screenshot penuh.
+`npm run test:e2e` — 29 halaman (24 masjid + 5 NGO) × 3 saiz skrin. `reka:demo-token` (+`--ngo`) jana sesi demo. **Alat dev sahaja.**
 
-```bash
-npm run test:e2e          # vite build + playwright test (72 ujian: 24 × 3)
-npm run test:e2e:report   # buka laporan HTML
-```
-
-- **`playwright.config.js`** — 3 projek saiz skrin; `webServer` guna-semula pelayan `:8000` (atau mulakan sendiri).
-- **`tests-e2e/global-setup.js`** — jalankan `php artisan reka:demo-token` → tulis `{token, generation}` ke `.smoke-target.json`.
-- **`app/Console/Commands/DemoTokenCommand.php`** (`reka:demo-token`) — jana sesi PIC demo lengkap (projek DraftReady + draf sebenar render). Idempoten (penanda e-mel `demo-playwright@reka.test`). **Alat dev sahaja.**
-- **`tests-e2e/smoke.spec.js`** — senarai halaman + semakan; screenshot ke `tests-e2e/screenshots/` (gitignored).
-- Prasyarat: DB di-seed (`migrate:fresh --seed`) — perlu 5 pakej + zon untuk render draf.
-- Bunyi console diabai (BENIGN): font luar, favicon, ResizeObserver, **sandbox iframe draf** (§5.2 P6 sekat skrip draf AI — memang betul).
-
-## Penyedia AI — preset (Julai 2026)
-
-Admin cuma pilih **Penyedia** → base URL + driver diisi automatik → masukkan API key + pilih model (dropdown). Menyelesaikan ralat "Sambungan gagal / HTTP 404" (dulu base URL salah).
-
-- **`app/Enums/AiVendor.php`** — preset: OpenAI, Anthropic, OpenRouter, DeepSeek, GLM·Z.ai (Zhipu), Groq, Mistral, Google Gemini, Ollama, Custom. Setiap satu: `driver()` + `baseUrl()` + `models()` (cadangan datalist) + `apiKeyUrl()`. Base URL disahkan dari dokumentasi rasmi.
-- **Borang reaktif** (`AiProviderForm`): Select `vendor` `->live()` → `afterStateUpdated` set `driver` + `base_url`; `model` guna `datalist` (dropdown + boleh taip). Kolum `vendor` baharu (migration).
-- `AiClient` TIDAK diubah — 404 diselesaikan hanya dengan base URL betul. Endpoint: OpenAI-compat `{base}/chat/completions`, Anthropic `{base}/v1/messages`.
-- Ujian: `tests/Feature/Phase7/AiVendorPresetTest.php` (11 — endpoint setiap vendor betul via Http::fake), `AiProviderFormTest.php` (4 — borang auto-isi).
+---
 
 ## Nota penting
 
-1. **git/gh:** harness set `GH_TOKEN`+`GITHUB_TOKEN` tak sah → guna `env -u GH_TOKEN -u GITHUB_TOKEN git push / gh ...`.
-2. **CSP + Vite dev:** `SecurityHeaders.php` ada gate **`local`-sahaja** (`withViteDevHosts()`) → `npm run dev` (hot-reload) berfungsi dalam browser bila `APP_ENV=local`. **Production/testing kekal ketat** (`default-src 'self'`, byte-identik). Alternatif: `npm run build` (pastikan `public/hot` tiada).
-3. Uji flow PIC/wizard: jana token demo guna `LeadQualifier::qualify()` (corak `tests/Feature/Phase10/EndToEndTest.php`).
+1. **git/gh:** guna `env -u GH_TOKEN -u GITHUB_TOKEN git push / gh ...` (token harness tak sah).
+2. **CSP + Vite dev:** `SecurityHeaders.php` gate `local`-sahaja (`withViteDevHosts()`). Production/testing kekal ketat. Gotcha: IPv6 `[::1]` BUKAN host-source sah — guna `localhost`/`127.0.0.1`.
+3. **Font pratonton:** semua pasangan A–J di-hos-sendiri (@fontsource) — WAJIB kerana CSP awam `font-src 'self'`. Shell draf kekal Google Fonts (konteks berbeza).
+4. **Varian design:** semua nilai varian divalidasi allowlist di `DesignResolver` — nilai tak dikenali fallback default, render tak boleh pecah.
 
 ## Tindakan tertunggak sebelum go-live (bukan bug)
 
-- `verse_library` seed = `PENDING_MANUAL_ENTRY` — **Azan WAJIB** isi teks Arab sebenar Surah At-Taubah:18 dari mushaf (R6 §9.2). Jangan taip dari ingatan.
+- **Kunci API WhatsApp** (`whatsapp_api_key`) — tampal melalui borang **Tetapan admin** (encrypted DB). **JANGAN commit.** Kemudian tekan "Uji Hantar" (mesej sampai 60189030363 dari peranti 60174627287).
+- **Migration tier→string** (`2026_07_11_000002`) — sudah lulus SQLite dev; **jalankan `php artisan migrate --pretend` di staging MySQL** sebelum deploy produksi (sahkan `MODIFY COLUMN VARCHAR(40)` kekalkan nilai).
+- `verse_library` seed = `PENDING_MANUAL_ENTRY` — **Azan WAJIB** isi teks Arab sebenar Surah At-Taubah:18 (R6 §9.2). Jangan taip dari ingatan.
 - `php artisan zones:verify` di produksi (59 kod zon JAKIM).
 - Notis privasi/terma dwibahasa & `docs/SOP-PELANGGARAN-DATA.md` = draf — perlu semakan perundangan.
+- **Kaveat draf NGO/hero:** imej hero dalam draf sampel guna placeholder warna (bukan imej sebenar) — imej sebenar untuk laman produksi.
 
 ## Perintah penting
 
 ```bash
-php artisan test                 # 88 ujian Pest
-php artisan migrate:fresh --seed # skema + seed (59 zon, 5 pakej, verse, settings)
+php artisan test                 # 144 ujian Pest
+php artisan migrate:fresh --seed # skema + seed (59 zon, 14 pakej, verse, 9 settings)
 npm run build                    # aset (guna ini untuk ujian browser tempatan)
 vendor/bin/pint --dirty          # format PHP
+php artisan reka:demo-token --ngo # jana sesi NGO demo (dev sahaja)
 php artisan zones:verify         # sahkan zon JAKIM (WAJIB sebelum prospek pertama)
 ```
 
 Login admin dev: `admin@reka.test` / `password` (2FA app authenticator dipaksa).
 
-Rujuk juga: `README.md`, `docs/GO-LIVE-CHECKLIST.md`, `docs/QA-RUN-F10.md`.
+Rujuk juga: `README.md`, `docs/GO-LIVE-CHECKLIST.md`, `docs/QA-RUN-F10.md`, `docs/SPEK-REKA-v1.1.md`.
