@@ -3,6 +3,7 @@
 use App\Models\Invitation;
 use App\Models\Project;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 /*
@@ -67,4 +68,26 @@ function enablePages(Project $project, array $pageKeys): void
     foreach ($pageKeys as $key) {
         $project->pages()->updateOrCreate(['page_key' => $key], ['enabled' => true, 'sort' => $sort++]);
     }
+}
+
+/** Kandungan draf sah (4 kunci teras) untuk fixture AI. */
+function validContent(): array
+{
+    return [
+        'meta' => ['title' => 'Masjid Ujian', 'description' => 'Laman rasmi Masjid Ujian.'],
+        'hero' => ['eyebrow' => 'Selamat Datang', 'headline' => 'Masjid Ujian', 'subheadline' => 'Memakmurkan masjid bersama komuniti.', 'cta_primary_label' => 'Infaq', 'cta_secondary_label' => 'Hubungi'],
+        'about' => ['heading' => 'Tentang Kami', 'paragraphs' => ['Masjid ini berkhidmat untuk komuniti setempat.'], 'stats' => [['label' => 'Ditubuhkan', 'value' => '1987']]],
+        'footer_description' => 'Masjid Ujian — memakmurkan syiar Islam.',
+    ];
+}
+
+/** Http::fake respons Anthropic dengan kandungan diberi. */
+function fakeAnthropic(array $content, int $status = 200): void
+{
+    Http::fake([
+        '*api.anthropic.com*' => Http::response([
+            'content' => [['type' => 'text', 'text' => json_encode($content, JSON_UNESCAPED_UNICODE)]],
+            'usage' => ['input_tokens' => 1200, 'output_tokens' => 800],
+        ], $status),
+    ]);
 }

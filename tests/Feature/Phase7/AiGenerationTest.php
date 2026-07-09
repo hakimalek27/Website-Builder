@@ -19,26 +19,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 // Fasa 7 — Modul AI & penjanaan draf (§8, §9). R12: Http::fake sentiasa.
-
-function validContent(): array
-{
-    return [
-        'meta' => ['title' => 'Masjid Ujian', 'description' => 'Laman rasmi Masjid Ujian.'],
-        'hero' => ['eyebrow' => 'Selamat Datang', 'headline' => 'Masjid Ujian', 'subheadline' => 'Memakmurkan masjid bersama komuniti.', 'cta_primary_label' => 'Infaq', 'cta_secondary_label' => 'Hubungi'],
-        'about' => ['heading' => 'Tentang Kami', 'paragraphs' => ['Masjid ini berkhidmat untuk komuniti setempat.'], 'stats' => [['label' => 'Ditubuhkan', 'value' => '1987']]],
-        'footer_description' => 'Masjid Ujian — memakmurkan syiar Islam.',
-    ];
-}
-
-function fakeAnthropic(array $content, int $status = 200): void
-{
-    Http::fake([
-        '*api.anthropic.com*' => Http::response([
-            'content' => [['type' => 'text', 'text' => json_encode($content, JSON_UNESCAPED_UNICODE)]],
-            'usage' => ['input_tokens' => 1200, 'output_tokens' => 800],
-        ], $status),
-    ]);
-}
+// (helper validContent() & fakeAnthropic() ditakrif dalam tests/Pest.php)
 
 function readyProject(array $extraPages = []): array
 {

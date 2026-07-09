@@ -1,9 +1,12 @@
 <?php
 
+use App\Http\Controllers\ApprovalController;
+use App\Http\Controllers\DraftController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\MinatController;
 use App\Http\Controllers\PicController;
 use App\Http\Controllers\SemakController;
+use App\Http\Controllers\TweakController;
 use App\Http\Controllers\WizardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -39,4 +42,26 @@ Route::prefix('/b/{token}')->middleware('resolve.invitation')->name('pic.')->gro
     Route::get('/jana', function (Request $request) {
         return view('pic.jana', ['token' => $request->route('token')]);
     })->name('jana');
+
+    // P5/P6 Pemapar draf.
+    Route::get('/draf/{generation}', [DraftController::class, 'show'])->name('draf');
+    Route::get('/draf/{generation}/penuh', [DraftController::class, 'raw'])->name('draf.raw');
+
+    // P7 Tweak reka bentuk (percuma).
+    Route::get('/tweak/reka', [TweakController::class, 'reka'])->name('tweak.reka');
+    Route::post('/tweak/reka', [TweakController::class, 'rekaRender'])->name('tweak.reka.render');
+
+    // P8 Tweak kandungan (AI).
+    Route::get('/tweak/kandungan', [TweakController::class, 'kandungan'])->name('tweak.kandungan');
+    Route::post('/tweak/kandungan', [TweakController::class, 'kandunganSubmit'])->name('tweak.kandungan.submit');
+
+    // P9 Kelulusan.
+    Route::get('/lulus', [ApprovalController::class, 'show'])->name('lulus');
+    Route::post('/lulus', [ApprovalController::class, 'store'])->name('lulus.store');
+
+    // P10 Status (placeholder — dilengkapkan Fasa 9).
+    Route::get('/status', function (Request $request) {
+        return view('pic.status', ['token' => $request->route('token')]);
+    })->name('status');
+    Route::post('/nota', [PicController::class, 'storeNote'])->name('nota');
 });
