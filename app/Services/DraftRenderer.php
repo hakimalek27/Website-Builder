@@ -49,7 +49,7 @@ class DraftRenderer
             'cardStyle' => $design['card'],
             'divider' => $design['divider'],
             'animations' => $design['animations'],
-            'showPrayer' => true,   // masjid; ditetapkan ikut tier di Fasa 11 NGO
+            'showPrayer' => $project->tier->isMosque(),   // NGO tiada kad waktu solat
             'verse' => $verse,
             'showVerse' => $showVerse,
             'zone' => $project->jakim_zone ?: '—',

@@ -75,7 +75,7 @@ class SpecBuilder
             'pages' => $project->pages()->orderBy('sort')->get()
                 ->map(fn ($p) => ['key' => $p->page_key, 'enabled' => (bool) $p->enabled, 'custom_name' => $p->custom_name])
                 ->all(),
-            'content' => [
+            'content' => $project->tier->isNgo() ? $this->ngoContent($l4) : [
                 'sejarah' => $this->withOrigin($l4['sejarah'] ?? null),
                 'ajk' => $l4['ajk'] ?? null,
                 'services' => $this->services($l4),
@@ -92,7 +92,9 @@ class SpecBuilder
                 'payment' => ['gateway' => $l5['payment_gateway'] ?? null, 'status' => $l5['gateway_status'] ?? null],
                 'cms' => $l5['cms_updater'] ?? null,
                 'i18n' => (bool) ($l5['bilingual'] ?? $project->is_gov),
-                'prayer' => ['zone' => $project->jakim_zone, 'show_countdown' => $l4['waktu_solat']['show_countdown'] ?? true],
+                'prayer' => $project->tier->isMosque()
+                    ? ['zone' => $project->jakim_zone, 'show_countdown' => $l4['waktu_solat']['show_countdown'] ?? true]
+                    : null,
                 'live' => $l4['live_streaming'] ?? null,
                 'wa_button' => ['enabled' => (bool) ($l5['whatsapp_button'] ?? false), 'number' => $l5['wa_number'] ?? null],
                 'kariah' => ['mode' => $l5['kariah_system'] ?? null, 'url' => $l5['kariah_url'] ?? null],
@@ -137,6 +139,25 @@ class SpecBuilder
         return $out;
     }
 
+    /** Blok content NGO/pertubuhan (Fasa 11) — struktur berlainan dari masjid. */
+    private function ngoContent(array $l4): array
+    {
+        return [
+            'profil' => $this->withOrigin($l4['profil'] ?? null),
+            'ajk' => $l4['ajk'] ?? null,
+            'programs' => $l4['program_utama']['programs'] ?? [],
+            'volunteer' => $l4['sukarelawan'] ?? null,
+            'membership' => $l4['keahlian'] ?? null,
+            'derma' => $l4['derma'] ?? null,
+            'faq' => $l4['soalan_lazim']['faqs'] ?? [],
+            'news_seed' => array_merge(
+                $l4['berita']['seed_items'] ?? [],
+                $l4['pengumuman']['seed_items'] ?? [],
+                $l4['program_akan_datang']['seed_items'] ?? [],
+            ),
+        ];
+    }
+
     private function withOrigin(?array $data): ?array
     {
         if ($data === null) {
@@ -150,7 +171,7 @@ class SpecBuilder
     private function aiFlags(array $l4): array
     {
         $flags = [];
-        foreach (['sejarah', 'perutusan'] as $page) {
+        foreach (['sejarah', 'perutusan', 'profil'] as $page) {
             if (($l4[$page]['mode'] ?? null) === 'butir_ringkas') {
                 $flags[] = ['path' => "content.{$page}", 'reviewed_by_pic' => false];
             }

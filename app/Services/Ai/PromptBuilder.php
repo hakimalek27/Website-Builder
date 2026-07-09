@@ -25,11 +25,12 @@ class PromptBuilder
         $enabledPages = $project->pages()->where('enabled', true)->pluck('page_key')->all();
 
         $mood = data_get($sections, 'step_2.mood', 'tenang_khusyuk');
+        $isNgo = $project->tier->isNgo();
 
-        $system = $this->systemPrompt($mood);
+        $system = $this->systemPrompt($mood, $isNgo);
 
         $data = $this->minimizedData($project, $sections, $enabledPages);
-        [$requested, $serviceKeys] = $this->requestedKeys($enabledPages, $sections);
+        [$requested, $serviceKeys] = $this->requestedKeys($enabledPages, $sections, $isNgo);
         $schema = $this->schemaFor($requested, $serviceKeys);
 
         $user = "DATA MASJID:\n".json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
@@ -52,9 +53,10 @@ class PromptBuilder
         ];
     }
 
-    public function systemPrompt(string $mood): string
+    public function systemPrompt(string $mood, bool $isNgo = false): string
     {
-        $template = File::get(resource_path('prompts/draft-system.txt'));
+        $file = $isNgo ? 'prompts/draft-system-ngo.txt' : 'prompts/draft-system.txt';
+        $template = File::get(resource_path($file));
 
         return str_replace('{{MOOD}}', Moods::prompt($mood), $template);
     }
@@ -67,6 +69,10 @@ class PromptBuilder
     {
         $l1 = $sections['step_1'] ?? [];
         $l4 = $sections['step_4']['panels'] ?? [];
+
+        if ($project->tier->isNgo()) {
+            return $this->minimizedNgoData($project, $sections, $l1, $l4);
+        }
 
         $data = [
             'nama_masjid' => $project->mosque_name,
@@ -128,10 +134,80 @@ class PromptBuilder
         return array_filter($data, fn ($v) => $v !== null && $v !== []);
     }
 
+    /**
+     * DATA NGO diminimumkan PII (§12.7): TIADA no. pendaftaran, no. akaun bank,
+     * nama+telefon individu/PIC. Hanya konteks am + tajuk program/derma.
+     */
+    private function minimizedNgoData(Project $project, array $sections, array $l1, array $l4): array
+    {
+        $data = [
+            'nama_pertubuhan' => $project->mosque_name,
+            'nama_pendek' => $l1['short_name'] ?? null,
+            'bandar' => $l1['city'] ?? null,
+            'negeri' => $l1['state'] ?? null,
+            'tahun_ditubuhkan' => $l1['established_year'] ?? null,
+            'mood' => data_get($sections, 'step_2.mood'),
+            'tier' => $project->tier->value,
+        ];
+
+        // Program (nama + sasaran sahaja).
+        if (! empty($l4['program_utama']['programs'] ?? [])) {
+            $data['program'] = array_map(
+                fn ($p) => ['nama' => $p['name'] ?? null, 'sasaran' => $p['audience'] ?? null],
+                $l4['program_utama']['programs'],
+            );
+        }
+
+        // Bidang sukarelawan (label sahaja).
+        if (! empty($l4['sukarelawan']['roles'] ?? [])) {
+            $data['sukarelawan_bidang'] = array_values(array_filter(array_map(
+                fn ($r) => $r['bidang'] ?? null,
+                $l4['sukarelawan']['roles'],
+            )));
+        }
+
+        // Derma: TAJUK kategori sahaja (TIADA no akaun bank).
+        if (! empty($l4['derma']['categories'] ?? [])) {
+            $data['derma_kategori'] = array_values(array_filter(array_map(
+                fn ($c) => $c['title'] ?? null,
+                $l4['derma']['categories'],
+            )));
+        }
+
+        // Profil (bullet ringkas jika mode butir_ringkas).
+        if (! empty($l4['profil']['bullets'] ?? [])) {
+            $data['profil_ringkas'] = array_values($l4['profil']['bullets']);
+        }
+
+        return array_filter($data, fn ($v) => $v !== null && $v !== []);
+    }
+
     /** @return array{0: array<int,string>, 1: array<int,string>} */
-    private function requestedKeys(array $enabledPages, array $sections): array
+    private function requestedKeys(array $enabledPages, array $sections, bool $isNgo = false): array
     {
         $keys = ['meta', 'hero', 'about', 'footer_description'];
+
+        // NGO / pertubuhan (Fasa 11) — tiada services masjid.
+        if ($isNgo) {
+            if (in_array('program_utama', $enabledPages, true)) {
+                $keys[] = 'programs';
+            }
+            if (in_array('sukarelawan', $enabledPages, true)) {
+                $keys[] = 'volunteer';
+            }
+            if (in_array('keahlian', $enabledPages, true)) {
+                $keys[] = 'membership';
+            }
+            if (in_array('derma', $enabledPages, true)) {
+                $keys[] = 'donate';
+            }
+            if (array_intersect(['berita', 'pengumuman', 'program_akan_datang'], $enabledPages)) {
+                $keys[] = 'announcements';
+            }
+
+            return [$keys, []];
+        }
+
         $serviceKeys = array_values(array_intersect(self::SERVICE_PAGES, $enabledPages));
 
         if ($serviceKeys !== []) {
@@ -169,6 +245,11 @@ class PromptBuilder
             'infaq' => ['heading' => '≤60', 'paragraph' => '≤240'],
             'announcements' => [['title' => '≤70', 'date_label' => '≤20', 'excerpt' => '≤140']],
             'visitor_info' => ['heading' => '≤60', 'paragraph' => '≤240'],
+            // NGO / pertubuhan (Fasa 11).
+            'programs' => [['title' => '≤40', 'blurb' => '≤160']],
+            'volunteer' => ['heading' => '≤60', 'paragraph' => '≤240', 'cta_label' => '≤20'],
+            'membership' => ['heading' => '≤60', 'paragraph' => '≤240'],
+            'donate' => ['heading' => '≤60', 'paragraph' => '≤240'],
             'footer_description' => '≤200',
         ];
 

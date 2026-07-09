@@ -27,6 +27,11 @@ class DraftContentValidator
         'infaq' => ['heading' => 60, 'paragraph' => 240],
         'announcements' => ['_each' => ['title' => 70, 'date_label' => 20, 'excerpt' => 140]],
         'visitor_info' => ['heading' => 60, 'paragraph' => 240],
+        // NGO / pertubuhan (Fasa 11) — aditif; dikuatkuasa hanya bila diminta.
+        'programs' => ['_each' => ['title' => 40, 'blurb' => 160]],
+        'volunteer' => ['heading' => 60, 'paragraph' => 240, 'cta_label' => 20],
+        'membership' => ['heading' => 60, 'paragraph' => 240],
+        'donate' => ['heading' => 60, 'paragraph' => 240],
         'footer_description' => 200,
     ];
 
