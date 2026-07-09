@@ -48,6 +48,9 @@ Route::prefix('/b/{token}')->middleware('resolve.invitation')->name('pic.')->gro
     Route::get('/draf/{generation}', [DraftController::class, 'show'])->name('draf');
     Route::get('/draf/{generation}/penuh', [DraftController::class, 'raw'])->name('draf.raw');
 
+    // Aset bertoken (thumbnail hero/logo/galeri dalam wizard) — semak milik projek.
+    Route::get('/aset/{asset}', [DraftController::class, 'asset'])->name('aset');
+
     // P7 Tweak reka bentuk (percuma).
     Route::get('/tweak/reka', [TweakController::class, 'reka'])->name('tweak.reka');
     Route::post('/tweak/reka', [TweakController::class, 'rekaRender'])->name('tweak.reka.render');

@@ -5,6 +5,7 @@ namespace App\Livewire\Wizard;
 use App\Enums\ProjectStatus;
 use App\Enums\Tier;
 use App\Exceptions\UploadException;
+use App\Models\Asset;
 use App\Models\DesignPackage;
 use App\Models\Invitation;
 use App\Models\Project;
@@ -19,6 +20,7 @@ use App\Support\PresetMatrix;
 use App\Support\WizardSteps;
 use App\Support\ZoneLookup;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
@@ -197,6 +199,9 @@ class WizardStep extends Component
         return PageCatalog::panels()[$pageKey] ?? [];
     }
 
+    /** Had bilangan imej hero (§6 L6). */
+    private const HERO_MAX = 3;
+
     /** Muat naik fail (§11.4): proses melalui UploadService → Asset → rujukan dalam data. */
     public function updatedFiles($value, string $key): void
     {
@@ -205,27 +210,72 @@ class WizardStep extends Component
             return;
         }
 
-        try {
-            $asset = app(UploadService::class)->store($value, $this->kindFor($key), $project);
-        } catch (UploadException $e) {
-            $this->addError("files.{$key}", $e->getMessage());
-            Arr::forget($this->files, $key);
-
-            return;
-        }
-
-        $ref = ['asset_id' => $asset->id, 'path' => $asset->path, 'name' => $asset->original_name];
+        $files = is_array($value) ? array_values($value) : [$value];   // 'multiple' → array
+        $service = app(UploadService::class);
+        $kind = $this->kindFor($key);
         $dataPath = $this->dataPathFor($key);
+        $multi = $this->isMultiTarget($key);
+        $errors = [];
 
-        if ($this->isMultiTarget($key)) {
-            $existing = Arr::get($this->data, $dataPath, []);
-            $existing[] = $ref;
-            Arr::set($this->data, $dataPath, $existing);
-        } else {
-            Arr::set($this->data, $dataPath, $ref);
+        foreach ($files as $file) {
+            // Kuatkuasa maksimum imej hero.
+            if ($key === 'hero' && count(Arr::get($this->data, $dataPath, [])) >= self::HERO_MAX) {
+                $errors[] = 'Maksimum '.self::HERO_MAX.' imej hero.';
+                break;
+            }
+
+            try {
+                $asset = $service->store($file, $kind, $project);
+            } catch (UploadException $e) {
+                $errors[] = $e->getMessage();
+
+                continue;
+            }
+
+            $ref = ['asset_id' => $asset->id, 'path' => $asset->path, 'name' => $asset->original_name];
+
+            if ($multi) {
+                $existing = Arr::get($this->data, $dataPath, []);
+                $existing[] = $ref;
+                Arr::set($this->data, $dataPath, $existing);
+            } else {
+                Arr::set($this->data, $dataPath, $ref);
+            }
         }
 
         Arr::forget($this->files, $key);
+        $this->save();
+
+        // addError SELEPAS save() (yang reset error bag) supaya ralat muat naik kekal dipapar.
+        foreach (array_unique($errors) as $msg) {
+            $this->addError("files.{$key}", $msg);
+        }
+    }
+
+    /** Buang satu imej hero (padam Asset + fail fizikal). */
+    public function removeHeroFile(int $index): void
+    {
+        $project = $this->resolveProject();
+        if ($project->isFrozen()) {
+            return;
+        }
+
+        $files = Arr::get($this->data, 'hero_files', []);
+        if (! isset($files[$index])) {
+            return;
+        }
+
+        $ref = $files[$index];
+        if (! empty($ref['asset_id'])) {
+            $asset = Asset::where('project_id', $project->id)->find($ref['asset_id']);
+            if ($asset !== null) {
+                Storage::disk('local')->delete($asset->path);
+                $asset->delete();
+            }
+        }
+
+        unset($files[$index]);
+        Arr::set($this->data, 'hero_files', array_values($files));
         $this->save();
     }
 

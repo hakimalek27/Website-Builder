@@ -15,13 +15,31 @@
         @error('data.hero_mode') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
 
         @if (($data['hero_mode'] ?? null) === 'upload')
+            @php $heroFiles = $data['hero_files'] ?? []; @endphp
             <div class="mt-3">
-                <input type="file" wire:model="files.hero" accept="image/jpeg,image/png,image/webp" class="{{ $inp }} text-xs">
-                @if (! empty($data['hero_files'] ?? []))
-                    <p class="mt-1 text-xs text-brand-600">✓ {{ count($data['hero_files']) }} imej dimuat naik</p>
+                @if (count($heroFiles) < 3)
+                    <input type="file" wire:model="files.hero" multiple accept="image/jpeg,image/png,image/webp" class="{{ $inp }} text-xs">
+                    <p class="mt-1 text-xs text-ink/55">Pilih 1–3 imej landskap (≥1600px lebar). Boleh pilih beberapa sekali gus.</p>
+                @else
+                    <p class="text-xs text-ink/55">Maksimum 3 imej dicapai — buang satu untuk menambah yang lain.</p>
                 @endif
                 <div wire:loading wire:target="files.hero" class="mt-1 text-xs text-gold-700">Memuat naik…</div>
                 @error('files.hero') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+
+                @if (! empty($heroFiles))
+                    <div class="mt-3 grid grid-cols-3 gap-2">
+                        @foreach ($heroFiles as $i => $hf)
+                            <div class="relative overflow-hidden rounded-xl border border-sand" wire:key="hero-{{ $hf['asset_id'] ?? $i }}">
+                                <img src="{{ route('pic.aset', ['token' => $token, 'asset' => $hf['asset_id']]) }}" alt="Imej hero {{ $i + 1 }}" class="h-24 w-full object-cover">
+                                <button type="button" wire:click="removeHeroFile({{ $i }})"
+                                    class="absolute top-1 right-1 grid h-6 w-6 place-items-center rounded-full bg-white/90 text-red-600 shadow transition hover:bg-white">
+                                    {!! \App\Support\Lucide::svg('X', 2, 'h-3.5 w-3.5') !!}
+                                </button>
+                            </div>
+                        @endforeach
+                    </div>
+                    <p class="mt-1 text-xs text-brand-600">✓ {{ count($heroFiles) }}/3 imej dimuat naik</p>
+                @endif
             </div>
         @endif
     </div>

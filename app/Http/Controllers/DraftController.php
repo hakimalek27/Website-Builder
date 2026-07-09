@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Asset;
 use App\Models\Generation;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 // §5.2 P5/P6 — pemapar draf.
 class DraftController extends Controller
@@ -36,6 +38,21 @@ class DraftController extends Controller
             'Content-Security-Policy' => "default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; frame-ancestors 'self'",
             'X-Frame-Options' => 'SAMEORIGIN', // benarkan iframe P5 (asal sama)
             'X-Robots-Tag' => 'noindex',
+        ]);
+    }
+
+    /** Hidangkan aset milik projek (thumbnail wizard) — bertoken via middleware invitation. */
+    public function asset(Request $request, string $token, Asset $asset): StreamedResponse
+    {
+        $project = $request->attributes->get('project');
+        abort_unless($asset->project_id === $project->id, 404);
+        abort_unless(in_array($asset->kind, ['hero', 'logo', 'gallery'], true), 404);
+        abort_unless(Storage::disk('local')->exists($asset->path), 404);
+
+        return Storage::disk('local')->response($asset->path, null, [
+            'Content-Type' => $asset->mime ?: 'application/octet-stream',
+            'X-Robots-Tag' => 'noindex',
+            'Cache-Control' => 'private, max-age=300',
         ]);
     }
 
