@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AiProviders\Tables;
 
+use App\Enums\AiVendor;
 use App\Models\AiProvider;
 use App\Services\Ai\AiClientFactory;
 use App\Services\Ai\AiException;
@@ -22,6 +23,8 @@ class AiProvidersTable
         return $table
             ->columns([
                 TextColumn::make('name')->label('Nama')->searchable()->sortable()->weight('bold'),
+                TextColumn::make('vendor')->label('Penyedia')->badge()
+                    ->formatStateUsing(fn ($state) => $state instanceof AiVendor ? $state->label() : $state),
                 TextColumn::make('driver')->label('Driver')->badge(),
                 TextColumn::make('model')->label('Model'),
                 IconColumn::make('is_active')->label('Aktif')->boolean(),

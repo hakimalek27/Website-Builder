@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\AiDriver;
+use App\Enums\AiVendor;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -20,6 +21,7 @@ class AiProvider extends Model
     protected function casts(): array
     {
         return [
+            'vendor' => AiVendor::class,
             'driver' => AiDriver::class,
             'api_key' => 'encrypted',
             'max_tokens' => 'integer',

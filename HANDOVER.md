@@ -52,6 +52,15 @@ npm run test:e2e:report   # buka laporan HTML
 - Prasyarat: DB di-seed (`migrate:fresh --seed`) — perlu 5 pakej + zon untuk render draf.
 - Bunyi console diabai (BENIGN): font luar, favicon, ResizeObserver, **sandbox iframe draf** (§5.2 P6 sekat skrip draf AI — memang betul).
 
+## Penyedia AI — preset (Julai 2026)
+
+Admin cuma pilih **Penyedia** → base URL + driver diisi automatik → masukkan API key + pilih model (dropdown). Menyelesaikan ralat "Sambungan gagal / HTTP 404" (dulu base URL salah).
+
+- **`app/Enums/AiVendor.php`** — preset: OpenAI, Anthropic, OpenRouter, DeepSeek, GLM·Z.ai (Zhipu), Groq, Mistral, Google Gemini, Ollama, Custom. Setiap satu: `driver()` + `baseUrl()` + `models()` (cadangan datalist) + `apiKeyUrl()`. Base URL disahkan dari dokumentasi rasmi.
+- **Borang reaktif** (`AiProviderForm`): Select `vendor` `->live()` → `afterStateUpdated` set `driver` + `base_url`; `model` guna `datalist` (dropdown + boleh taip). Kolum `vendor` baharu (migration).
+- `AiClient` TIDAK diubah — 404 diselesaikan hanya dengan base URL betul. Endpoint: OpenAI-compat `{base}/chat/completions`, Anthropic `{base}/v1/messages`.
+- Ujian: `tests/Feature/Phase7/AiVendorPresetTest.php` (11 — endpoint setiap vendor betul via Http::fake), `AiProviderFormTest.php` (4 — borang auto-isi).
+
 ## Nota penting
 
 1. **git/gh:** harness set `GH_TOKEN`+`GITHUB_TOKEN` tak sah → guna `env -u GH_TOKEN -u GITHUB_TOKEN git push / gh ...`.

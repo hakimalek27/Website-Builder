@@ -2,11 +2,15 @@
 
 namespace App\Filament\Resources\AiProviders\Schemas;
 
+use App\Enums\AiVendor;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Illuminate\Support\HtmlString;
 
 class AiProviderForm
 {
@@ -14,22 +18,58 @@ class AiProviderForm
     {
         return $schema
             ->components([
-                TextInput::make('name')->label('Nama')->required()->maxLength(80),
-                Select::make('driver')->label('Driver')->required()
-                    ->options(['anthropic' => 'Anthropic (Claude)', 'openai_compatible' => 'OpenAI-compatible'])
-                    ->default('anthropic'),
-                TextInput::make('base_url')->label('Base URL (pilihan)')
-                    ->placeholder('cth: http://host:11434/v1 (Ollama) — kosong untuk lalai'),
+                TextInput::make('name')->label('Nama')->required()->maxLength(80)
+                    ->placeholder('cth: OpenRouter Utama'),
+
+                // Pilih penyedia → auto-isi driver + base URL + cadangan model.
+                Select::make('vendor')
+                    ->label('Penyedia')
+                    ->options(AiVendor::options())
+                    ->default('anthropic')
+                    ->required()
+                    ->live()
+                    ->afterStateUpdated(function ($state, Set $set): void {
+                        $vendor = AiVendor::tryFrom((string) $state);
+                        if (! $vendor) {
+                            return;
+                        }
+                        $set('driver', $vendor->driver()->value);
+                        $set('base_url', $vendor->baseUrl());
+                        $set('model', '');
+                    })
+                    ->helperText('Base URL & driver diisi automatik. Admin cuma perlu API key + model.'),
+
+                Select::make('driver')->label('Driver (auto)')->required()
+                    ->options(['anthropic' => 'Anthropic (/v1/messages)', 'openai_compatible' => 'OpenAI-compatible (/chat/completions)'])
+                    ->default('anthropic')
+                    ->helperText('Ditetapkan ikut penyedia — jarang perlu diubah.'),
+
+                TextInput::make('base_url')->label('Base URL')
+                    ->default(AiVendor::Anthropic->baseUrl())
+                    ->placeholder('auto-isi ikut penyedia')
+                    ->helperText('Diisi automatik. Edit hanya untuk Ollama / self-hosted / custom.'),
+
                 TextInput::make('api_key')
                     ->label('API Key')
                     ->password()
                     ->revealable()
                     // Write-only: kosong = kekal nilai lama; paparan ••••+4 melalui placeholder.
                     ->dehydrated(fn ($state) => filled($state))
-                    ->placeholder(fn ($record) => $record?->api_key ? '••••'.substr($record->api_key, -4) : 'Masukkan kunci')
-                    ->required(fn (string $operation) => $operation === 'create'),
+                    ->placeholder(fn ($record) => $record?->api_key ? '••••'.substr($record->api_key, -4) : 'Tampal secret key di sini')
+                    ->required(fn (string $operation) => $operation === 'create')
+                    ->helperText(function (Get $get): ?HtmlString {
+                        $url = AiVendor::tryFrom((string) $get('vendor'))?->apiKeyUrl();
+
+                        return $url
+                            ? new HtmlString('Dapatkan key: <a href="'.e($url).'" target="_blank" rel="noopener" class="underline">'.e($url).'</a>')
+                            : null;
+                    }),
+
                 TextInput::make('model')->label('Model')->required()
-                    ->placeholder('cth: claude-sonnet-5 / claude-haiku-4-5 / glm-5 (JANGAN hard-code)'),
+                    ->placeholder('pilih dari senarai atau taip sendiri')
+                    ->datalist(fn (Get $get): array => AiVendor::tryFrom((string) $get('vendor'))?->models() ?? [])
+                    ->helperText('Klik untuk cadangan, atau taip mana-mana ID model penyedia.'),
+
                 TextInput::make('max_tokens')->label('Max tokens')->numeric()->default(3000),
                 TextInput::make('temperature')->label('Temperature')->numeric()->step(0.1)->default(0.7),
                 TextInput::make('timeout_s')->label('Timeout (saat)')->numeric()->default(90),
