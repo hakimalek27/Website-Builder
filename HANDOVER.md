@@ -1,6 +1,6 @@
 # HANDOVER — REKA (Website Builder)
 
-Kemas kini terakhir: **9 Julai 2026** · Branch: `main` · Remote: `github.com/hakimalek27/Website-Builder`
+Kemas kini terakhir: **10 Julai 2026** · Branch: `main` · Remote: `github.com/hakimalek27/Website-Builder`
 
 REKA — platform tempahan & penjanaan draf laman web masjid.
 Stack: **Laravel 13.19 · PHP 8.4 · Filament v4.11 · Livewire 3 · Tailwind 4 · Pest** (dev: SQLite).
@@ -9,9 +9,9 @@ Stack: **Laravel 13.19 · PHP 8.4 · Filament v4.11 · Livewire 3 · Tailwind 4 
 
 ## Status semasa
 
-- **Fasa 0–10 siap** (spek `docs/SPEK-REKA-v1.1.md`) + **rombakan UI/UX "Premium Islamik-Moden"** (commit `2fed894`).
-- **88 ujian Pest hijau** (304 assertions) · `pint` bersih · `npm run build` bersih · `migrate:fresh --seed` bersih.
-- Semua kerja **di-push ke `main`**.
+- **Fasa 0–10 siap** (spek `docs/SPEK-REKA-v1.1.md`) + **rombakan UI/UX "Premium Islamik-Moden"** (`2fed894`) + **ujian smoke Playwright** (`fb108eb`) + **preset penyedia AI** (`a964fb7`).
+- **103 ujian Pest hijau** (344 assertions) + **72 ujian smoke Playwright hijau** · `pint` bersih · `npm run build` bersih · `migrate:fresh --seed` bersih.
+- Semua kerja **di-push ke `main`** (commit terkini `a964fb7`).
 
 ## Sesi terakhir — Rombakan UI/UX (commit `2fed894`)
 
