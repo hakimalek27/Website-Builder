@@ -15,6 +15,11 @@
 /node_modules
 /public/build
 /public/hot
+/test-results
+/playwright-report
+/blob-report
+/tests-e2e/.smoke-target.json
+/tests-e2e/screenshots
 /public/storage
 /storage/*.key
 /storage/pail

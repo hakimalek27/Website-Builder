@@ -74,8 +74,10 @@ class SecurityHeaders
      */
     protected function withViteDevHosts(string $csp): string
     {
-        $hosts = 'http://localhost:* http://127.0.0.1:* http://[::1]:*';
-        $ws = 'ws://localhost:* ws://127.0.0.1:* ws://[::1]:*';
+        // Nota: IPv6 literal `[::1]` BUKAN host-source CSP yang sah (browser tolak).
+        // Vite lapor origin sebagai `localhost`, jadi `localhost` + `127.0.0.1` mencukupi.
+        $hosts = 'http://localhost:* http://127.0.0.1:*';
+        $ws = 'ws://localhost:* ws://127.0.0.1:*';
 
         // Pecah string CSP kepada peta arahan (kekal susunan asal).
         $directives = [];

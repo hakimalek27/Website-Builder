@@ -36,6 +36,22 @@ Rombakan menyeluruh semua halaman custom kepada gaya premium (hijau zamrud + ema
 
 **LUAR skop (kekal sistem token draf sendiri):** `resources/views/draft/shell.blade.php` + `resources/views/components/design-preview.blade.php`.
 
+## Ujian smoke (Playwright) — `tests-e2e/`
+
+Ujian visual **boleh-ulang** merentas 3 saiz skrin (mobile 393 / tablet 768 / desktop 1440) untuk **24 halaman** (awam + PIC + wizard + admin). Setiap halaman: semak render, tiada ralat console/CSP, + screenshot penuh.
+
+```bash
+npm run test:e2e          # vite build + playwright test (72 ujian: 24 × 3)
+npm run test:e2e:report   # buka laporan HTML
+```
+
+- **`playwright.config.js`** — 3 projek saiz skrin; `webServer` guna-semula pelayan `:8000` (atau mulakan sendiri).
+- **`tests-e2e/global-setup.js`** — jalankan `php artisan reka:demo-token` → tulis `{token, generation}` ke `.smoke-target.json`.
+- **`app/Console/Commands/DemoTokenCommand.php`** (`reka:demo-token`) — jana sesi PIC demo lengkap (projek DraftReady + draf sebenar render). Idempoten (penanda e-mel `demo-playwright@reka.test`). **Alat dev sahaja.**
+- **`tests-e2e/smoke.spec.js`** — senarai halaman + semakan; screenshot ke `tests-e2e/screenshots/` (gitignored).
+- Prasyarat: DB di-seed (`migrate:fresh --seed`) — perlu 5 pakej + zon untuk render draf.
+- Bunyi console diabai (BENIGN): font luar, favicon, ResizeObserver, **sandbox iframe draf** (§5.2 P6 sekat skrip draf AI — memang betul).
+
 ## Nota penting
 
 1. **git/gh:** harness set `GH_TOKEN`+`GITHUB_TOKEN` tak sah → guna `env -u GH_TOKEN -u GITHUB_TOKEN git push / gh ...`.

@@ -4,11 +4,14 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "test:e2e": "vite build && playwright test",
+        "test:e2e:report": "playwright show-report"
     },
     "devDependencies": {
         "@fontsource-variable/plus-jakarta-sans": "^5.2.8",
         "@fontsource/cormorant-garamond": "^5.2.11",
+        "@playwright/test": "^1.61.1",
         "@tailwindcss/vite": "^4.0.0",
         "axios": "^1.11.0",
         "concurrently": "^9.0.1",
