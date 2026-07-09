@@ -130,9 +130,67 @@ class WizardStep extends Component
     /** Autosave: dipanggil bila mana-mana medan data.* dikemas kini. */
     public function updated(string $name): void
     {
-        if (str_starts_with($name, 'data.')) {
-            $this->save();
+        if (! str_starts_with($name, 'data.')) {
+            return;
         }
+
+        $this->save();
+
+        // Elak morph DOM penuh pada simpanan skalar (menaip/select) — inilah punca
+        // dropdown L4 tertutup sendiri. Radio/checkbox & langkah reaktif tetap render
+        // (perlu untuk showIf + pratonton hidup). Chip "Disimpan" dikemas kini via event.
+        if (! $this->needsRender($name)) {
+            $this->skipRender();
+        }
+    }
+
+    /** Perlukah render penuh selepas medan ini disimpan? (elak morph tak perlu §6.13) */
+    protected function needsRender(string $name): bool
+    {
+        // Langkah reaktif: preset halaman (0/3), pratonton reka hidup (2).
+        if (in_array($this->step, [0, 2, 3], true)) {
+            return true;
+        }
+
+        $key = substr($name, strlen('data.'));
+        $firstSegment = explode('.', $key)[0];
+
+        // Medan skalar yang mengawal blok bersyarat merentas langkah.
+        if (in_array($firstSegment, ['state', 'logo_status', 'hero_mode', 'domain_status', 'cms_updater', 'payment_gateway'], true)) {
+            return true;
+        }
+
+        // Langkah 4: hanya kawalan .live (radio/checkbox/facility_checklist) memacu showIf.
+        if ($this->step === 4 && str_starts_with($key, 'panels.')) {
+            return $this->step4FieldNeedsRender($key);
+        }
+
+        return false;
+    }
+
+    /** Cari jenis medan panel L4 dari path; render hanya untuk pemacu showIf. */
+    protected function step4FieldNeedsRender(string $key): bool
+    {
+        $parts = explode('.', $key);          // panels.{page}.{field}[.{i}.{sub}]
+        $pageKey = $parts[1] ?? null;
+        $fieldKey = $parts[2] ?? null;
+        if ($pageKey === null || $fieldKey === null) {
+            return true;                       // selamat: render
+        }
+
+        foreach ($this->panelSchema($pageKey) as $field) {
+            if (($field['key'] ?? null) === $fieldKey) {
+                return in_array($field['type'] ?? '', ['radio', 'checkbox', 'facility_checklist'], true);
+            }
+        }
+
+        return false;
+    }
+
+    /** Skema panel L4 untuk page_key (dipisah supaya mudah diperluas ikut tier). */
+    protected function panelSchema(string $pageKey): array
+    {
+        return PageCatalog::panels()[$pageKey] ?? [];
     }
 
     /** Muat naik fail (§11.4): proses melalui UploadService → Asset → rujukan dalam data. */
@@ -226,6 +284,9 @@ class WizardStep extends Component
 
         $this->afterSave($project);
         $this->savedAt = now()->format('H:i');
+
+        // Kemas kini chip "Disimpan" walaupun render dilangkau (skipRender pada autosave skalar).
+        $this->dispatch('wizard-saved', at: $this->savedAt);
     }
 
     /** Hook selepas simpan setiap langkah. */

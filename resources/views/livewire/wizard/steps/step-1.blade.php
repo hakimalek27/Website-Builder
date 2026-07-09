@@ -36,7 +36,7 @@
         </div>
         <div>
             <label class="block text-sm font-medium">Negeri <span class="text-red-600">*</span></label>
-            <select wire:model.live="data.state" class="{{ $inp }}">
+            <select wire:model.live="data.state" wire:key="step1-state" class="{{ $inp }}">
                 <option value="">— Pilih —</option>
                 @foreach (config('reka.states') as $s)
                     <option value="{{ $s }}">{{ $s }}</option>
@@ -46,7 +46,7 @@
         </div>
         <div>
             <label class="block text-sm font-medium">Zon solat JAKIM <span class="text-red-600">*</span></label>
-            <select wire:model.blur="data.jakim_zone" class="{{ $inp }}">
+            <select wire:model.blur="data.jakim_zone" wire:key="step1-zone" class="{{ $inp }}">
                 <option value="">— Pilih negeri dahulu —</option>
                 @foreach ($this->zoneOptions() as $code => $label)
                     <option value="{{ $code }}">{{ $label }}</option>

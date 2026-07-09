@@ -18,7 +18,7 @@
 @endphp
 
 @if ($visible)
-    <div class="mb-3">
+    <div class="mb-3" wire:key="f-{{ $rel }}">
         @if (! in_array($type, ['checkbox', 'note']))
             <label class="label flex items-center gap-1.5">
                 {{ $field['label'] }}
@@ -132,7 +132,7 @@
             @case('repeater_text')
                 <div class="space-y-2">
                     @foreach ($panelData[$field['key']] ?? [] as $i => $row)
-                        <div class="flex gap-2">
+                        <div class="flex gap-2" wire:key="rt-{{ $rel }}-{{ $i }}">
                             <input type="text" wire:model.blur="data.{{ $rel }}.{{ $i }}" placeholder="{{ $field['placeholder'] ?? '' }}" class="input flex-1">
                             <button type="button" wire:click="removeRow('{{ $rel }}', {{ $i }})"
                                 class="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-ink/40 transition hover:bg-red-50 hover:text-red-600">
@@ -149,7 +149,7 @@
             @case('repeater')
                 <div class="space-y-3">
                     @foreach ($panelData[$field['key']] ?? [] as $i => $row)
-                        <div class="rounded-2xl border border-sand bg-cream p-4">
+                        <div class="rounded-2xl border border-sand bg-cream p-4" wire:key="row-{{ $rel }}-{{ $i }}">
                             <div class="flex justify-end">
                                 <button type="button" wire:click="removeRow('{{ $rel }}', {{ $i }})"
                                     class="flex items-center gap-1 text-xs font-medium text-red-600 hover:underline">

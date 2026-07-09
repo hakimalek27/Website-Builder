@@ -105,6 +105,8 @@
     @media (prefers-reduced-motion: reduce) {
         html { scroll-behavior: auto; }
     }
+    /* Alpine: sembunyi elemen x-show sehingga Alpine memulakan (elak flash). */
+    [x-cloak] { display: none !important; }
 }
 
 /* ── Komponen kongsi (guna @apply supaya kekal DRY) ───── */

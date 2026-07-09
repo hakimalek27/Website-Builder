@@ -18,11 +18,12 @@
                 <h1 class="font-display text-2xl font-bold text-brand-800">{{ $stepMeta['title'] }}</h1>
                 <p class="mt-1 text-sm text-ink/60">{{ $stepMeta['subtitle'] }}</p>
             </div>
-            @if ($savedAt)
-                <span class="animate-scale-in flex shrink-0 items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700">
-                    {!! \App\Support\Lucide::svg('Check', 2.5, 'h-3.5 w-3.5') !!} Disimpan {{ $savedAt }}
-                </span>
-            @endif
+            {{-- Chip "Disimpan" dipacu Alpine: dikemas kini walau render dilangkau (skipRender autosave). --}}
+            <span x-data="{ at: @js($savedAt) }" x-on:wizard-saved.window="at = $event.detail.at"
+                x-show="at" x-cloak
+                class="animate-scale-in flex shrink-0 items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700">
+                {!! \App\Support\Lucide::svg('Check', 2.5, 'h-3.5 w-3.5') !!} Disimpan <span x-text="at"></span>
+            </span>
         </div>
 
         @if ($readOnly)
