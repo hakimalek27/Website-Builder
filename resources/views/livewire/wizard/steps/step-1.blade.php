@@ -112,7 +112,7 @@
         <input type="url" wire:model.blur="data.tiktok_url" placeholder="TikTok (pautan)" class="{{ $inp }}">
     </div>
 
-    {{-- Logo (§6 L1). Upload penuh + re-encode = Fasa 6 (TODO-F6). --}}
+    {{-- Logo (§6 L1). Upload diproses melalui UploadService (re-encode + buang EXIF, §11.4). --}}
     <div>
         <label class="block text-sm font-medium">Logo masjid <span class="text-red-600">*</span></label>
         <div class="mt-2 space-y-2">
