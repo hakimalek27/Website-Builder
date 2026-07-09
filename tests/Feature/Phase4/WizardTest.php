@@ -3,8 +3,6 @@
 use App\Enums\ProjectStatus;
 use App\Enums\Tier;
 use App\Livewire\Wizard\WizardStep;
-use App\Models\Invitation;
-use App\Models\Project;
 use App\Models\ProjectPage;
 use App\Models\ProjectSection;
 use App\Support\ZoneLookup;
@@ -13,15 +11,7 @@ use Database\Seeders\JakimZoneSeeder;
 use Livewire\Livewire;
 
 // Fasa 4 — enjin wizard + L0–L2 (§6, §6.11, §6.13, §7.5).
-
-function picSession(array $projectAttrs = []): array
-{
-    $token = Invitation::generateToken();
-    $project = Project::factory()->create($projectAttrs);
-    Invitation::factory()->for($project)->withToken($token)->create();
-
-    return [$project, $token];
-}
+// (helper picSession() ditakrif dalam tests/Pest.php)
 
 it('autosaves step data into project_sections (§6.13)', function () {
     [$project, $token] = picSession();

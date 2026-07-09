@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Invitation;
+use App\Models\Project;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -44,7 +46,25 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+/**
+ * Cipta sesi PIC ujian: Project + Invitation + token plaintext.
+ *
+ * @return array{0: Project, 1: string}
+ */
+function picSession(array $projectAttrs = []): array
 {
-    // ..
+    $token = Invitation::generateToken();
+    $project = Project::factory()->create($projectAttrs);
+    Invitation::factory()->for($project)->withToken($token)->create();
+
+    return [$project, $token];
+}
+
+/** Hidupkan senarai page_key untuk projek (project_pages). */
+function enablePages(Project $project, array $pageKeys): void
+{
+    $sort = 0;
+    foreach ($pageKeys as $key) {
+        $project->pages()->updateOrCreate(['page_key' => $key], ['enabled' => true, 'sort' => $sort++]);
+    }
 }

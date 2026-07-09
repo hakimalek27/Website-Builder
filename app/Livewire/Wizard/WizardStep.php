@@ -9,9 +9,11 @@ use App\Models\Invitation;
 use App\Models\Project;
 use App\Models\ProjectPage;
 use App\Models\ProjectSection;
+use App\Support\PageCatalog;
 use App\Support\PresetMatrix;
 use App\Support\WizardSteps;
 use App\Support\ZoneLookup;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Livewire\Component;
 
@@ -52,6 +54,45 @@ class WizardStep extends Component
 
         $section = $project->sections()->where('section_key', $this->sectionKey())->first();
         $this->data = $section?->data ?? [];
+
+        if ($this->step === 3 && ! isset($this->data['pages'])) {
+            // Inisialisasi dari project_pages (preset §6.11 telah diapply di L0).
+            $this->data['pages'] = $project->pages()->where('enabled', true)->pluck('page_key')->all();
+        }
+
+        if ($this->step === 4) {
+            $this->applyPanelDefaults($project);
+        }
+    }
+
+    /** Pra-isi & lalai panel L4 (§6 L4) — cth infaq 4 kategori, toggle waktu_solat. */
+    protected function applyPanelDefaults(Project $project): void
+    {
+        $this->data['panels'] ??= [];
+
+        foreach ($this->activePanels($project) as $pageKey) {
+            $this->data['panels'][$pageKey] ??= [];
+
+            foreach (PageCatalog::panels()[$pageKey] as $field) {
+                $path = $field['key'];
+                // Pra-isi kategori infaq.
+                if (($field['prefill'] ?? null) === 'infaq' && empty($this->data['panels'][$pageKey][$path])) {
+                    $this->data['panels'][$pageKey][$path] = PageCatalog::infaqPrefill();
+                }
+                // Lalai checkbox.
+                if ($field['type'] === 'checkbox' && ($field['default'] ?? false) && ! array_key_exists($path, $this->data['panels'][$pageKey])) {
+                    $this->data['panels'][$pageKey][$path] = true;
+                }
+            }
+        }
+    }
+
+    /** page_key aktif (project_pages enabled) yang mempunyai panel L4. */
+    protected function activePanels(Project $project): array
+    {
+        $enabled = $project->pages()->where('enabled', true)->pluck('page_key')->all();
+
+        return array_values(array_intersect($enabled, PageCatalog::pagesWithPanel()));
     }
 
     protected function sectionKey(): string
@@ -118,8 +159,36 @@ class WizardStep extends Component
             0 => $this->afterStep0($project),
             1 => $this->afterStep1($project),
             2 => $this->afterStep2($project),
+            3 => $this->afterStep3($project),
             default => null,
         };
+    }
+
+    /** L3 — segerak pilihan halaman ke project_pages (§6 L3). */
+    protected function afterStep3(Project $project): void
+    {
+        $selected = collect($this->data['pages'] ?? [])
+            ->merge(PageCatalog::MANDATORY)   // utama & hubungi kekal wajib
+            ->unique()
+            ->values();
+
+        $sort = 0;
+        foreach (array_keys(PageCatalog::meta()) as $pageKey) {
+            $project->pages()->updateOrCreate(
+                ['page_key' => $pageKey],
+                ['enabled' => $selected->contains($pageKey), 'sort' => $sort++],
+            );
+        }
+
+        // Halaman custom (max 3).
+        foreach (array_slice($this->data['custom'] ?? [], 0, 3) as $i => $custom) {
+            if (filled($custom['name'] ?? null)) {
+                $project->pages()->updateOrCreate(
+                    ['page_key' => 'custom_'.$i],
+                    ['enabled' => true, 'custom_name' => $custom['name'], 'sort' => 100 + $i],
+                );
+            }
+        }
     }
 
     protected function afterStep0(Project $project): void
@@ -204,6 +273,38 @@ class WizardStep extends Component
         return redirect()->route('pic.home', ['token' => $this->token]);
     }
 
+    // --- Repeater generik (§6 L4/L5) ---
+
+    public function addRow(string $path): void
+    {
+        $rows = Arr::get($this->data, $path, []);
+        $rows[] = [];
+        Arr::set($this->data, $path, array_values($rows));
+        $this->save();
+    }
+
+    public function removeRow(string $path, int $index): void
+    {
+        $rows = Arr::get($this->data, $path, []);
+        unset($rows[$index]);
+        Arr::set($this->data, $path, array_values($rows));
+        $this->save();
+    }
+
+    /** Muat templat statik boleh-edit (§6 L4). */
+    public function loadTemplate(string $path, string $template): void
+    {
+        Arr::set($this->data, $path, __('templates.'.$template));
+        $this->save();
+    }
+
+    /** Muat 8 soalan lazim biasa ke panel FAQ. */
+    public function loadFaqCommon(string $path): void
+    {
+        Arr::set($this->data, $path, trans('templates.faq_common'));
+        $this->save();
+    }
+
     /** @return array<string, mixed> */
     protected function rulesFor(): array
     {
@@ -237,8 +338,77 @@ class WizardStep extends Component
                 'design_package' => ['required', 'in:warisan_hijau,biru_nilam,emas_kubah,teal_kontemporari,marun_agung'],
                 'mood' => ['required', 'in:tenang_khusyuk,mesra_keluarga,megah_berwibawa'],
             ],
+            4 => $this->rulesForStep4(),
+            5 => $this->rulesForStep5(),
             default => [],
         };
+    }
+
+    /** Validasi L4 dibina dinamik dari skema panel aktif (§6 L4). */
+    protected function rulesForStep4(): array
+    {
+        $rules = [];
+        $project = $this->resolveProject();
+
+        foreach ($this->activePanels($project) as $pageKey) {
+            foreach (PageCatalog::panels()[$pageKey] as $field) {
+                $base = "panels.{$pageKey}.{$field['key']}";
+                $type = $field['type'];
+
+                if (in_array($type, ['text', 'textarea', 'number', 'email', 'url', 'select', 'radio'], true)) {
+                    $r = [];
+                    if ($field['required'] ?? false) {
+                        $r[] = 'required';
+                    } else {
+                        $r[] = 'nullable';
+                    }
+                    if (isset($field['max'])) {
+                        $r[] = 'max:'.$field['max'];
+                    }
+                    if (isset($field['options'])) {
+                        $r[] = 'in:'.implode(',', array_keys($field['options']));
+                    }
+                    $rules[$base] = $r;
+                }
+
+                // Repeater: enum + required subfield DIKUNCI (cth peringkat Quran).
+                if ($type === 'repeater' && isset($field['item'])) {
+                    foreach ($field['item'] as $sub) {
+                        $subBase = "{$base}.*.{$sub['key']}";
+                        $r = ['nullable'];
+                        if (isset($sub['options'])) {
+                            $r[] = 'in:'.implode(',', array_keys($sub['options']));
+                        }
+                        if (isset($sub['max'])) {
+                            $r[] = 'max:'.$sub['max'];
+                        }
+                        $rules[$subBase] = $r;
+                    }
+                }
+            }
+
+            // Galeri: consent WAJIB jika ada fail (§6 L4).
+            if ($pageKey === 'galeri' && ! empty($this->data['panels']['galeri']['images'] ?? [])) {
+                $rules['panels.galeri.consent'] = ['accepted'];
+            }
+        }
+
+        return $rules;
+    }
+
+    /** Validasi L5 (§6 L5). */
+    protected function rulesForStep5(): array
+    {
+        $rules = [
+            'cms_updater' => ['required', 'in:ajk_sendiri,urus_azan,jarang'],
+        ];
+
+        // payment_gateway WAJIB jika infaq ditanda (§6.12).
+        if ($this->resolveProject()->pages()->where('page_key', 'infaq')->where('enabled', true)->exists()) {
+            $rules['payment_gateway'] = ['required', 'in:toyyibpay,billplz,duitnow_qr_statik,fpx_korporat,manual_bank'];
+        }
+
+        return $rules;
     }
 
     /** @return array<string, string> */
@@ -310,12 +480,18 @@ class WizardStep extends Component
 
     public function render()
     {
-        return view('livewire.wizard.wizard-step', [
+        $viewData = [
             'stepMeta' => WizardSteps::all()[$this->step],
             'totalSteps' => WizardSteps::count(),
             'designPackages' => $this->step === 2
                 ? DesignPackage::where('is_active', true)->get()
                 : collect(),
-        ]);
+        ];
+
+        if (in_array($this->step, [3, 4], true)) {
+            $viewData['activePanels'] = $this->activePanels($this->resolveProject());
+        }
+
+        return view('livewire.wizard.wizard-step', $viewData);
     }
 }
