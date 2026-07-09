@@ -19,6 +19,7 @@ class DesignPackage extends Model
             'tokens' => 'array',
             'fonts' => 'array',
             'icon_style' => 'array',
+            'variants' => 'array',
             'preview_meta' => 'array',
             'is_active' => 'boolean',
         ];

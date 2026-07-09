@@ -3,6 +3,7 @@
 namespace App\Services\Ai;
 
 use App\Models\Project;
+use App\Support\Moods;
 use Illuminate\Support\Facades\File;
 
 /**
@@ -12,13 +13,6 @@ use Illuminate\Support\Facades\File;
  */
 class PromptBuilder
 {
-    /** §8.3 pemetaan mood. */
-    private const MOODS = [
-        'tenang_khusyuk' => 'tenang, khusyuk, merendah',
-        'mesra_keluarga' => 'mesra, hangat, komuniti',
-        'megah_berwibawa' => 'formal, berwibawa, meyakinkan',
-    ];
-
     private const SERVICE_PAGES = ['nikah', 'jenazah', 'tahlil_doa', 'khidmat_nasihat', 'sewa_dewan'];
 
     /**
@@ -62,7 +56,7 @@ class PromptBuilder
     {
         $template = File::get(resource_path('prompts/draft-system.txt'));
 
-        return str_replace('{{MOOD}}', self::MOODS[$mood] ?? self::MOODS['tenang_khusyuk'], $template);
+        return str_replace('{{MOOD}}', Moods::prompt($mood), $template);
     }
 
     /**

@@ -103,7 +103,7 @@
                 <div>
                     <span class="text-xs text-ink/60">Bekas</span>
                     <div class="mt-1 flex flex-wrap gap-2">
-                        @foreach (['bulat-penuh' => 'Bulat penuh', 'bulat-cair' => 'Bulat cair', 'kotak-lembut' => 'Kotak lembut', 'tanpa-bekas' => 'Tanpa bekas'] as $c => $lbl)
+                        @foreach (['bulat-penuh' => 'Bulat penuh', 'bulat-cair' => 'Bulat cair', 'kotak-lembut' => 'Kotak lembut', 'kotak-tegas' => 'Kotak tegas', 'heksagon' => 'Heksagon', 'tanpa-bekas' => 'Tanpa bekas'] as $c => $lbl)
                             <label class="cursor-pointer">
                                 <input type="radio" wire:model.live="data.icon_style.container" value="{{ $c }}" class="peer sr-only">
                                 <span class="block rounded-xl border border-sand px-2 py-1 text-xs transition peer-checked:border-brand-600 peer-checked:bg-brand-50 peer-checked:ring-1 peer-checked:ring-brand-600/20">{{ $lbl }}</span>
@@ -114,17 +114,45 @@
             </div>
         </div>
 
-        {{-- Susun atur laman utama --}}
+        {{-- Susun atur laman utama (6 pilihan) --}}
         <div>
             <label class="block text-sm font-semibold">Susun atur laman utama</label>
-            <div class="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                @foreach (['hero-tengah' => 'Hero tengah', 'hero-belah' => 'Hero belah', 'grid-kad' => 'Grid kad', 'klasik-formal' => 'Klasik formal'] as $l => $lbl)
+            <div class="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                @foreach (['hero-tengah' => 'Hero tengah', 'hero-belah' => 'Hero belah', 'grid-kad' => 'Grid kad', 'klasik-formal' => 'Klasik formal', 'hero-penuh' => 'Hero penuh (imej latar)', 'hero-mihrab' => 'Hero mihrab (lengkung)'] as $l => $lbl)
                     <label class="cursor-pointer">
                         <input type="radio" wire:model.live="data.layout_home" value="{{ $l }}" class="peer sr-only">
                         <div class="rounded-xl border border-sand px-2 py-2 text-center text-xs transition peer-checked:border-brand-600 peer-checked:bg-brand-50 peer-checked:ring-1 peer-checked:ring-brand-600/20">{{ $lbl }}</div>
                     </label>
                 @endforeach
             </div>
+        </div>
+
+        {{-- Gaya struktur (varian §7) — header / footer / kad / pembatas + animasi --}}
+        <div>
+            <label class="block text-sm font-semibold">Gaya struktur</label>
+            <div class="mt-2 grid gap-3 sm:grid-cols-2">
+                @foreach ([
+                    'header_style' => ['label' => 'Pengepala', 'opts' => ['padat' => 'Padat', 'gradien' => 'Gradien', 'tengah' => 'Tengah']],
+                    'footer_style' => ['label' => 'Pengaki', 'opts' => ['ringkas' => 'Ringkas', 'tengah-jenama' => 'Tengah berjenama', 'tiga-lajur' => 'Tiga lajur']],
+                    'card_style' => ['label' => 'Kad', 'opts' => ['lembut' => 'Lembut', 'garis' => 'Garis', 'terapung' => 'Terapung']],
+                    'divider' => ['label' => 'Pembatas', 'opts' => ['tiada' => 'Tiada', 'garis-emas' => 'Garis emas', 'lengkung' => 'Lengkung']],
+                ] as $field => $cfg)
+                    <div>
+                        <span class="text-xs text-ink/60">{{ $cfg['label'] }}</span>
+                        <div class="mt-1 flex flex-wrap gap-1.5">
+                            @foreach ($cfg['opts'] as $v => $lbl)
+                                <label class="cursor-pointer">
+                                    <input type="radio" wire:model.live="data.{{ $field }}" value="{{ $v }}" class="peer sr-only">
+                                    <span class="block rounded-lg border border-sand px-2 py-1 text-xs transition peer-checked:border-brand-600 peer-checked:bg-brand-50 peer-checked:ring-1 peer-checked:ring-brand-600/20">{{ $lbl }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+            <label class="mt-3 flex items-center gap-2 text-sm">
+                <input type="checkbox" wire:model.live="data.animations" class="h-4 w-4 accent-brand-600"> Animasi halus (fade masuk semasa skrol)
+            </label>
         </div>
 
         {{-- Elemen Islamik --}}
@@ -141,7 +169,7 @@
         <div>
             <label class="block text-sm font-semibold">Nada penulisan <span class="text-red-600">*</span></label>
             <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
-                @foreach (['tenang_khusyuk' => 'Tenang & khusyuk', 'mesra_keluarga' => 'Mesra keluarga', 'megah_berwibawa' => 'Megah & berwibawa'] as $m => $lbl)
+                @foreach (\App\Support\Moods::options() as $m => $lbl)
                     <label class="cursor-pointer">
                         <input type="radio" wire:model.live="data.mood" value="{{ $m }}" class="peer sr-only">
                         <div class="rounded-xl border border-sand px-3 py-2 text-center text-sm transition peer-checked:border-brand-600 peer-checked:bg-brand-50 peer-checked:ring-1 peer-checked:ring-brand-600/20">{{ $lbl }}</div>
@@ -163,6 +191,8 @@
             :icon-container="$data['icon_style']['container'] ?? 'bulat-cair'"
             :mosque-name="$mosqueName"
             :layout="$data['layout_home'] ?? 'hero-tengah'"
+            :mood="$data['mood'] ?? null"
+            :card="$data['card_style'] ?? 'lembut'"
         />
     </div>
 </div>

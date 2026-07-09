@@ -12,6 +12,7 @@ use App\Models\ProjectPage;
 use App\Models\ProjectSection;
 use App\Services\UploadService;
 use App\Support\FontPairs;
+use App\Support\Moods;
 use App\Support\PageCatalog;
 use App\Support\PaletteDeriver;
 use App\Support\PresetMatrix;
@@ -19,6 +20,7 @@ use App\Support\WizardSteps;
 use App\Support\ZoneLookup;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -380,6 +382,11 @@ class WizardStep extends Component
             'font_pair' => $this->data['font_pair'] ?? null,
             'icon_style' => $this->data['icon_style'] ?? null,
             'layout' => $this->data['layout_home'] ?? null,
+            'header_style' => $this->data['header_style'] ?? null,
+            'footer_style' => $this->data['footer_style'] ?? null,
+            'card_style' => $this->data['card_style'] ?? null,
+            'divider' => $this->data['divider'] ?? null,
+            'animations' => $this->data['animations'] ?? null,
             'islamic_elements' => $this->data['islamic_elements'] ?? null,
             'mood' => $this->data['mood'] ?? null,
         ], fn ($v) => filled($v) || $v === []);
@@ -481,8 +488,15 @@ class WizardStep extends Component
                 'logo_status' => ['required', 'in:ada,perlu_direka,teks_sahaja'],
             ],
             2 => [
-                'design_package' => ['required', 'in:warisan_hijau,biru_nilam,emas_kubah,teal_kontemporari,marun_agung'],
-                'mood' => ['required', 'in:tenang_khusyuk,mesra_keluarga,megah_berwibawa'],
+                'design_package' => ['required', Rule::exists('design_packages', 'key')],
+                'mood' => ['required', Rule::in(Moods::keys())],
+                'font_pair' => ['nullable', Rule::in(FontPairs::keys())],
+                'layout_home' => ['nullable', 'string', 'max:40'],
+                'header_style' => ['nullable', 'string', 'max:40'],
+                'footer_style' => ['nullable', 'string', 'max:40'],
+                'card_style' => ['nullable', 'string', 'max:40'],
+                'divider' => ['nullable', 'string', 'max:40'],
+                'animations' => ['nullable', 'boolean'],
                 'palette_mode' => ['nullable', 'in:pakej,custom'],
                 'custom_primary' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
                 'custom_accent' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
