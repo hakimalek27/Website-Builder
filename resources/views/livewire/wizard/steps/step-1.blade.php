@@ -3,7 +3,7 @@
 <div class="space-y-5">
     <div class="grid gap-4 sm:grid-cols-2">
         <div class="sm:col-span-2">
-            <label class="block text-sm font-medium">Nama rasmi masjid <span class="text-red-600">*</span></label>
+            <label class="block text-sm font-medium">Nama rasmi {{ $orgNoun ?? 'organisasi' }} <span class="text-red-600">*</span></label>
             <input type="text" wire:model.blur="data.official_name" maxlength="150"
                    placeholder="Cth: Masjid Al-Muttaqin Wangsa Melawati" class="{{ $inp }}">
             @error('data.official_name') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
@@ -44,17 +44,19 @@
             </select>
             @error('data.state') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
         </div>
-        <div>
-            <label class="block text-sm font-medium">Zon solat JAKIM <span class="text-red-600">*</span></label>
-            <select wire:model.blur="data.jakim_zone" wire:key="step1-zone" class="{{ $inp }}">
-                <option value="">— Pilih negeri dahulu —</option>
-                @foreach ($this->zoneOptions() as $code => $label)
-                    <option value="{{ $code }}">{{ $label }}</option>
-                @endforeach
-            </select>
-            <p class="mt-1 text-xs text-ink/55">Zon menentukan waktu solat rasmi JAKIM di laman anda.</p>
-            @error('data.jakim_zone') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-        </div>
+        @unless ($isNgo ?? false)
+            <div>
+                <label class="block text-sm font-medium">Zon solat JAKIM <span class="text-red-600">*</span></label>
+                <select wire:model.blur="data.jakim_zone" wire:key="step1-zone" class="{{ $inp }}">
+                    <option value="">— Pilih negeri dahulu —</option>
+                    @foreach ($this->zoneOptions() as $code => $label)
+                        <option value="{{ $code }}">{{ $label }}</option>
+                    @endforeach
+                </select>
+                <p class="mt-1 text-xs text-ink/55">Zon menentukan waktu solat rasmi JAKIM di laman anda.</p>
+                @error('data.jakim_zone') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+            </div>
+        @endunless
     </div>
 
     <div class="grid gap-4 sm:grid-cols-2">

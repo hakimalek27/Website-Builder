@@ -12,6 +12,7 @@ beforeEach(function () {
 it('validates and saves a valid lead, then redirects to thanks', function () {
     $response = $this->post('/minat', [
         'mosque_name' => 'Masjid Ujian Wangsa',
+        'org_type' => 'masjid',
         'state' => 'Selangor',
         'pic_name' => 'Ahmad bin Ali',
         'pic_phone' => '0123456789',
@@ -74,6 +75,7 @@ it('skips Turnstile when not configured (§5.1)', function () {
 
     $response = $this->post('/minat', [
         'mosque_name' => 'Masjid Tanpa Turnstile',
+        'org_type' => 'masjid',
         'state' => 'Kedah',
         'pic_name' => 'Zaki',
         'pic_phone' => '0198887777',

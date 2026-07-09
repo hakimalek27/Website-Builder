@@ -31,7 +31,8 @@ class LeadQualifier
             $project = Project::create([
                 'lead_id' => $lead->id,
                 'mosque_name' => $lead->mosque_name,
-                'tier' => Tier::MasjidKariah,   // provisional — dipilih di L0
+                // provisional — dipilih di L0; NGO bermula sebagai ngo_komuniti.
+                'tier' => $lead->org_type === 'ngo' ? Tier::NgoKomuniti : Tier::MasjidKariah,
                 'is_gov' => false,
                 'state' => $lead->state,
                 'jakim_zone' => '',             // provisional — dipilih di L1

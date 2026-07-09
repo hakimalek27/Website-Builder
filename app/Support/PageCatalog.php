@@ -2,8 +2,12 @@
 
 namespace App\Support;
 
+use App\Enums\Tier;
+
 /**
- * Katalog 28+ page_key (§6 L3) dikumpul 8 kluster + skema panel L4 (§6 L4).
+ * Katalog page_key (§6 L3) dikumpul kluster + skema panel L4 (§6 L4).
+ * Masjid & NGO (Fasa 11): clustersFor()/metaFor()/panelsFor() parameter ikut tier;
+ * clusters()/panels() masjid kekal verbatim (laluan masjid byte-identik).
  *
  * Skema panel = deklaratif; satu renderer generik (livewire/wizard/panels/_field)
  * merender semua jenis medan. Ini menggantikan puluhan blade tangan.
@@ -80,6 +84,45 @@ class PageCatalog
             'soalan_lazim' => ['label' => 'Soalan Lazim (FAQ)', 'tooltip' => 'Soalan & jawapan biasa. Dilihat di: masjid besar.'],
             'hubungi' => ['label' => 'Hubungi Kami', 'tooltip' => 'Maklumat & borang hubungan. Dilihat di: semua masjid.'],
             'muat_turun' => ['label' => 'Muat Turun', 'tooltip' => 'Dokumen PDF untuk dimuat turun. Dilihat di: masjid kariah.'],
+            // Halaman khusus NGO / pertubuhan (Fasa 11).
+            'profil' => ['label' => 'Profil & Sejarah', 'tooltip' => 'Latar belakang, misi & penubuhan pertubuhan.'],
+            'program_utama' => ['label' => 'Program & Inisiatif', 'tooltip' => 'Program utama & aktiviti pertubuhan.'],
+            'sukarelawan' => ['label' => 'Sukarelawan', 'tooltip' => 'Peluang & cara menyertai sebagai sukarelawan.'],
+            'keahlian' => ['label' => 'Keahlian', 'tooltip' => 'Syarat, yuran & manfaat menjadi ahli.'],
+            'derma' => ['label' => 'Derma / Sumbangan', 'tooltip' => 'Kategori derma & maklumat bank/QR.'],
+        ];
+    }
+
+    // ── Katalog ikut tier (masjid vs NGO) — Fasa 11 ──
+
+    /** @return array<string, array<int, string>> */
+    public static function clustersFor(Tier $tier): array
+    {
+        return $tier->isNgo() ? self::ngoClusters() : self::clusters();
+    }
+
+    /** @return array<string, array{label: string, tooltip: string}> */
+    public static function metaFor(Tier $tier): array
+    {
+        $keys = array_merge(self::MANDATORY, ...array_values(self::clustersFor($tier)));
+
+        return array_intersect_key(self::meta(), array_flip($keys));
+    }
+
+    /** @return array<string, array<int, array<string, mixed>>> */
+    public static function panelsFor(Tier $tier): array
+    {
+        return $tier->isNgo() ? self::ngoPanels() : self::panels();
+    }
+
+    /** Kluster NGO → page_key. utama & hubungi kekal wajib berasingan. */
+    private static function ngoClusters(): array
+    {
+        return [
+            'Korporat' => ['profil', 'perutusan', 'visi_misi', 'ajk'],
+            'Program' => ['program_utama', 'program_akan_datang', 'berita', 'pengumuman', 'galeri'],
+            'Penglibatan' => ['sukarelawan', 'keahlian', 'derma'],
+            'Sokongan' => ['soalan_lazim', 'hubungi', 'muat_turun'],
         ];
     }
 
@@ -314,6 +357,114 @@ class PageCatalog
             ['icon' => 'Building', 'title' => 'Wakaf', 'desc' => 'Wakaf tunai untuk pembangunan.'],
             ['icon' => 'HandHeart', 'title' => 'Pembinaan', 'desc' => 'Dana projek pembinaan & naik taraf.'],
             ['icon' => 'Users', 'title' => 'Anak Yatim', 'desc' => 'Bantuan untuk anak yatim & asnaf.'],
+        ];
+    }
+
+    /** Pra-isi kategori derma NGO (§6 L4 / Fasa 11). */
+    public static function dermaPrefill(): array
+    {
+        return [
+            ['icon' => 'HeartHandshake', 'title' => 'Derma Am', 'desc' => 'Sumbangan am untuk operasi & aktiviti.'],
+            ['icon' => 'BookOpen', 'title' => 'Dana Pendidikan', 'desc' => 'Bantuan pendidikan & biasiswa.'],
+            ['icon' => 'Users', 'title' => 'Bantuan Asnaf', 'desc' => 'Bantuan untuk asnaf & keluarga memerlukan.'],
+            ['icon' => 'Building', 'title' => 'Dana Operasi', 'desc' => 'Menampung kos operasi pertubuhan.'],
+        ];
+    }
+
+    /**
+     * Skema panel L4 NGO (§6 L4 / Fasa 11). Panel dikongsi (visi_misi/berita/pengumuman/
+     * galeri/soalan_lazim/hubungi/muat_turun) guna semula skema masjid; jawatan & derma khusus NGO.
+     *
+     * @return array<string, array<int, array<string, mixed>>>
+     */
+    private static function ngoPanels(): array
+    {
+        $m = self::panels();
+
+        return [
+            'profil' => [
+                ['key' => 'mode', 'type' => 'radio', 'label' => 'Cara isi', 'required' => true, 'options' => [
+                    'tulis_penuh' => 'Tulis penuh sendiri', 'butir_ringkas' => 'Butir ringkas (AI karang)', 'kemudian' => 'Beri kemudian',
+                ]],
+                ['key' => 'full_text', 'type' => 'textarea', 'label' => 'Profil / sejarah', 'max' => 3000, 'showIf' => ['mode' => 'tulis_penuh']],
+                ['key' => 'bullets', 'type' => 'repeater_text', 'label' => 'Butir ringkas', 'ai' => true, 'showIf' => ['mode' => 'butir_ringkas'], 'placeholder' => 'Cth: Ditubuhkan 2015, fokus kebajikan anak yatim'],
+                ['key' => 'registration_no', 'type' => 'text', 'label' => 'No. Pendaftaran (ROS/SSM)'],
+                ['key' => 'milestones', 'type' => 'repeater', 'label' => 'Peristiwa penting', 'item' => [
+                    ['key' => 'tahun', 'type' => 'text', 'label' => 'Tahun'], ['key' => 'peristiwa', 'type' => 'text', 'label' => 'Peristiwa'],
+                ]],
+            ],
+            'perutusan' => [
+                ['key' => 'role', 'type' => 'select', 'label' => 'Jawatan', 'required' => true, 'options' => [
+                    'Penaung' => 'Penaung', 'Pengerusi' => 'Pengerusi', 'Presiden' => 'Presiden',
+                    'Timbalan Pengerusi' => 'Timbalan Pengerusi', 'Setiausaha' => 'Setiausaha',
+                    'Bendahari' => 'Bendahari', 'Pengarah Eksekutif' => 'Pengarah Eksekutif',
+                ]],
+                ['key' => 'name', 'type' => 'text', 'label' => 'Nama', 'required' => true],
+                ['key' => 'photo', 'type' => 'upload', 'label' => 'Gambar'],
+                ['key' => 'mode', 'type' => 'radio', 'label' => 'Cara isi', 'required' => true, 'options' => [
+                    'tulis_penuh' => 'Tulis penuh', 'butir_ringkas' => 'Butir ringkas (AI)', 'kemudian' => 'Kemudian',
+                ]],
+                ['key' => 'message', 'type' => 'textarea', 'label' => 'Perutusan', 'ai' => true, 'max' => 2000],
+            ],
+            'visi_misi' => $m['visi_misi'],
+            'ajk' => [
+                ['key' => 'structure_note', 'type' => 'text', 'label' => 'Nota struktur'],
+                ['key' => 'members', 'type' => 'repeater', 'label' => 'Ahli Jawatankuasa', 'pdpa' => true, 'item' => [
+                    ['key' => 'name', 'type' => 'text', 'label' => 'Nama', 'required' => true],
+                    ['key' => 'position', 'type' => 'text', 'label' => 'Jawatan', 'required' => true],
+                    ['key' => 'group', 'type' => 'select', 'label' => 'Kumpulan', 'options' => ['pengurusan' => 'Pengurusan', 'biro' => 'Biro', 'sukarelawan' => 'Sukarelawan']],
+                    ['key' => 'photo', 'type' => 'upload', 'label' => 'Gambar'],
+                ]],
+                ['key' => 'full_list_later', 'type' => 'checkbox', 'label' => 'Senarai penuh akan dihantar kemudian'],
+            ],
+            'program_utama' => [
+                ['key' => 'programs', 'type' => 'repeater', 'label' => 'Program & inisiatif', 'min' => 1, 'item' => [
+                    ['key' => 'name', 'type' => 'text', 'label' => 'Nama program', 'required' => true],
+                    ['key' => 'desc', 'type' => 'textarea', 'label' => 'Penerangan', 'max' => 300],
+                    ['key' => 'audience', 'type' => 'text', 'label' => 'Sasaran'],
+                    ['key' => 'schedule', 'type' => 'text', 'label' => 'Jadual / kekerapan'],
+                ]],
+            ],
+            'program_akan_datang' => [
+                ['key' => 'seed_items', 'type' => 'repeater', 'label' => 'Acara akan datang (max 3)', 'max' => 3, 'item' => [
+                    ['key' => 'tajuk', 'type' => 'text', 'label' => 'Tajuk'],
+                    ['key' => 'tarikh', 'type' => 'text', 'label' => 'Tarikh'],
+                    ['key' => 'lokasi', 'type' => 'text', 'label' => 'Lokasi'],
+                ]],
+            ],
+            'berita' => $m['berita'],
+            'pengumuman' => $m['pengumuman'],
+            'galeri' => $m['galeri'],
+            'sukarelawan' => [
+                ['key' => 'intro', 'type' => 'textarea', 'label' => 'Pengenalan sukarelawan', 'ai' => true, 'max' => 1000],
+                ['key' => 'roles', 'type' => 'repeater', 'label' => 'Bidang sukarelawan', 'item' => [
+                    ['key' => 'bidang', 'type' => 'text', 'label' => 'Bidang'], ['key' => 'komitmen', 'type' => 'text', 'label' => 'Komitmen masa'],
+                ]],
+                ['key' => 'form_url', 'type' => 'url', 'label' => 'Pautan borang sukarelawan'],
+                ['key' => 'contact', 'type' => 'text', 'label' => 'Hubungi', 'required' => true],
+            ],
+            'keahlian' => [
+                ['key' => 'criteria', 'type' => 'textarea', 'label' => 'Syarat keahlian', 'max' => 1000],
+                ['key' => 'fee', 'type' => 'text', 'label' => 'Yuran keahlian'],
+                ['key' => 'benefits', 'type' => 'repeater_text', 'label' => 'Manfaat ahli', 'placeholder' => 'Cth: Diskaun program'],
+                ['key' => 'form_pdf', 'type' => 'upload', 'label' => 'Borang keahlian (PDF)'],
+                ['key' => 'contact', 'type' => 'text', 'label' => 'Hubungi', 'required' => true],
+            ],
+            'derma' => [
+                ['key' => 'categories', 'type' => 'repeater', 'label' => 'Kategori derma', 'prefill' => 'derma', 'item' => [
+                    ['key' => 'icon', 'type' => 'select', 'label' => 'Ikon', 'options' => self::infaqIconOptions()],
+                    ['key' => 'title', 'type' => 'text', 'label' => 'Tajuk', 'required' => true],
+                    ['key' => 'desc', 'type' => 'text', 'label' => 'Penerangan', 'max' => 160],
+                ]],
+                ['key' => 'bank_name', 'type' => 'text', 'label' => 'Nama bank', 'required' => true],
+                ['key' => 'bank_account', 'type' => 'text', 'label' => 'Nombor akaun', 'required' => true],
+                ['key' => 'account_holder', 'type' => 'text', 'label' => 'Nama pemegang akaun', 'required' => true],
+                ['key' => 'qr_image', 'type' => 'upload', 'label' => 'Imej QR (DuitNow)'],
+                ['key' => 'notice', 'type' => 'note', 'label' => 'Nombor akaun akan dipaparkan awam — sahkan betul.'],
+            ],
+            'soalan_lazim' => $m['soalan_lazim'],
+            'hubungi' => $m['hubungi'],
+            'muat_turun' => $m['muat_turun'],
         ];
     }
 }

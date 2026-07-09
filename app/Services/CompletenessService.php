@@ -29,13 +29,17 @@ class CompletenessService
         };
 
         // --- Global (L0, L1, L2 mood, L9) ---
-        $add('Jenis masjid', 0, 'tier', filled($get(0, 'tier')));
+        $add('Jenis organisasi', 0, 'tier', filled($get(0, 'tier')));
 
         $l1 = [
-            'official_name' => 'Nama rasmi masjid', 'address_line1' => 'Alamat', 'postcode' => 'Poskod',
-            'city' => 'Bandar', 'state' => 'Negeri', 'jakim_zone' => 'Zon solat', 'authority' => 'Pihak berkuasa',
+            'official_name' => 'Nama rasmi organisasi', 'address_line1' => 'Alamat', 'postcode' => 'Poskod',
+            'city' => 'Bandar', 'state' => 'Negeri', 'authority' => 'Pihak berkuasa',
             'gps' => 'Koordinat GPS', 'phone_primary' => 'Telefon utama', 'email' => 'E-mel', 'logo_status' => 'Status logo',
         ];
+        // Zon solat JAKIM hanya wajib untuk masjid/surau (NGO tiada waktu solat).
+        if ($project->tier->isMosque()) {
+            $l1['jakim_zone'] = 'Zon solat';
+        }
         foreach ($l1 as $key => $label) {
             $add($label, 1, $key, filled($get(1, $key)));
         }
@@ -50,9 +54,9 @@ class CompletenessService
             $add($label, 9, $key, (bool) $get(9, $key));
         }
 
-        // --- L4 bersyarat: medan wajib setiap panel aktif ---
+        // --- L4 bersyarat: medan wajib setiap panel aktif (ikut tier) ---
         $activePages = $project->pages()->where('enabled', true)->pluck('page_key')->all();
-        $panels = PageCatalog::panels();
+        $panels = PageCatalog::panelsFor($project->tier);
         $meta = PageCatalog::meta();
 
         foreach (array_intersect($activePages, array_keys($panels)) as $page) {

@@ -35,7 +35,7 @@ it('runs the full funnel end to end and exports a valid handover package', funct
 
     // 1. Lead (borang minat awam).
     $this->post('/minat', [
-        'mosque_name' => 'Surau E2E', 'state' => 'W.P. Kuala Lumpur',
+        'mosque_name' => 'Surau E2E', 'org_type' => 'surau', 'state' => 'W.P. Kuala Lumpur',
         'pic_name' => 'Ahmad', 'pic_phone' => '0123456789', 'pic_email' => 'ahmad@test.my',
     ])->assertRedirect(route('minat.terima-kasih'));
     $lead = Lead::where('mosque_name', 'Surau E2E')->firstOrFail();

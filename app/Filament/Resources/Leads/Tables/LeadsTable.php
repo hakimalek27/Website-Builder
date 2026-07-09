@@ -21,7 +21,12 @@ class LeadsTable
     {
         return $table
             ->columns([
-                TextColumn::make('mosque_name')->label('Masjid')->searchable()->sortable()->weight('bold'),
+                TextColumn::make('mosque_name')->label('Organisasi')->searchable()->sortable()->weight('bold'),
+                TextColumn::make('org_type')->label('Jenis')->badge()
+                    ->formatStateUsing(fn (?string $state) => match ($state) {
+                        'masjid' => 'Masjid', 'surau' => 'Surau', 'ngo' => 'NGO', default => '—',
+                    })
+                    ->color(fn (?string $state) => $state === 'ngo' ? 'warning' : 'gray'),
                 TextColumn::make('state')->label('Negeri')->sortable(),
                 TextColumn::make('pic_name')->label('PIC')->searchable(),
                 TextColumn::make('pic_phone')->label('Telefon'),

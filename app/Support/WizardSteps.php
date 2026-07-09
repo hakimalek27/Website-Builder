@@ -13,8 +13,8 @@ class WizardSteps
     public static function all(): array
     {
         return [
-            ['index' => 0, 'title' => 'Jenis Masjid & Titik Mula', 'subtitle' => 'Tier & pematuhan kerajaan'],
-            ['index' => 1, 'title' => 'Maklumat Asas Masjid', 'subtitle' => 'Nama, alamat, hubungi, zon solat'],
+            ['index' => 0, 'title' => 'Jenis Organisasi & Titik Mula', 'subtitle' => 'Masjid, surau atau NGO'],
+            ['index' => 1, 'title' => 'Maklumat Asas', 'subtitle' => 'Nama, alamat, hubungi, zon solat'],
             ['index' => 2, 'title' => 'Identiti & Reka Bentuk', 'subtitle' => 'Pakej warna, font, ikon, susun atur'],
             ['index' => 3, 'title' => 'Struktur Halaman', 'subtitle' => 'Pilih halaman untuk laman anda'],
             ['index' => 4, 'title' => 'Kandungan Halaman', 'subtitle' => 'Isi butiran setiap halaman'],

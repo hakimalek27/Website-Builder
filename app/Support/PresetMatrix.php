@@ -20,7 +20,17 @@ class PresetMatrix
      */
     public static function pagesFor(Tier $tier, bool $isGov): array
     {
-        // Base — semua tier.
+        // NGO / pertubuhan (Fasa 11) — set halaman berlainan.
+        if ($tier->isNgo()) {
+            $ngo = ['utama', 'profil', 'program_utama', 'pengumuman', 'galeri', 'derma', 'sukarelawan', 'soalan_lazim', 'hubungi'];
+            if ($tier === Tier::NgoPenuh) {
+                $ngo = array_merge($ngo, ['perutusan', 'visi_misi', 'ajk', 'berita', 'program_akan_datang', 'keahlian', 'muat_turun']);
+            }
+
+            return array_values(array_unique($ngo));
+        }
+
+        // Base — semua tier masjid.
         $base = [
             'utama', 'waktu_solat', 'hubungi',
             'pengumuman', 'infaq', 'soalan_lazim',

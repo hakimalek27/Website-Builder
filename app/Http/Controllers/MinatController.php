@@ -37,6 +37,7 @@ class MinatController extends Controller
 
         $data = $request->validate([
             'mosque_name' => ['required', 'string', 'max:150'],
+            'org_type' => ['required', 'in:masjid,surau,ngo'],
             'state' => ['required', 'string', 'in:'.implode(',', config('reka.states'))],
             'pic_name' => ['required', 'string', 'max:100'],
             'pic_phone' => ['required', 'string', 'regex:/^01[0-9]{8,9}$/'],

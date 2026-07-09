@@ -106,6 +106,6 @@ it('renders the full wizard page over HTTP (smoke)', function () {
     $this->seed(JakimZoneSeeder::class);
     [$project, $token] = picSession();
 
-    $this->get("/b/{$token}/langkah/0")->assertOk()->assertSee('Jenis Masjid');
+    $this->get("/b/{$token}/langkah/0")->assertOk()->assertSee('Jenis Organisasi');
     $this->get("/b/{$token}/langkah/2")->assertOk()->assertSee('Pakej reka bentuk');
 });

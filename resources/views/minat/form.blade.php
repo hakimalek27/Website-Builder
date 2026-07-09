@@ -73,7 +73,17 @@
                     </div>
 
                     <div>
-                        <label for="mosque_name" class="label">Nama masjid / surau <span class="text-red-600">*</span></label>
+                        <label for="org_type" class="label">Jenis organisasi <span class="text-red-600">*</span></label>
+                        <select id="org_type" name="org_type" required class="input">
+                            <option value="">— Pilih —</option>
+                            @foreach (['masjid' => 'Masjid', 'surau' => 'Surau', 'ngo' => 'Pertubuhan / NGO'] as $ov => $ol)
+                                <option value="{{ $ov }}" @selected(old('org_type') === $ov)>{{ $ol }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="mosque_name" class="label">Nama masjid / surau / pertubuhan <span class="text-red-600">*</span></label>
                         <input id="mosque_name" name="mosque_name" type="text" required maxlength="150"
                             value="{{ old('mosque_name') }}"
                             placeholder="Cth: Masjid Al-Muttaqin Wangsa Melawati"

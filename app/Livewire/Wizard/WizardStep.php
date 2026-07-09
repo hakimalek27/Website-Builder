@@ -52,6 +52,10 @@ class WizardStep extends Component
 
     public string $mosqueName = '';
 
+    public bool $isNgo = false;
+
+    public string $orgNoun = 'masjid';
+
     public function mount(string $token, int $step): void
     {
         $this->token = $token;
@@ -60,6 +64,8 @@ class WizardStep extends Component
         $project = $this->resolveProject();
         $this->readOnly = $project->isFrozen();
         $this->mosqueName = $project->mosque_name;
+        $this->isNgo = $project->tier->isNgo();
+        $this->orgNoun = $project->tier->orgNoun();
 
         // PIC membuka wizard buat kali pertama → in_progress.
         if ($project->status === ProjectStatus::Invited) {
@@ -90,15 +96,19 @@ class WizardStep extends Component
     protected function applyPanelDefaults(Project $project): void
     {
         $this->data['panels'] ??= [];
+        $panels = PageCatalog::panelsFor($project->tier);
 
         foreach ($this->activePanels($project) as $pageKey) {
             $this->data['panels'][$pageKey] ??= [];
 
-            foreach (PageCatalog::panels()[$pageKey] as $field) {
+            foreach ($panels[$pageKey] as $field) {
                 $path = $field['key'];
-                // Pra-isi kategori infaq.
+                // Pra-isi kategori infaq / derma.
                 if (($field['prefill'] ?? null) === 'infaq' && empty($this->data['panels'][$pageKey][$path])) {
                     $this->data['panels'][$pageKey][$path] = PageCatalog::infaqPrefill();
+                }
+                if (($field['prefill'] ?? null) === 'derma' && empty($this->data['panels'][$pageKey][$path])) {
+                    $this->data['panels'][$pageKey][$path] = PageCatalog::dermaPrefill();
                 }
                 // Lalai checkbox.
                 if ($field['type'] === 'checkbox' && ($field['default'] ?? false) && ! array_key_exists($path, $this->data['panels'][$pageKey])) {
@@ -108,12 +118,12 @@ class WizardStep extends Component
         }
     }
 
-    /** page_key aktif (project_pages enabled) yang mempunyai panel L4. */
+    /** page_key aktif (project_pages enabled) yang mempunyai panel L4 (ikut tier). */
     protected function activePanels(Project $project): array
     {
         $enabled = $project->pages()->where('enabled', true)->pluck('page_key')->all();
 
-        return array_values(array_intersect($enabled, PageCatalog::pagesWithPanel()));
+        return array_values(array_intersect($enabled, array_keys(PageCatalog::panelsFor($project->tier))));
     }
 
     protected function sectionKey(): string
@@ -193,10 +203,10 @@ class WizardStep extends Component
         return false;
     }
 
-    /** Skema panel L4 untuk page_key (dipisah supaya mudah diperluas ikut tier). */
+    /** Skema panel L4 untuk page_key (ikut tier projek). */
     protected function panelSchema(string $pageKey): array
     {
-        return PageCatalog::panels()[$pageKey] ?? [];
+        return PageCatalog::panelsFor($this->resolveProject()->tier)[$pageKey] ?? [];
     }
 
     /** Had bilangan imej hero (§6 L6). */
@@ -364,7 +374,7 @@ class WizardStep extends Component
             ->values();
 
         $sort = 0;
-        foreach (array_keys(PageCatalog::meta()) as $pageKey) {
+        foreach (array_keys(PageCatalog::metaFor($project->tier)) as $pageKey) {
             $project->pages()->updateOrCreate(
                 ['page_key' => $pageKey],
                 ['enabled' => $selected->contains($pageKey), 'sort' => $sort++],
@@ -386,6 +396,11 @@ class WizardStep extends Component
     {
         $tier = Tier::tryFrom($this->data['tier'] ?? '') ?? $project->tier;
         $isGov = (bool) ($this->data['is_gov'] ?? false);
+
+        // NGO/pertubuhan tiada konteks domain .gov.my.
+        if ($tier->isNgo()) {
+            $isGov = false;
+        }
 
         $project->update(['tier' => $tier, 'is_gov' => $isGov]);
 
@@ -513,7 +528,7 @@ class WizardStep extends Component
     {
         return match ($this->step) {
             0 => [
-                'tier' => ['required', 'in:surau_ringkas,masjid_kariah,masjid_besar'],
+                'tier' => ['required', Rule::in(Tier::values())],
                 'is_gov' => ['boolean'],
             ],
             1 => [
@@ -576,8 +591,9 @@ class WizardStep extends Component
         $rules = [];
         $project = $this->resolveProject();
 
+        $panels = PageCatalog::panelsFor($project->tier);
         foreach ($this->activePanels($project) as $pageKey) {
-            foreach (PageCatalog::panels()[$pageKey] as $field) {
+            foreach ($panels[$pageKey] as $field) {
                 $base = "panels.{$pageKey}.{$field['key']}";
                 $type = $field['type'];
 
