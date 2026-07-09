@@ -329,9 +329,13 @@ class WizardStep extends Component
     public function next()
     {
         $this->save();
-        $target = min($this->step + 1, WizardSteps::count() - 1);
 
-        return redirect()->route('pic.step', ['token' => $this->token, 'step' => $target]);
+        // Langkah terakhir → terus ke Semak & Hantar (bukan redirect ke diri sendiri).
+        if ($this->step >= WizardSteps::count() - 1) {
+            return redirect()->route('pic.semak', ['token' => $this->token]);
+        }
+
+        return redirect()->route('pic.step', ['token' => $this->token, 'step' => $this->step + 1]);
     }
 
     public function back()

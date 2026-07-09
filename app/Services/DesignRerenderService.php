@@ -8,6 +8,7 @@ use App\Exceptions\GateException;
 use App\Models\AuditLog;
 use App\Models\Generation;
 use App\Models\Project;
+use App\Models\Setting;
 
 /**
  * §8.7 / P7 — Tweak reka bentuk: render SEMULA draf dengan tokens baharu.
@@ -23,8 +24,9 @@ class DesignRerenderService
             throw new GateException('Draf telah diluluskan — baca-sahaja.');
         }
 
-        if ($project->quota_design_used >= 5) {
-            throw new GateException('Kuota render reka bentuk (5) telah habis.');
+        $cap = (int) (Setting::get('default_design_quota') ?? 5);
+        if ($project->quota_design_used >= $cap) {
+            throw new GateException("Kuota render reka bentuk ({$cap}) telah habis.");
         }
 
         $last = $project->generations()

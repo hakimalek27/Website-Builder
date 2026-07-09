@@ -21,8 +21,8 @@ class ProjectsTable
                 TextColumn::make('mosque_name')->label('Masjid')->searchable()->sortable()->weight('bold'),
                 TextColumn::make('tier')->label('Tier')->badge(),
                 TextColumn::make('state')->label('Negeri'),
-                TextColumn::make('status')->label('Status')->badge()
-                    ->formatStateUsing(fn (ProjectStatus $s) => $s->label()),
+                // ProjectStatus implement HasLabel+HasColor → badge auto-label & auto-warna (elak container resolve enum).
+                TextColumn::make('status')->label('Status')->badge(),
                 TextColumn::make('quota_ai_used')->label('Kuota AI')
                     ->formatStateUsing(fn ($state, Project $r) => "{$state}/{$r->quota_ai_total}"),
                 TextColumn::make('cost')->label('Kos (RM)')

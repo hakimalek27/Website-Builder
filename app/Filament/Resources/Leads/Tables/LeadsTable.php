@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Leads\Tables;
 use App\Enums\LeadStatus;
 use App\Models\AuditLog;
 use App\Models\Lead;
+use App\Models\Setting;
 use App\Services\LeadQualifier;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
@@ -64,14 +65,14 @@ class LeadsTable
                             ->label('Tempoh token (hari)')
                             ->numeric()
                             ->minValue(1)
-                            ->default(30)
+                            ->default(fn () => (int) (Setting::get('invitation_default_days') ?? 30))
                             ->required(),
                         TextInput::make('ai_quota')
                             ->label('Kuota AI')
                             ->numeric()
                             ->minValue(1)
                             ->maxValue(20)
-                            ->default(3)
+                            ->default(fn () => (int) (Setting::get('default_ai_quota') ?? 3))
                             ->required(),
                     ])
                     ->action(function (Lead $record, array $data): void {

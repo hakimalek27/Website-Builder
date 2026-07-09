@@ -2,10 +2,13 @@
 
 namespace App\Enums;
 
+use Filament\Support\Contracts\HasColor;
+use Filament\Support\Contracts\HasLabel;
+
 /**
  * Status projek — state machine §4.2. transitionTo() menguatkuasakan laluan ini.
  */
-enum ProjectStatus: string
+enum ProjectStatus: string implements HasColor, HasLabel
 {
     case Invited = 'invited';
     case InProgress = 'in_progress';
@@ -78,5 +81,35 @@ enum ProjectStatus: string
             self::Cancelled => 'Dibatalkan',
             self::Expired => 'Luput',
         };
+    }
+
+    /** Filament HasLabel — badge lencana guna label BM. */
+    public function getLabel(): string
+    {
+        return $this->label();
+    }
+
+    /** Warna lencana Filament (§16.B). */
+    public function color(): string
+    {
+        return match ($this) {
+            self::Invited => 'gray',
+            self::InProgress => 'info',
+            self::Submitted => 'warning',
+            self::DraftReady => 'info',
+            self::Approved => 'success',
+            self::HandoverExported => 'success',
+            self::InBuild => 'primary',
+            self::InReview => 'warning',
+            self::Live => 'success',
+            self::Archived => 'gray',
+            self::Cancelled, self::Expired => 'danger',
+        };
+    }
+
+    /** Filament HasColor. */
+    public function getColor(): string
+    {
+        return $this->color();
     }
 }

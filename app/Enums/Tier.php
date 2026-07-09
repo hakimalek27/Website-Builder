@@ -2,8 +2,10 @@
 
 namespace App\Enums;
 
-// Tier masjid — §6 Langkah 0.
-enum Tier: string
+use Filament\Support\Contracts\HasLabel;
+
+// Tier organisasi — §6 Langkah 0.
+enum Tier: string implements HasLabel
 {
     case SurauRingkas = 'surau_ringkas';
     case MasjidKariah = 'masjid_kariah';
@@ -16,5 +18,11 @@ enum Tier: string
             self::MasjidKariah => 'Masjid Kariah',
             self::MasjidBesar => 'Masjid Besar',
         };
+    }
+
+    /** Filament HasLabel. */
+    public function getLabel(): string
+    {
+        return $this->label();
     }
 }
