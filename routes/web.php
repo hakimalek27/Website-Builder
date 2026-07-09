@@ -5,6 +5,7 @@ use App\Http\Controllers\MinatController;
 use App\Http\Controllers\PicController;
 use App\Http\Controllers\SemakController;
 use App\Http\Controllers\WizardController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // --- Awam (tiada auth) — §5.1 ---
@@ -33,4 +34,9 @@ Route::prefix('/b/{token}')->middleware('resolve.invitation')->name('pic.')->gro
     // P3 Semak & Hantar.
     Route::get('/semak', [SemakController::class, 'show'])->name('semak');
     Route::post('/hantar', [SemakController::class, 'submit'])->name('submit');
+
+    // P4 Hab penjanaan draf.
+    Route::get('/jana', function (Request $request) {
+        return view('pic.jana', ['token' => $request->route('token')]);
+    })->name('jana');
 });

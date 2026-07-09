@@ -31,6 +31,18 @@ class AiProvider extends Model
         ];
     }
 
+    protected static function booted(): void
+    {
+        // Hanya satu provider boleh jadi default (§5.3).
+        static::saved(function (self $provider) {
+            if ($provider->is_default) {
+                static::query()->whereKeyNot($provider->getKey())
+                    ->where('is_default', true)
+                    ->update(['is_default' => false]);
+            }
+        });
+    }
+
     public function generations(): HasMany
     {
         return $this->hasMany(Generation::class);

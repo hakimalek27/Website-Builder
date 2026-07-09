@@ -1,0 +1,183 @@
+<?php
+
+namespace App\Services\Ai;
+
+use App\Models\Project;
+use Illuminate\Support\Facades\File;
+
+/**
+ * §8.3 — bina prompt. System DISALIN VERBATIM dari resources/prompts/draft-system.txt.
+ * User = DATA MASJID (PII-MINIMIZED §12.7) + SKEMA OUTPUT (§8.2, hanya kunci
+ * diperlukan) + ARAHAN TWEAK (content_tweak sahaja).
+ */
+class PromptBuilder
+{
+    /** §8.3 pemetaan mood. */
+    private const MOODS = [
+        'tenang_khusyuk' => 'tenang, khusyuk, merendah',
+        'mesra_keluarga' => 'mesra, hangat, komuniti',
+        'megah_berwibawa' => 'formal, berwibawa, meyakinkan',
+    ];
+
+    private const SERVICE_PAGES = ['nikah', 'jenazah', 'tahlil_doa', 'khidmat_nasihat', 'sewa_dewan'];
+
+    /**
+     * @param  array<string, mixed>|null  $tweak  ['categories'=>[], 'message'=>string, 'current_json'=>array]
+     * @return array{system:string, user:string, requested_keys:array<int,string>, service_keys:array<int,string>}
+     */
+    public function build(Project $project, string $type = 'initial', ?array $tweak = null): array
+    {
+        $sections = $project->sections()->get()->mapWithKeys(fn ($s) => [$s->section_key => $s->data])->all();
+        $enabledPages = $project->pages()->where('enabled', true)->pluck('page_key')->all();
+
+        $mood = data_get($sections, 'step_2.mood', 'tenang_khusyuk');
+
+        $system = $this->systemPrompt($mood);
+
+        $data = $this->minimizedData($project, $sections, $enabledPages);
+        [$requested, $serviceKeys] = $this->requestedKeys($enabledPages, $sections);
+        $schema = $this->schemaFor($requested, $serviceKeys);
+
+        $user = "DATA MASJID:\n".json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+            ."\n\nSKEMA OUTPUT (balas JSON SAHAJA, tepat mengikut kunci & had panjang):\n"
+            .json_encode($schema, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
+        if ($type === 'content_tweak' && $tweak !== null) {
+            $user .= "\n\nARAHAN TWEAK:\n"
+                ."JSON semasa:\n".json_encode($tweak['current_json'] ?? [], JSON_UNESCAPED_UNICODE)."\n"
+                .'Kategori: '.implode(', ', $tweak['categories'] ?? [])."\n"
+                .'Arahan PIC: '.($tweak['message'] ?? '')."\n"
+                .'Ubah HANYA bahagian berkaitan, kekalkan yang lain.';
+        }
+
+        return [
+            'system' => $system,
+            'user' => $user,
+            'requested_keys' => $requested,
+            'service_keys' => $serviceKeys,
+        ];
+    }
+
+    public function systemPrompt(string $mood): string
+    {
+        $template = File::get(resource_path('prompts/draft-system.txt'));
+
+        return str_replace('{{MOOD}}', self::MOODS[$mood] ?? self::MOODS['tenang_khusyuk'], $template);
+    }
+
+    /**
+     * DATA MASJID diminimumkan PII (§12.7): TIADA telefon/emel individu,
+     * no. akaun bank penuh, nama+telefon PIC, IC.
+     */
+    private function minimizedData(Project $project, array $sections, array $enabledPages): array
+    {
+        $l1 = $sections['step_1'] ?? [];
+        $l4 = $sections['step_4']['panels'] ?? [];
+
+        $data = [
+            'nama_masjid' => $project->mosque_name,
+            'nama_pendek' => $l1['short_name'] ?? null,
+            'bandar' => $l1['city'] ?? null,
+            'negeri' => $l1['state'] ?? null,
+            'tahun_ditubuhkan' => $l1['established_year'] ?? null,
+            'kapasiti' => $l1['capacity'] ?? null,
+            'pihak_berkuasa' => $l1['authority'] ?? null,
+            'mood' => data_get($sections, 'step_2.mood'),
+            'tier' => $project->tier->value,
+        ];
+
+        // Khidmat (tanpa contact person / nombor).
+        $services = [];
+        foreach (self::SERVICE_PAGES as $page) {
+            if (in_array($page, $enabledPages, true) && ! empty($l4[$page]['short_desc'] ?? null)) {
+                $services[] = ['key' => $page, 'ringkasan' => $l4[$page]['short_desc'], 'fee' => $l4[$page]['fee'] ?? null];
+            }
+        }
+        if ($services !== []) {
+            $data['khidmat'] = $services;
+        }
+
+        // Fasiliti (label sahaja).
+        if (! empty($l4['fasiliti']['items'] ?? [])) {
+            $data['fasiliti'] = array_values($l4['fasiliti']['items']);
+        }
+
+        // Kelas Quran (nama + peringkat).
+        if (! empty($l4['kelas_quran']['classes'] ?? [])) {
+            $data['kelas_quran'] = array_map(
+                fn ($c) => ['nama' => $c['name'] ?? null, 'peringkat' => $c['level'] ?? null],
+                $l4['kelas_quran']['classes'],
+            );
+        }
+
+        // Kuliah (tajuk + hari).
+        if (! empty($l4['kuliah_mingguan']['sessions'] ?? [])) {
+            $data['kuliah'] = array_map(
+                fn ($s) => ['tajuk' => $s['topic'] ?? null, 'hari' => $s['day'] ?? null],
+                $l4['kuliah_mingguan']['sessions'],
+            );
+        }
+
+        // Infaq: TAJUK kategori sahaja (TIADA no akaun bank).
+        if (! empty($l4['infaq']['categories'] ?? [])) {
+            $data['infaq_kategori'] = array_values(array_filter(array_map(
+                fn ($c) => $c['title'] ?? null,
+                $l4['infaq']['categories'],
+            )));
+        }
+
+        // Sejarah (bullet ringkas jika mode butir_ringkas).
+        if (! empty($l4['sejarah']['bullets'] ?? [])) {
+            $data['sejarah_ringkas'] = array_values($l4['sejarah']['bullets']);
+        }
+
+        return array_filter($data, fn ($v) => $v !== null && $v !== []);
+    }
+
+    /** @return array{0: array<int,string>, 1: array<int,string>} */
+    private function requestedKeys(array $enabledPages, array $sections): array
+    {
+        $keys = ['meta', 'hero', 'about', 'footer_description'];
+        $serviceKeys = array_values(array_intersect(self::SERVICE_PAGES, $enabledPages));
+
+        if ($serviceKeys !== []) {
+            $keys[] = 'services';
+        }
+        if (in_array('fasiliti', $enabledPages, true)) {
+            $keys[] = 'facilities';
+        }
+        if (in_array('kuliah_mingguan', $enabledPages, true)) {
+            $keys[] = 'kuliah';
+        }
+        if (in_array('infaq', $enabledPages, true)) {
+            $keys[] = 'infaq';
+        }
+        if (array_intersect(['berita', 'pengumuman'], $enabledPages)) {
+            $keys[] = 'announcements';
+        }
+        if (in_array('info_pelawat', $enabledPages, true)) {
+            $keys[] = 'visitor_info';
+        }
+
+        return [$keys, $serviceKeys];
+    }
+
+    /** Skema §8.2 dengan hanya kunci diminta. */
+    private function schemaFor(array $requested, array $serviceKeys): array
+    {
+        $all = [
+            'meta' => ['title' => '≤60', 'description' => '≤160'],
+            'hero' => ['eyebrow' => '≤40', 'headline' => '≤60', 'subheadline' => '≤140', 'cta_primary_label' => '≤20', 'cta_secondary_label' => '≤20'],
+            'about' => ['heading' => '≤60', 'paragraphs' => ['60–120 patah, 2–3 item'], 'stats' => [['label' => '≤20', 'value' => '≤12']]],
+            'services' => [['key' => 'dari: '.implode('/', $serviceKeys), 'title' => '≤40', 'blurb' => '≤160']],
+            'facilities' => [['title' => '≤40', 'blurb' => '≤140']],
+            'kuliah' => ['heading' => '≤60', 'intro' => '≤200'],
+            'infaq' => ['heading' => '≤60', 'paragraph' => '≤240'],
+            'announcements' => [['title' => '≤70', 'date_label' => '≤20', 'excerpt' => '≤140']],
+            'visitor_info' => ['heading' => '≤60', 'paragraph' => '≤240'],
+            'footer_description' => '≤200',
+        ];
+
+        return array_intersect_key($all, array_flip($requested));
+    }
+}

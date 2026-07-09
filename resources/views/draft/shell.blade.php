@@ -1,0 +1,241 @@
+{{-- §8.5 — Blade shell deterministik. AI TIDAK menulis HTML. --}}
+@php
+    $t = array_merge([
+        'primary' => '#1B5E3F', 'primaryDark' => '#0F3D27', 'accent' => '#C9A961',
+        'ink' => '#1A1A1A', 'bg' => '#FAF7F2', 'bgAlt' => '#EFE8DC', 'radius' => '1rem',
+    ], $tokens);
+    $body = $fonts['body'] ?? 'Plus Jakarta Sans';
+    $display = $fonts['display'] ?? 'Cormorant Garamond';
+    $arabic = $fonts['arabic'] ?? 'Amiri';
+    $fontQuery = urlencode($body).':wght@400;600;700&family='.urlencode($display).':wght@500;600;700&family='.urlencode($arabic);
+@endphp
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>{{ $content['meta']['title'] ?? $project->mosque_name }} — DRAF</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family={{ $fontQuery }}&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:{{ $t['primary'] }};--primary-dark:{{ $t['primaryDark'] }};--accent:{{ $t['accent'] }};
+  --ink:{{ $t['ink'] }};--bg:{{ $t['bg'] }};--bg-alt:{{ $t['bgAlt'] }};--radius:{{ $t['radius'] }};
+  --font-body:'{{ $body }}',system-ui,sans-serif;--font-display:'{{ $display }}',Georgia,serif;--font-arabic:'{{ $arabic }}',serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-body);color:var(--ink);background:var(--bg);line-height:1.65;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+h1,h2,h3{font-family:var(--font-display);line-height:1.2;color:var(--primary-dark)}
+.section{padding:56px 0}
+.eyebrow{display:inline-block;font-size:.8rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--primary);background:color-mix(in srgb,var(--primary) 12%,transparent);padding:4px 12px;border-radius:999px}
+/* Banner DRAF (suntikan server) */
+.draft-banner{position:sticky;top:0;z-index:50;background:var(--primary-dark);color:#fff;text-align:center;font-size:.8rem;font-weight:600;padding:8px 12px;letter-spacing:.02em}
+/* Watermark diagonal berulang */
+.watermark{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:repeating-linear-gradient(-45deg,transparent 0 120px,rgba(0,0,0,.05) 120px 240px);}
+.watermark::before{content:"DRAF DRAF DRAF DRAF DRAF DRAF DRAF DRAF DRAF DRAF DRAF DRAF DRAF DRAF DRAF DRAF";position:absolute;inset:-20%;font-size:44px;font-weight:800;color:rgba(0,0,0,.045);transform:rotate(-30deg);word-spacing:40px;line-height:180px;overflow:hidden}
+.content{position:relative;z-index:1}
+/* Header */
+.site-header{background:var(--primary-dark);color:#fff}
+.site-header .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
+.brand{font-family:var(--font-display);font-weight:700;font-size:1.25rem}
+.nav{display:flex;gap:18px;font-size:.85rem;opacity:.9;flex-wrap:wrap}
+/* Hero */
+.hero{background:linear-gradient(160deg,var(--bg-alt),var(--bg));text-align:center;padding:72px 0}
+.hero h1{font-size:2.6rem;margin:16px 0}
+.hero p{max-width:640px;margin:0 auto;color:color-mix(in srgb,var(--ink) 75%,transparent)}
+.arabic{font-family:var(--font-arabic);direction:rtl;font-size:1.6rem;color:var(--primary);margin-bottom:8px}
+.btn-row{display:flex;gap:12px;justify-content:center;margin-top:28px;flex-wrap:wrap}
+.btn{padding:12px 26px;border-radius:12px;font-weight:600;font-size:.95rem}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-accent{background:var(--accent);color:var(--primary-dark)}
+/* Kad waktu solat statik */
+.prayer{background:#fff;border:1px solid var(--bg-alt);border-radius:var(--radius);padding:20px;margin-top:32px;max-width:720px;margin-inline:auto}
+.prayer-label{font-size:.75rem;color:color-mix(in srgb,var(--ink) 55%,transparent);text-align:center;margin-bottom:12px}
+.prayer-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;text-align:center}
+.prayer-grid div span{display:block}
+.prayer-grid .name{font-size:.7rem;opacity:.6}
+.prayer-grid .time{font-weight:700;color:var(--primary)}
+/* Grid kad */
+.grid{display:grid;gap:20px}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.grid-2{grid-template-columns:repeat(2,1fr)}
+.card{background:#fff;border:1px solid var(--bg-alt);border-radius:var(--radius);padding:22px}
+.card h3{font-size:1.15rem;margin-bottom:8px}
+.stat{text-align:center}
+.stat .value{font-size:2rem;font-weight:800;color:var(--primary);font-family:var(--font-display)}
+.stat .label{font-size:.8rem;opacity:.65}
+.ai-flag{font-size:.7rem;color:#8C6D2F;font-style:italic}
+.placeholder-img{background:var(--bg-alt);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;height:200px;color:color-mix(in srgb,var(--ink) 45%,transparent);font-size:.85rem}
+.section-alt{background:var(--bg-alt)}
+.center{text-align:center}
+footer.site{background:var(--primary-dark);color:#fff;padding:40px 0;text-align:center}
+footer.site p{opacity:.85;max-width:600px;margin:0 auto;font-size:.9rem}
+@media(max-width:720px){.grid-3,.grid-2{grid-template-columns:1fr}.prayer-grid{grid-template-columns:repeat(3,1fr)}.hero h1{font-size:2rem}}
+</style>
+</head>
+<body>
+<div class="draft-banner">DRAF SAMPEL — BUKAN LAMAN SEBENAR · Dijana {{ $generatedAt }} · Versi {{ $version }}</div>
+<div class="watermark"></div>
+
+<div class="content">
+    <header class="site-header">
+        <div class="wrap">
+            <span class="brand">{{ $project->short_name ?: $project->mosque_name }}</span>
+            <nav class="nav">
+                @foreach (array_slice($pages, 0, 6) as $p)
+                    <a href="#">{{ $p['label'] }}</a>
+                @endforeach
+            </nav>
+        </div>
+    </header>
+
+    {{-- Hero --}}
+    <section class="hero">
+        <div class="wrap">
+            @if ($showVerse)
+                <p class="arabic">{{ $verse->arabic_text }}</p>
+            @endif
+            @if (! empty($content['hero']['eyebrow']))
+                <span class="eyebrow">{{ $content['hero']['eyebrow'] }}</span>
+            @endif
+            <h1>{{ $content['hero']['headline'] ?? $project->mosque_name }}</h1>
+            <p>{{ $content['hero']['subheadline'] ?? '' }}</p>
+            <div class="btn-row">
+                @if (! empty($content['hero']['cta_primary_label']))<span class="btn btn-primary">{{ $content['hero']['cta_primary_label'] }}</span>@endif
+                @if (! empty($content['hero']['cta_secondary_label']))<span class="btn btn-accent">{{ $content['hero']['cta_secondary_label'] }}</span>@endif
+            </div>
+
+            {{-- Waktu solat: blok STATIK berlabel (§8.5/§9.3) --}}
+            <div class="prayer">
+                <p class="prayer-label">Contoh paparan — waktu sebenar akan diambil terus dari JAKIM e-Solat (zon {{ $zone }})</p>
+                <div class="prayer-grid">
+                    @foreach (['Subuh' => '5:55', 'Syuruk' => '7:10', 'Zohor' => '13:15', 'Asar' => '16:38', 'Maghrib' => '19:29', 'Isyak' => '20:42'] as $name => $time)
+                        <div><span class="name">{{ $name }}</span><span class="time">{{ $time }}</span></div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{-- Tentang --}}
+    @if (! empty($content['about']))
+        <section class="section">
+            <div class="wrap grid grid-2" style="align-items:center">
+                <div>
+                    <span class="eyebrow">Tentang Kami</span>
+                    <h2 style="margin:12px 0">{{ $content['about']['heading'] ?? 'Tentang Masjid' }}</h2>
+                    @foreach (($content['about']['paragraphs'] ?? []) as $para)
+                        <p style="margin-bottom:12px">{{ $para }}</p>
+                    @endforeach
+                    @if (in_array('sejarah', $aiFlags, true))
+                        <p class="ai-flag">✎ Dijana AI — sila semak ketepatan</p>
+                    @endif
+                </div>
+                <div class="grid grid-2">
+                    @foreach (($content['about']['stats'] ?? []) as $stat)
+                        <div class="card stat"><span class="value">{{ $stat['value'] ?? '' }}</span><span class="label">{{ $stat['label'] ?? '' }}</span></div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
+
+    {{-- Khidmat --}}
+    @if (! empty($content['services']))
+        <section class="section section-alt">
+            <div class="wrap">
+                <h2 class="center" style="margin-bottom:28px">Khidmat Kariah</h2>
+                <div class="grid grid-3">
+                    @foreach ($content['services'] as $svc)
+                        <div class="card"><h3>{{ $svc['title'] ?? '' }}</h3><p>{{ $svc['blurb'] ?? '' }}</p></div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
+
+    {{-- Fasiliti --}}
+    @if (! empty($content['facilities']))
+        <section class="section">
+            <div class="wrap">
+                <h2 class="center" style="margin-bottom:28px">Fasiliti</h2>
+                <div class="grid grid-3">
+                    @foreach ($content['facilities'] as $f)
+                        <div class="card"><h3>{{ $f['title'] ?? '' }}</h3><p>{{ $f['blurb'] ?? '' }}</p></div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
+
+    {{-- Kuliah --}}
+    @if (! empty($content['kuliah']))
+        <section class="section section-alt">
+            <div class="wrap center">
+                <h2>{{ $content['kuliah']['heading'] ?? 'Kuliah' }}</h2>
+                <p style="max-width:640px;margin:12px auto 0">{{ $content['kuliah']['intro'] ?? '' }}</p>
+            </div>
+        </section>
+    @endif
+
+    {{-- Infaq --}}
+    @if (! empty($content['infaq']))
+        <section class="section">
+            <div class="wrap center">
+                <h2>{{ $content['infaq']['heading'] ?? 'Infaq' }}</h2>
+                <p style="max-width:640px;margin:12px auto 0">{{ $content['infaq']['paragraph'] ?? '' }}</p>
+                <div style="margin-top:20px"><span class="btn btn-primary">Infaq Sekarang</span></div>
+            </div>
+        </section>
+    @endif
+
+    {{-- Pengumuman --}}
+    @if (! empty($content['announcements']))
+        <section class="section section-alt">
+            <div class="wrap">
+                <h2 class="center" style="margin-bottom:28px">Pengumuman</h2>
+                <div class="grid grid-3">
+                    @foreach ($content['announcements'] as $a)
+                        <div class="card"><span class="label">{{ $a['date_label'] ?? '' }}</span><h3 style="margin:6px 0">{{ $a['title'] ?? '' }}</h3><p>{{ $a['excerpt'] ?? '' }}</p></div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
+
+    {{-- Info pelawat --}}
+    @if (! empty($content['visitor_info']))
+        <section class="section">
+            <div class="wrap center">
+                <h2>{{ $content['visitor_info']['heading'] ?? 'Info Pelawat' }}</h2>
+                <p style="max-width:640px;margin:12px auto 0">{{ $content['visitor_info']['paragraph'] ?? '' }}</p>
+            </div>
+        </section>
+    @endif
+
+    {{-- Halaman penuh laman anda --}}
+    <section class="section section-alt">
+        <div class="wrap">
+            <h2 class="center" style="margin-bottom:28px">Halaman penuh laman anda</h2>
+            <div class="grid grid-3">
+                @foreach ($pages as $p)
+                    <div class="card center"><h3 style="font-size:1rem">{{ $p['label'] }}</h3></div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <footer class="site">
+        <div class="wrap">
+            <p class="brand" style="color:#fff;margin-bottom:10px">{{ $project->mosque_name }}</p>
+            <p>{{ $content['footer_description'] ?? '' }}</p>
+        </div>
+    </footer>
+</div>
+</body>
+</html>
