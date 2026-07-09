@@ -1,6 +1,6 @@
 @props([
     'tokens' => [],
-    'fonts' => ['body' => 'Plus Jakarta Sans', 'display' => 'Cormorant Garamond'],
+    'fonts' => ['body' => 'Plus Jakarta Sans Variable', 'display' => 'Cormorant Garamond'],
     'iconWeight' => 'sederhana',
     'iconContainer' => 'bulat-cair',
     'mosqueName' => 'Masjid Al-Hidayah',
@@ -21,7 +21,7 @@
     };
 @endphp
 <div class="overflow-hidden rounded-2xl border border-[#EFE8DC] shadow-sm"
-     style="background: {{ $t['bg'] }}; color: {{ $t['ink'] }};">
+     style="background: {{ $t['bg'] }}; color: {{ $t['ink'] }}; font-family: '{{ $fonts['body'] ?? 'Plus Jakarta Sans Variable' }}', ui-sans-serif, sans-serif;">
     {{-- Header masjid --}}
     <div class="flex items-center justify-between px-4 py-3" style="background: {{ $t['primaryDark'] }}; color:#fff;">
         <span class="font-bold truncate" style="font-family: '{{ $fonts['display'] ?? 'serif' }}', serif;">

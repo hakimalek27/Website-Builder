@@ -26,14 +26,53 @@
             @error('data.design_package') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
         </div>
 
-        {{-- Pasangan font --}}
+        {{-- Warna: ikut pakej ATAU pilih sendiri (mod custom + kawalan kontras WCAG) --}}
+        <div>
+            <label class="block text-sm font-semibold">Warna</label>
+            <div class="mt-2 flex gap-2">
+                @foreach (['pakej' => 'Ikut pakej', 'custom' => 'Pilih sendiri'] as $m => $lbl)
+                    <label class="cursor-pointer">
+                        <input type="radio" wire:model.live="data.palette_mode" value="{{ $m }}" class="peer sr-only">
+                        <span class="block rounded-xl border border-sand px-3 py-1.5 text-xs transition peer-checked:border-brand-600 peer-checked:bg-brand-50 peer-checked:ring-1 peer-checked:ring-brand-600/20">{{ $lbl }}</span>
+                    </label>
+                @endforeach
+            </div>
+            @if (($data['palette_mode'] ?? 'pakej') === 'custom')
+                <div class="mt-3 flex flex-wrap items-center gap-4 rounded-xl border border-sand bg-cream p-3">
+                    <label class="flex items-center gap-2 text-xs font-medium">Utama
+                        <input type="color" wire:model.live="data.custom_primary" class="h-8 w-12 cursor-pointer rounded border border-sand bg-white">
+                    </label>
+                    <label class="flex items-center gap-2 text-xs font-medium">Aksen
+                        <input type="color" wire:model.live="data.custom_accent" class="h-8 w-12 cursor-pointer rounded border border-sand bg-white">
+                    </label>
+                    @php $derived = $this->customPalettePreview(); @endphp
+                    @if ($derived)
+                        <div class="flex items-center gap-1.5">
+                            @foreach (['primary', 'primaryDark', 'accent', 'ink', 'bg', 'bgAlt'] as $tk)
+                                <span class="h-6 w-6 rounded-md border border-black/10" style="background: {{ $derived['tokens'][$tk] ?? '#fff' }}" title="{{ $tk }}"></span>
+                            @endforeach
+                        </div>
+                        @if ($derived['adjusted'])
+                            <p class="w-full text-xs text-gold-700">⚠ Warna utama digelapkan automatik untuk kebolehbacaan (WCAG ≥ 4.5:1).</p>
+                        @endif
+                    @else
+                        <p class="text-xs text-ink/55">Pilih warna utama &amp; aksen untuk lihat pratonton.</p>
+                    @endif
+                </div>
+                @error('data.custom_primary') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                @error('data.custom_accent') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+            @endif
+        </div>
+
+        {{-- Pasangan font (10 pilihan A–J; kad dipapar dalam font sebenar) --}}
         <div>
             <label class="block text-sm font-semibold">Pasangan font</label>
-            <div class="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                @foreach (['A' => 'Jakarta + Cormorant', 'B' => 'Inter + Playfair', 'C' => 'Figtree + Lora', 'D' => 'IBM Plex'] as $key => $label)
+            <div class="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+                @foreach (\App\Support\FontPairs::options() as $key => $label)
                     <label class="cursor-pointer">
                         <input type="radio" wire:model.live="data.font_pair" value="{{ $key }}" class="peer sr-only">
-                        <div class="rounded-xl border border-sand px-2 py-2 text-center text-xs transition peer-checked:border-brand-600 peer-checked:bg-brand-50 peer-checked:ring-1 peer-checked:ring-brand-600/20">{{ $label }}</div>
+                        <div class="rounded-xl border border-sand px-2 py-2 text-center text-xs transition peer-checked:border-brand-600 peer-checked:bg-brand-50 peer-checked:ring-1 peer-checked:ring-brand-600/20"
+                             style="font-family: '{{ \App\Support\FontPairs::previewFonts($key)['display'] }}', serif;">{{ $label }}</div>
                     </label>
                 @endforeach
             </div>

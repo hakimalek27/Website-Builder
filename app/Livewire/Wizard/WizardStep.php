@@ -11,7 +11,9 @@ use App\Models\Project;
 use App\Models\ProjectPage;
 use App\Models\ProjectSection;
 use App\Services\UploadService;
+use App\Support\FontPairs;
 use App\Support\PageCatalog;
+use App\Support\PaletteDeriver;
 use App\Support\PresetMatrix;
 use App\Support\WizardSteps;
 use App\Support\ZoneLookup;
@@ -370,8 +372,11 @@ class WizardStep extends Component
             return;
         }
 
+        // Mod custom → simpan token terbitan penuh (WCAG-selamat) sebagai palette override.
+        $custom = $this->customPalettePreview();
+
         $overrides = array_filter([
-            'palette' => $this->data['palette'] ?? null,
+            'palette' => $custom['tokens'] ?? ($this->data['palette'] ?? null),
             'font_pair' => $this->data['font_pair'] ?? null,
             'icon_style' => $this->data['icon_style'] ?? null,
             'layout' => $this->data['layout_home'] ?? null,
@@ -478,6 +483,9 @@ class WizardStep extends Component
             2 => [
                 'design_package' => ['required', 'in:warisan_hijau,biru_nilam,emas_kubah,teal_kontemporari,marun_agung'],
                 'mood' => ['required', 'in:tenang_khusyuk,mesra_keluarga,megah_berwibawa'],
+                'palette_mode' => ['nullable', 'in:pakej,custom'],
+                'custom_primary' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+                'custom_accent' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             ],
             4 => $this->rulesForStep4(),
             5 => $this->rulesForStep5(),
@@ -605,6 +613,11 @@ class WizardStep extends Component
         $package = DesignPackage::where('key', $key)->first();
         $tokens = $package?->tokens ?? [];
 
+        $custom = $this->customPalettePreview();
+        if ($custom !== null) {
+            return array_merge($tokens, $custom['tokens']);
+        }
+
         if (! empty($this->data['palette']) && is_array($this->data['palette'])) {
             $tokens = array_merge($tokens, $this->data['palette']);
         }
@@ -612,24 +625,42 @@ class WizardStep extends Component
         return $tokens;
     }
 
-    /** Fon berkesan untuk pratonton (pakej default atau font_pair override §7.4). */
-    public function previewFonts(): array
+    /**
+     * Pratonton palet custom (mod custom + 2 hex sah) — token terbitan + bendera pelarasan WCAG.
+     *
+     * @return array{tokens: array<string,string>, adjusted: bool}|null
+     */
+    public function customPalettePreview(): ?array
     {
-        $pairs = [
-            'A' => ['body' => 'Plus Jakarta Sans', 'display' => 'Cormorant Garamond'],
-            'B' => ['body' => 'Inter', 'display' => 'Playfair Display'],
-            'C' => ['body' => 'Figtree', 'display' => 'Lora'],
-            'D' => ['body' => 'IBM Plex Sans', 'display' => 'IBM Plex Serif'],
-        ];
-
-        if (! empty($this->data['font_pair']) && isset($pairs[$this->data['font_pair']])) {
-            return $pairs[$this->data['font_pair']];
+        if (($this->data['palette_mode'] ?? 'pakej') !== 'custom') {
+            return null;
         }
 
-        $key = $this->data['design_package'] ?? 'warisan_hijau';
-        $package = DesignPackage::where('key', $key)->first();
+        $primary = $this->data['custom_primary'] ?? null;
+        $accent = $this->data['custom_accent'] ?? null;
+        if (! PaletteDeriver::isValidHex($primary) || ! PaletteDeriver::isValidHex($accent)) {
+            return null;
+        }
 
-        return $package?->fonts ?? $pairs['A'];
+        return PaletteDeriver::derive($primary, $accent);
+    }
+
+    /** Fon berkesan untuk pratonton (nama fontsource di-hos-sendiri §7.4). */
+    public function previewFonts(): array
+    {
+        $pair = $this->data['font_pair'] ?? null;
+        if (! empty($pair) && FontPairs::has($pair)) {
+            return FontPairs::previewFonts($pair);
+        }
+
+        // Fallback: font pakej → tukar ke nama pratonton fontsource (elak jatuh ke serif generik).
+        $key = $this->data['design_package'] ?? 'warisan_hijau';
+        $fonts = DesignPackage::where('key', $key)->first()?->fonts ?? FontPairs::fonts(FontPairs::DEFAULT);
+
+        return [
+            'body' => FontPairs::previewFamily($fonts['body'] ?? 'Plus Jakarta Sans'),
+            'display' => FontPairs::previewFamily($fonts['display'] ?? 'Cormorant Garamond'),
+        ];
     }
 
     public function render()
