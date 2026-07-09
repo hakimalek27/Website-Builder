@@ -22,10 +22,20 @@ use Symfony\Component\HttpFoundation\Response;
 class SecurityHeaders
 {
     /**
-     * CSP asas aplikasi (§11.3). Route draf (P6) akan melonggarkan ini untuk
-     * Google Fonts melalui CSP tersendiri pada fasa berkenaan.
+     * CSP asas aplikasi (§11.3) — halaman statik awam.
+     * Route draf (P6) akan melonggarkan ini untuk Google Fonts (Fasa 8).
      */
     protected string $baseCsp = "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'";
+
+    /**
+     * CSP untuk route interaktif (Filament /admin & wizard PIC /b/*).
+     *
+     * Nota (R1/R2): Livewire + Alpine (dipakai Filament & wizard) memerlukan
+     * 'unsafe-eval' (penilaian ungkapan Alpine) + 'unsafe-inline' (skrip config
+     * awal Livewire). CSP `script-src 'self'` sahaja akan memecahkan UI ini.
+     * Halaman statik awam kekal CSP ketat §11.3.
+     */
+    protected string $interactiveCsp = "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; font-src 'self' data:; connect-src 'self'";
 
     public function handle(Request $request, Closure $next): Response
     {
@@ -34,9 +44,18 @@ class SecurityHeaders
         $this->setIfAbsent($response, 'X-Content-Type-Options', 'nosniff');
         $this->setIfAbsent($response, 'Referrer-Policy', 'strict-origin-when-cross-origin');
         $this->setIfAbsent($response, 'X-Frame-Options', 'DENY');
-        $this->setIfAbsent($response, 'Content-Security-Policy', $this->baseCsp);
+        $this->setIfAbsent($response, 'Content-Security-Policy', $this->cspFor($request));
 
         return $response;
+    }
+
+    protected function cspFor(Request $request): string
+    {
+        if ($request->is('admin', 'admin/*') || $request->is('b/*') || $request->is('livewire/*')) {
+            return $this->interactiveCsp;
+        }
+
+        return $this->baseCsp;
     }
 
     protected function setIfAbsent(Response $response, string $name, string $value): void

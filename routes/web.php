@@ -3,6 +3,7 @@
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\MinatController;
 use App\Http\Controllers\PicController;
+use App\Http\Controllers\WizardController;
 use Illuminate\Support\Facades\Route;
 
 // --- Awam (tiada auth) — §5.1 ---
@@ -24,7 +25,7 @@ Route::view('/terma', 'legal.terma')->name('terma');
 Route::prefix('/b/{token}')->middleware('resolve.invitation')->name('pic.')->group(function () {
     Route::get('/', [PicController::class, 'home'])->name('home'); // P1
 
-    // P2 wizard langkah — dibina Fasa 4 (placeholder 501).
-    Route::get('/langkah/{step}', fn () => abort(501, 'Wizard langkah dibina pada Fasa 4.'))
+    // P2 wizard langkah.
+    Route::get('/langkah/{step}', [WizardController::class, 'show'])
         ->whereNumber('step')->name('step');
 });
