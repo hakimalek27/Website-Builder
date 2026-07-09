@@ -20,7 +20,7 @@
         <div class="mt-2 h-3 w-full overflow-hidden rounded-full bg-[#EFE8DC]">
             <div class="h-full rounded-full bg-[#1B5E3F] transition-all" style="width: {{ $progress['percent'] }}%"></div>
         </div>
-        <div class="mt-5">
+        <div class="mt-5 flex flex-wrap gap-3">
             <a href="{{ route('pic.step', ['token' => $token, 'step' => $progress['resume_step']]) }}"
                class="inline-block rounded-xl bg-[#1B5E3F] px-6 py-3 text-sm font-semibold text-white hover:bg-[#0F3D27] transition">
                 @if ($progress['completed'] === 0)
@@ -28,6 +28,10 @@
                 @else
                     Sambung di Langkah {{ $progress['resume_step'] }}
                 @endif
+            </a>
+            <a href="{{ route('pic.semak', ['token' => $token]) }}"
+               class="inline-block rounded-xl border border-[#1B5E3F]/30 px-6 py-3 text-sm font-semibold text-[#0F3D27] hover:bg-[#EFE8DC] transition">
+                Semak &amp; Hantar
             </a>
         </div>
     </div>

@@ -128,7 +128,16 @@
             @endforeach
         </div>
         @if (($data['logo_status'] ?? null) === 'ada')
-            <p class="mt-2 text-xs text-[#8C6D2F]">Muat naik logo akan diaktifkan pada langkah Media (png/svg/jpg, ≤4MB).</p>
+            <div class="mt-2">
+                <input type="file" wire:model="files.logo" accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                       class="w-full rounded-lg border border-[#EFE8DC] bg-white px-3 py-2 text-xs">
+                <p class="mt-1 text-xs text-[#1A1A1A]/55">png/svg/jpg, ≤4MB.</p>
+                @if (! empty($data['logo_file']['name'] ?? null))
+                    <p class="mt-1 text-xs text-[#1B5E3F]">✓ {{ $data['logo_file']['name'] }}</p>
+                @endif
+                <div wire:loading wire:target="files.logo" class="mt-1 text-xs text-[#8C6D2F]">Memuat naik…</div>
+                @error('files.logo') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+            </div>
         @endif
         @error('data.logo_status') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
     </div>

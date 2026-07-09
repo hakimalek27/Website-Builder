@@ -80,8 +80,22 @@
             @break
 
         @case('upload')
+            <input type="file" wire:model="files.{{ $rel }}" class="{{ $inp }} text-xs">
+            @if (! empty($panelData[$field['key']]['name'] ?? null))
+                <p class="mt-1 text-xs text-[#1B5E3F]">✓ {{ $panelData[$field['key']]['name'] }}</p>
+            @endif
+            <div wire:loading wire:target="files.{{ $rel }}" class="mt-1 text-xs text-[#8C6D2F]">Memuat naik…</div>
+            @error('files.'.$rel) <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+            @break
+
         @case('upload_multi')
-            <p class="{{ $inp }} bg-[#FAF7F2] text-xs text-[#8C6D2F]">Muat naik diaktifkan pada Langkah Media (Fasa 6).</p>
+            <input type="file" wire:model="files.{{ $rel }}" class="{{ $inp }} text-xs">
+            @php $uploaded = $panelData[$field['key']] ?? []; @endphp
+            @if (! empty($uploaded))
+                <p class="mt-1 text-xs text-[#1B5E3F]">✓ {{ count($uploaded) }} fail dimuat naik</p>
+            @endif
+            <div wire:loading wire:target="files.{{ $rel }}" class="mt-1 text-xs text-[#8C6D2F]">Memuat naik…</div>
+            @error('files.'.$rel) <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
             @break
 
         @case('facility_checklist')

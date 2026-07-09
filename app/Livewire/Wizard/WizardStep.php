@@ -4,11 +4,13 @@ namespace App\Livewire\Wizard;
 
 use App\Enums\ProjectStatus;
 use App\Enums\Tier;
+use App\Exceptions\UploadException;
 use App\Models\DesignPackage;
 use App\Models\Invitation;
 use App\Models\Project;
 use App\Models\ProjectPage;
 use App\Models\ProjectSection;
+use App\Services\UploadService;
 use App\Support\PageCatalog;
 use App\Support\PresetMatrix;
 use App\Support\WizardSteps;
@@ -16,6 +18,7 @@ use App\Support\ZoneLookup;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 /**
  * Enjin wizard (§6, §5.2 P2). Satu komponen berparameter untuk semua langkah.
@@ -25,12 +28,17 @@ use Livewire\Component;
  */
 class WizardStep extends Component
 {
+    use WithFileUploads;
+
     public string $token;
 
     public int $step;
 
     /** @var array<string, mixed> */
     public array $data = [];
+
+    /** Muat naik sementara dikunci oleh path rel. */
+    public array $files = [];
 
     public ?string $savedAt = null;
 
@@ -62,6 +70,13 @@ class WizardStep extends Component
 
         if ($this->step === 4) {
             $this->applyPanelDefaults($project);
+        }
+
+        if ($this->step === 9) {
+            // Pra-isi identiti PIC dari jemputan (boleh dibetulkan).
+            $invitation = $project->invitation;
+            $this->data['pic_name'] ??= $invitation?->pic_name;
+            $this->data['pic_phone'] ??= $invitation?->pic_phone;
         }
     }
 
@@ -118,6 +133,67 @@ class WizardStep extends Component
         if (str_starts_with($name, 'data.')) {
             $this->save();
         }
+    }
+
+    /** Muat naik fail (§11.4): proses melalui UploadService → Asset → rujukan dalam data. */
+    public function updatedFiles($value, string $key): void
+    {
+        $project = $this->resolveProject();
+        if ($project->isFrozen() || $value === null) {
+            return;
+        }
+
+        try {
+            $asset = app(UploadService::class)->store($value, $this->kindFor($key), $project);
+        } catch (UploadException $e) {
+            $this->addError("files.{$key}", $e->getMessage());
+            Arr::forget($this->files, $key);
+
+            return;
+        }
+
+        $ref = ['asset_id' => $asset->id, 'path' => $asset->path, 'name' => $asset->original_name];
+        $dataPath = $this->dataPathFor($key);
+
+        if ($this->isMultiTarget($key)) {
+            $existing = Arr::get($this->data, $dataPath, []);
+            $existing[] = $ref;
+            Arr::set($this->data, $dataPath, $existing);
+        } else {
+            Arr::set($this->data, $dataPath, $ref);
+        }
+
+        Arr::forget($this->files, $key);
+        $this->save();
+    }
+
+    private function kindFor(string $key): string
+    {
+        return match (true) {
+            $key === 'logo' => 'logo',
+            $key === 'hero' => 'hero',
+            str_contains($key, 'galeri.images') => 'gallery',
+            str_contains($key, 'qr_image') => 'qr',
+            str_contains($key, 'form_pdf'), str_ends_with($key, '.file') => 'doc',
+            str_contains($key, 'perutusan') => 'perutusan_photo',
+            str_contains($key, 'facility') => 'facility_photo',
+            str_contains($key, 'photo') => 'committee_photo',
+            default => 'gallery',
+        };
+    }
+
+    private function isMultiTarget(string $key): bool
+    {
+        return $key === 'hero' || str_contains($key, 'images');
+    }
+
+    private function dataPathFor(string $key): string
+    {
+        return match ($key) {
+            'logo' => 'logo_file',
+            'hero' => 'hero_files',
+            default => $key,
+        };
     }
 
     public function save(): void
@@ -340,6 +416,19 @@ class WizardStep extends Component
             ],
             4 => $this->rulesForStep4(),
             5 => $this->rulesForStep5(),
+            6 => [
+                'hero_mode' => ['required', 'in:upload,perlu_fotografi,stok_sementara'],
+            ],
+            8 => [
+                'domain_status' => ['required', 'in:ada,belum,gov_my'],
+            ],
+            9 => [
+                'pic_name' => ['required', 'string', 'max:100'],
+                'pic_position' => ['required', 'string', 'max:100'],
+                'pic_phone' => ['required', 'string'],
+                'consent_pdpa' => ['accepted'],
+                'declare_truth_authority' => ['accepted'],
+            ],
             default => [],
         };
     }
