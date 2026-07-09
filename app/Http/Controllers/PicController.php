@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AuditLog;
 use App\Models\Note;
 use App\Models\Project;
+use App\Services\Notifier;
 use App\Services\WizardProgress;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -44,6 +45,7 @@ class PicController extends Controller
         ]);
 
         AuditLog::record('pic', null, 'note.created', $note);
+        app(Notifier::class)->noteAdded($project, $note);   // WA → admin (Fasa 11)
 
         return back()->with('success', 'Nota dihantar.');
     }

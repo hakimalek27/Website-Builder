@@ -18,9 +18,11 @@ class SettingsSeeder extends Seeder
         Setting::put('default_design_quota', '5');
         Setting::put('invitation_default_days', '30');
         Setting::put('admin_notify_email', config('reka.admin_notify_email'));
-        Setting::put('whatsapp_gateway_url', null);
+        Setting::put('admin_notify_phone', '60189030363');
+        Setting::put('whatsapp_gateway_url', 'https://wassap.wehdah.my');
+        Setting::put('whatsapp_session_id', null);
 
-        // Nilai sulit (secret gateway WhatsApp).
-        Setting::put('whatsapp_gateway_secret', null, encrypted: true);
+        // Nilai sulit (kunci API gateway — ditampal melalui Tetapan admin, JANGAN commit).
+        Setting::put('whatsapp_api_key', null, encrypted: true);
     }
 }

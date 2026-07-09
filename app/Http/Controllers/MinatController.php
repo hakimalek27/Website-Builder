@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\NewLeadMail;
 use App\Models\Lead;
+use App\Services\Notifier;
 use App\Services\Turnstile;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -50,11 +49,8 @@ class MinatController extends Controller
 
         $lead = Lead::create($data);
 
-        // Notifikasi admin (mail, dibaris).
-        $adminEmail = config('reka.admin_notify_email');
-        if (filled($adminEmail)) {
-            Mail::to($adminEmail)->queue(new NewLeadMail($lead));
-        }
+        // Notifikasi admin: WA segera (60189030363) + fallback/mail penuh lead.
+        app(Notifier::class)->leadReceived($lead);
 
         return redirect()->route('minat.terima-kasih');
     }

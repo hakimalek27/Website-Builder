@@ -3,18 +3,24 @@
 namespace App\Services;
 
 use App\Jobs\SendWhatsappJob;
+use App\Mail\AdminAlertMail;
 use App\Mail\ApprovedMail;
 use App\Mail\GenerationFailedMail;
+use App\Mail\NewLeadMail;
 use App\Mail\SubmittedMail;
 use App\Models\Generation;
+use App\Models\Lead;
+use App\Models\Note;
 use App\Models\NotificationLog;
 use App\Models\Project;
+use App\Models\Setting;
 use Illuminate\Contracts\Mail\Mailable;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 /**
- * §13 — 9 event notifikasi. Saluran WA melalui gateway (queued + fallback mail);
- * mail melalui queue. Setiap hantaran direkod dalam notification_logs.
+ * §13 — event notifikasi (9 asal + 3 Fasa 11). Saluran WA melalui gateway
+ * (queued + fallback mail); mail melalui queue. Direkod dalam notification_logs.
  */
 class Notifier
 {
@@ -22,7 +28,7 @@ class Notifier
 
     private function adminEmail(): ?string
     {
-        return config('reka.admin_notify_email');
+        return Setting::get('admin_notify_email') ?: config('reka.admin_notify_email');
     }
 
     private function picPhone(Project $project): ?string
@@ -82,6 +88,9 @@ class Notifier
     public function submitted(Project $project): void
     {
         $this->mail($this->adminEmail(), new SubmittedMail($project), $project, 'submitted');
+        // Fasa 11: makluman WA segera kepada admin (60189030363).
+        $msg = "REKA: {$project->mosque_name} telah menghantar borang — draf dijana automatik.";
+        $this->whatsapp($this->adminPhoneOrNull(), $msg, $project, 'submitted', new AdminAlertMail('Borang dihantar', $msg), $this->adminEmail());
     }
 
     public function generationSucceeded(Project $project, Generation $generation, string $link): void
@@ -118,9 +127,25 @@ class Notifier
         $this->mail($this->adminEmail(), new SubmittedMail($project), $project, 'token.expiring');
     }
 
+    // --- Event Fasa 11 (WA → admin 60189030363) ---
+
+    /** Lead baharu dari borang minat (§5.1). */
+    public function leadReceived(Lead $lead): void
+    {
+        $msg = "REKA: Lead baharu — {$lead->mosque_name} ({$lead->state}).";
+        $this->whatsapp($this->adminPhoneOrNull(), $msg, null, 'lead.received', new AdminAlertMail('Lead baharu', $msg), $this->adminEmail());
+        $this->mail($this->adminEmail(), new NewLeadMail($lead), null, 'lead.received');
+    }
+
+    /** Nota/soalan baharu dari PIC (§5.2 P11). */
+    public function noteAdded(Project $project, Note $note): void
+    {
+        $msg = "REKA: Nota baharu dari {$project->mosque_name}: ".Str::limit($note->body, 80);
+        $this->whatsapp($this->adminPhoneOrNull(), $msg, $project, 'note.added', new AdminAlertMail('Nota PIC', $msg), $this->adminEmail());
+    }
+
     private function adminPhoneOrNull(): ?string
     {
-        // Admin phone tidak disimpan berasingan; guna null (mail sahaja).
-        return null;
+        return Setting::get('admin_notify_phone') ?: null;
     }
 }

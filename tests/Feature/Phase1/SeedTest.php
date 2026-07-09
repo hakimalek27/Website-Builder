@@ -50,9 +50,10 @@ it('seeds default settings (§5.3)', function () {
     expect(Setting::get('default_ai_quota'))->toBe('3');
     expect(Setting::get('default_design_quota'))->toBe('5');
     expect(Setting::get('invitation_default_days'))->toBe('30');
+    expect(Setting::get('admin_notify_phone'))->toBe('60189030363');
     expect(Setting::whereIn('key', [
         'gen_cooldown_minutes', 'default_ai_quota', 'default_design_quota',
-        'invitation_default_days', 'admin_notify_email', 'whatsapp_gateway_url',
-        'whatsapp_gateway_secret',
-    ])->count())->toBe(7);
+        'invitation_default_days', 'admin_notify_email', 'admin_notify_phone',
+        'whatsapp_gateway_url', 'whatsapp_session_id', 'whatsapp_api_key',
+    ])->count())->toBe(9);
 });

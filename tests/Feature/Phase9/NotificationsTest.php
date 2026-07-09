@@ -6,6 +6,7 @@ use App\Jobs\SendWhatsappJob;
 use App\Mail\SubmittedMail;
 use App\Models\Generation;
 use App\Models\Invitation;
+use App\Models\Lead;
 use App\Models\Note;
 use App\Models\NotificationLog;
 use App\Models\Project;
@@ -18,24 +19,34 @@ use Illuminate\Support\Facades\Mail;
 
 // Fasa 9 — notifikasi (§13), status PIC, admin, pengerasan (§11.3).
 
-it('WhatsApp adapter posts with the gateway secret (§13)', function () {
-    Setting::put('whatsapp_gateway_url', 'https://gw.example/send');
-    Setting::put('whatsapp_gateway_secret', 'rahsia123', encrypted: true);
-    Http::fake(['*gw.example*' => Http::response(['ok' => true], 200)]);
+it('WhatsApp adapter posts to wassap.wehdah.my with X-API-Key (§13)', function () {
+    Setting::put('whatsapp_gateway_url', 'https://wassap.wehdah.my');
+    Setting::put('whatsapp_api_key', 'sk_test123', encrypted: true);
+    Http::fake(['*wassap.wehdah.my*' => Http::response(['success' => true, 'data' => ['message_id' => 'm1']], 200)]);
 
     $ok = app(WhatsappGateway::class)->send('60195998294', 'Salam', null, 'test.event');
 
     expect($ok)->toBeTrue();
-    Http::assertSent(fn ($request) => $request->hasHeader('X-Gateway-Secret', 'rahsia123')
-        && $request['phone'] === '60195998294'
+    Http::assertSent(fn ($request) => str_contains($request->url(), '/v1/messages/send')
+        && $request->hasHeader('X-API-Key', 'sk_test123')
+        && $request['to'] === '60195998294'
         && $request['message'] === 'Salam');
     $this->assertDatabaseHas('notification_logs', ['event' => 'test.event', 'channel' => 'whatsapp', 'status' => 'sent']);
 });
 
+it('normalizes 01x numbers to 601x msisdn', function () {
+    Setting::put('whatsapp_gateway_url', 'https://wassap.wehdah.my');
+    Http::fake(['*wassap.wehdah.my*' => Http::response(['success' => true], 200)]);
+
+    app(WhatsappGateway::class)->send('0189030363', 'Hai', null, 'test.norm');
+
+    Http::assertSent(fn ($request) => $request['to'] === '60189030363');
+});
+
 it('falls back to mail and logs when WhatsApp fails (§13)', function () {
     Mail::fake();
-    Setting::put('whatsapp_gateway_url', 'https://gw.example/send');
-    Http::fake(['*gw.example*' => Http::response('', 500)]);
+    Setting::put('whatsapp_gateway_url', 'https://wassap.wehdah.my');
+    Http::fake(['*wassap.wehdah.my*' => Http::response('', 500)]);
     $project = Project::factory()->create();
 
     $ok = app(WhatsappGateway::class)->send('60123456789', 'Salam', $project->id, 'test.event');
@@ -47,15 +58,18 @@ it('falls back to mail and logs when WhatsApp fails (§13)', function () {
     Mail::assertQueued(SubmittedMail::class);
 });
 
-it('dispatches all nine notification events (§13)', function () {
+it('dispatches all twelve notification events (§13 + Fasa 11)', function () {
     Mail::fake();
     config()->set('reka.admin_notify_email', 'admin@reka.test');
-    Setting::put('whatsapp_gateway_url', 'https://gw.example/send');
-    Http::fake(['*gw.example*' => Http::response(['ok' => true], 200)]);
+    Setting::put('whatsapp_gateway_url', 'https://gw.example');
+    Setting::put('admin_notify_phone', '60189030363');
+    Http::fake(['*gw.example*' => Http::response(['success' => true], 200)]);
 
     $project = Project::factory()->create();
     Invitation::factory()->for($project)->create(['pic_phone' => '60123456789', 'pic_email' => 'pic@test.my']);
     $gen = Generation::factory()->for($project)->succeeded()->create();
+    $lead = Lead::create(['mosque_name' => 'Lead X', 'org_type' => 'masjid', 'state' => 'Selangor', 'pic_name' => 'A', 'pic_phone' => '0123456789']);
+    $note = Note::create(['project_id' => $project->id, 'author' => 'pic', 'author_name' => 'PIC', 'kind' => 'general', 'body' => 'Nota ujian']);
 
     $n = app(Notifier::class);
     $n->invitationSent($project, 'link');
@@ -67,11 +81,14 @@ it('dispatches all nine notification events (§13)', function () {
     $n->approved($project);
     $n->buildUpdated($project, 'Live', 'link');
     $n->tokenExpiring($project);
+    $n->leadReceived($lead);
+    $n->noteAdded($project, $note);
 
     $events = NotificationLog::pluck('event')->unique()->values()->all();
     foreach ([
         'invitation.sent', 'wizard.reminder', 'submitted', 'generation.succeeded',
-        'generation.failed', 'quota.exhausted_note', 'approved', 'status.build_updated', 'token.expiring',
+        'generation.failed', 'quota.exhausted_note', 'approved', 'status.build_updated',
+        'token.expiring', 'lead.received', 'note.added',
     ] as $event) {
         expect($events)->toContain($event);
     }
