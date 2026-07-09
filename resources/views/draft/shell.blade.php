@@ -1,4 +1,4 @@
-{{-- §8.5 — Blade shell deterministik. AI TIDAK menulis HTML. --}}
+{{-- §8.5 — Blade shell deterministik. AI TIDAK menulis HTML. Varian struktur = §7 pelbagaian. --}}
 @php
     $t = array_merge([
         'primary' => '#1B5E3F', 'primaryDark' => '#0F3D27', 'accent' => '#C9A961',
@@ -8,6 +8,28 @@
     $display = $fonts['display'] ?? 'Cormorant Garamond';
     $arabic = $fonts['arabic'] ?? 'Amiri';
     $fontQuery = urlencode($body).':wght@400;600;700&family='.urlencode($display).':wght@500;600;700&family='.urlencode($arabic);
+
+    // Varian struktur (dengan default supaya draf pakej asal kekal sama).
+    $layout = $layout ?? 'hero-tengah';
+    $header = $header ?? 'padat';
+    $footer = $footer ?? 'ringkas';
+    $cardStyle = $cardStyle ?? 'lembut';
+    $divider = $divider ?? 'tiada';
+    $animations = $animations ?? false;
+    $showPrayer = $showPrayer ?? true;
+
+    // Gaya ikon kad khidmat.
+    $iconStroke = \App\Support\Lucide::strokeForWeight($iconStyle['weight'] ?? 'sederhana');
+    $iconContainer = $iconStyle['container'] ?? 'bulat-cair';
+    $svcContainer = match ($iconContainer) {
+        'bulat-penuh' => 'border-radius:9999px;background:var(--primary);color:#fff;',
+        'kotak-lembut' => 'border-radius:.6rem;background:color-mix(in srgb,var(--primary) 12%,transparent);color:var(--primary);',
+        'kotak-tegas' => 'border-radius:.25rem;background:var(--primary);color:#fff;',
+        'heksagon' => 'clip-path:polygon(25% 5%,75% 5%,100% 50%,75% 95%,25% 95%,0 50%);background:var(--primary);color:#fff;',
+        'tanpa-bekas' => 'background:transparent;color:var(--primary);',
+        default => 'border-radius:9999px;background:color-mix(in srgb,var(--primary) 12%,transparent);color:var(--primary);',
+    };
+    $svcIcons = ['HeartHandshake', 'HandHeart', 'BookOpen', 'Users', 'Building', 'Sparkles'];
 @endphp
 <!DOCTYPE html>
 <html lang="ms">
@@ -44,6 +66,10 @@ h1,h2,h3{font-family:var(--font-display);line-height:1.2;color:var(--primary-dar
 .site-header .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
 .brand{font-family:var(--font-display);font-weight:700;font-size:1.25rem}
 .nav{display:flex;gap:18px;font-size:.85rem;opacity:.9;flex-wrap:wrap}
+/* Varian header */
+.hdr-gradien{background:linear-gradient(120deg,var(--primary-dark),var(--primary))}
+.hdr-tengah .wrap{flex-direction:column;height:auto;padding-top:16px;padding-bottom:16px;gap:8px}
+.hdr-tengah .nav{justify-content:center}
 /* Hero */
 .hero{background:linear-gradient(160deg,var(--bg-alt),var(--bg));text-align:center;padding:72px 0}
 .hero h1{font-size:2.6rem;margin:16px 0}
@@ -53,6 +79,19 @@ h1,h2,h3{font-family:var(--font-display);line-height:1.2;color:var(--primary-dar
 .btn{padding:12px 26px;border-radius:12px;font-weight:600;font-size:.95rem}
 .btn-primary{background:var(--primary);color:#fff}
 .btn-accent{background:var(--accent);color:var(--primary-dark)}
+/* Varian susun atur hero */
+.layout-hero-belah{text-align:left}
+.layout-hero-belah .btn-row{justify-content:flex-start}
+.layout-hero-belah p{margin-left:0}
+.layout-klasik-formal .wrap{border-top:2px solid var(--accent);border-bottom:2px solid var(--accent);padding:32px 20px}
+.layout-hero-penuh{background:linear-gradient(150deg,var(--primary-dark),var(--primary))}
+.layout-hero-penuh h1,.layout-hero-penuh p{color:#fff}
+.layout-hero-penuh .eyebrow{background:rgba(255,255,255,.15);color:#fff}
+.layout-hero-mihrab .wrap{max-width:760px;background:var(--bg-alt);border-radius:280px 280px var(--radius) var(--radius);padding:64px 44px}
+/* Pembatas seksyen */
+.divider-garis-emas{position:relative;height:2px;background:var(--accent);width:90px;margin:0 auto}
+.divider-garis-emas::after{content:"◆";position:absolute;top:-.7em;left:50%;transform:translateX(-50%);color:var(--accent);background:var(--bg);padding:0 10px;font-size:.7rem}
+.divider-lengkung{height:44px;background:var(--bg-alt);border-radius:0 0 50% 50%/0 0 100% 100%}
 /* Kad waktu solat statik */
 .prayer{background:#fff;border:1px solid var(--bg-alt);border-radius:var(--radius);padding:20px;margin-top:32px;max-width:720px;margin-inline:auto}
 .prayer-label{font-size:.75rem;color:color-mix(in srgb,var(--ink) 55%,transparent);text-align:center;margin-bottom:12px}
@@ -66,6 +105,12 @@ h1,h2,h3{font-family:var(--font-display);line-height:1.2;color:var(--primary-dar
 .grid-2{grid-template-columns:repeat(2,1fr)}
 .card{background:#fff;border:1px solid var(--bg-alt);border-radius:var(--radius);padding:22px}
 .card h3{font-size:1.15rem;margin-bottom:8px}
+/* Varian kad */
+.card-garis .card{border:1px solid color-mix(in srgb,var(--primary) 24%,transparent);border-radius:.5rem;box-shadow:none}
+.card-terapung .card{border:0;border-radius:calc(var(--radius) + .2rem);box-shadow:0 14px 34px -14px rgba(0,0,0,.28)}
+/* Ikon kad khidmat */
+.svc-ic{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;margin-bottom:12px}
+.svc-ic svg{width:22px;height:22px}
 .stat{text-align:center}
 .stat .value{font-size:2rem;font-weight:800;color:var(--primary);font-family:var(--font-display)}
 .stat .label{font-size:.8rem;opacity:.65}
@@ -75,15 +120,23 @@ h1,h2,h3{font-family:var(--font-display);line-height:1.2;color:var(--primary-dar
 .center{text-align:center}
 footer.site{background:var(--primary-dark);color:#fff;padding:40px 0;text-align:center}
 footer.site p{opacity:.85;max-width:600px;margin:0 auto;font-size:.9rem}
-@media(max-width:720px){.grid-3,.grid-2{grid-template-columns:1fr}.prayer-grid{grid-template-columns:repeat(3,1fr)}.hero h1{font-size:2rem}}
+/* Varian footer */
+footer.ftr-tengah-jenama{padding:52px 0}
+footer.ftr-tiga-lajur{text-align:left}
+footer.ftr-tiga-lajur .cols{display:grid;grid-template-columns:2fr 1fr 1fr;gap:28px;text-align:left}
+footer.ftr-tiga-lajur .cols a{display:block;opacity:.85;font-size:.85rem;margin-top:4px}
+/* Animasi halus (hormati reduced-motion) */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:no-preference){.has-anim .section{animation:fadeUp .7s both}}
+@media(max-width:720px){.grid-3,.grid-2{grid-template-columns:1fr}.prayer-grid{grid-template-columns:repeat(3,1fr)}.hero h1{font-size:2rem}.ftr-tiga-lajur .cols{grid-template-columns:1fr}}
 </style>
 </head>
-<body>
+<body class="card-{{ $cardStyle }}@if ($animations) has-anim @endif" data-layout="{{ $layout }}" data-header="{{ $header }}">
 <div class="draft-banner">DRAF SAMPEL — BUKAN LAMAN SEBENAR · Dijana {{ $generatedAt }} · Versi {{ $version }}</div>
 <div class="watermark"></div>
 
 <div class="content">
-    <header class="site-header">
+    <header class="site-header hdr-{{ $header }}">
         <div class="wrap">
             <span class="brand">{{ $project->short_name ?: $project->mosque_name }}</span>
             <nav class="nav">
@@ -94,8 +147,8 @@ footer.site p{opacity:.85;max-width:600px;margin:0 auto;font-size:.9rem}
         </div>
     </header>
 
-    {{-- Hero --}}
-    <section class="hero">
+    {{-- Hero — susun atur ikut pilihan (§7) --}}
+    <section class="hero layout-{{ $layout }}">
         <div class="wrap">
             @if ($showVerse)
                 <p class="arabic">{{ $verse->arabic_text }}</p>
@@ -110,17 +163,23 @@ footer.site p{opacity:.85;max-width:600px;margin:0 auto;font-size:.9rem}
                 @if (! empty($content['hero']['cta_secondary_label']))<span class="btn btn-accent">{{ $content['hero']['cta_secondary_label'] }}</span>@endif
             </div>
 
-            {{-- Waktu solat: blok STATIK berlabel (§8.5/§9.3) --}}
-            <div class="prayer">
-                <p class="prayer-label">Contoh paparan — waktu sebenar akan diambil terus dari JAKIM e-Solat (zon {{ $zone }})</p>
-                <div class="prayer-grid">
-                    @foreach (['Subuh' => '5:55', 'Syuruk' => '7:10', 'Zohor' => '13:15', 'Asar' => '16:38', 'Maghrib' => '19:29', 'Isyak' => '20:42'] as $name => $time)
-                        <div><span class="name">{{ $name }}</span><span class="time">{{ $time }}</span></div>
-                    @endforeach
+            {{-- Waktu solat: blok STATIK berlabel (§8.5/§9.3) — masjid sahaja --}}
+            @if ($showPrayer)
+                <div class="prayer">
+                    <p class="prayer-label">Contoh paparan — waktu sebenar akan diambil terus dari JAKIM e-Solat (zon {{ $zone }})</p>
+                    <div class="prayer-grid">
+                        @foreach (['Subuh' => '5:55', 'Syuruk' => '7:10', 'Zohor' => '13:15', 'Asar' => '16:38', 'Maghrib' => '19:29', 'Isyak' => '20:42'] as $name => $time)
+                            <div><span class="name">{{ $name }}</span><span class="time">{{ $time }}</span></div>
+                        @endforeach
+                    </div>
                 </div>
-            </div>
+            @endif
         </div>
     </section>
+
+    @if ($divider !== 'tiada')
+        <div class="wrap" style="padding-top:8px"><div class="divider-{{ $divider }}"></div></div>
+    @endif
 
     {{-- Tentang --}}
     @if (! empty($content['about']))
@@ -151,8 +210,28 @@ footer.site p{opacity:.85;max-width:600px;margin:0 auto;font-size:.9rem}
             <div class="wrap">
                 <h2 class="center" style="margin-bottom:28px">Khidmat Kariah</h2>
                 <div class="grid grid-3">
-                    @foreach ($content['services'] as $svc)
-                        <div class="card"><h3>{{ $svc['title'] ?? '' }}</h3><p>{{ $svc['blurb'] ?? '' }}</p></div>
+                    @foreach ($content['services'] as $i => $svc)
+                        <div class="card">
+                            <span class="svc-ic" style="{{ $svcContainer }}">{!! \App\Support\Lucide::svg($svcIcons[$i % count($svcIcons)], $iconStroke, '') !!}</span>
+                            <h3>{{ $svc['title'] ?? '' }}</h3><p>{{ $svc['blurb'] ?? '' }}</p>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
+
+    {{-- Program (NGO) — ditetapkan di Fasa 11 NGO --}}
+    @if (! empty($content['programs']))
+        <section class="section section-alt">
+            <div class="wrap">
+                <h2 class="center" style="margin-bottom:28px">Program &amp; Inisiatif</h2>
+                <div class="grid grid-3">
+                    @foreach ($content['programs'] as $i => $prog)
+                        <div class="card">
+                            <span class="svc-ic" style="{{ $svcContainer }}">{!! \App\Support\Lucide::svg($svcIcons[$i % count($svcIcons)], $iconStroke, '') !!}</span>
+                            <h3>{{ $prog['title'] ?? '' }}</h3><p>{{ $prog['blurb'] ?? '' }}</p>
+                        </div>
                     @endforeach
                 </div>
             </div>
@@ -183,13 +262,46 @@ footer.site p{opacity:.85;max-width:600px;margin:0 auto;font-size:.9rem}
         </section>
     @endif
 
-    {{-- Infaq --}}
+    {{-- Infaq / Derma --}}
     @if (! empty($content['infaq']))
         <section class="section">
             <div class="wrap center">
                 <h2>{{ $content['infaq']['heading'] ?? 'Infaq' }}</h2>
                 <p style="max-width:640px;margin:12px auto 0">{{ $content['infaq']['paragraph'] ?? '' }}</p>
                 <div style="margin-top:20px"><span class="btn btn-primary">Infaq Sekarang</span></div>
+            </div>
+        </section>
+    @endif
+
+    {{-- Derma (NGO) --}}
+    @if (! empty($content['donate']))
+        <section class="section">
+            <div class="wrap center">
+                <h2>{{ $content['donate']['heading'] ?? 'Derma / Sumbangan' }}</h2>
+                <p style="max-width:640px;margin:12px auto 0">{{ $content['donate']['paragraph'] ?? '' }}</p>
+                <div style="margin-top:20px"><span class="btn btn-primary">Derma Sekarang</span></div>
+            </div>
+        </section>
+    @endif
+
+    {{-- Sukarelawan / Keahlian (NGO) --}}
+    @if (! empty($content['volunteer']) || ! empty($content['membership']))
+        <section class="section section-alt">
+            <div class="wrap grid grid-2">
+                @if (! empty($content['volunteer']))
+                    <div class="card center">
+                        <h3>{{ $content['volunteer']['heading'] ?? 'Jadi Sukarelawan' }}</h3>
+                        <p style="margin:10px 0 16px">{{ $content['volunteer']['paragraph'] ?? '' }}</p>
+                        <span class="btn btn-primary">{{ $content['volunteer']['cta_label'] ?? 'Jadi Sukarelawan' }}</span>
+                    </div>
+                @endif
+                @if (! empty($content['membership']))
+                    <div class="card center">
+                        <h3>{{ $content['membership']['heading'] ?? 'Daftar Ahli' }}</h3>
+                        <p style="margin:10px 0 16px">{{ $content['membership']['paragraph'] ?? '' }}</p>
+                        <span class="btn btn-accent">Daftar Ahli</span>
+                    </div>
+                @endif
             </div>
         </section>
     @endif
@@ -230,12 +342,47 @@ footer.site p{opacity:.85;max-width:600px;margin:0 auto;font-size:.9rem}
         </div>
     </section>
 
-    <footer class="site">
-        <div class="wrap">
-            <p class="brand" style="color:#fff;margin-bottom:10px">{{ $project->mosque_name }}</p>
-            <p>{{ $content['footer_description'] ?? '' }}</p>
-        </div>
-    </footer>
+    @switch($footer)
+        @case('tiga-lajur')
+            <footer class="site ftr-tiga-lajur">
+                <div class="wrap cols">
+                    <div>
+                        <p class="brand" style="color:#fff;margin-bottom:10px">{{ $project->mosque_name }}</p>
+                        <p style="margin:0">{{ $content['footer_description'] ?? '' }}</p>
+                    </div>
+                    <div>
+                        <p style="font-weight:700;margin-bottom:6px">Laman</p>
+                        @foreach (array_slice($pages, 0, 4) as $p)<a href="#">{{ $p['label'] }}</a>@endforeach
+                    </div>
+                    <div>
+                        <p style="font-weight:700;margin-bottom:6px">Hubungi</p>
+                        <a href="#">{{ $project->mosque_name }}</a>
+                        <a href="#">{{ $project->state }}</a>
+                    </div>
+                </div>
+            </footer>
+        @break
+
+        @case('tengah-jenama')
+            <footer class="site ftr-tengah-jenama">
+                <div class="wrap">
+                    <p class="brand" style="color:#fff;font-size:1.5rem;margin-bottom:12px">{{ $project->mosque_name }}</p>
+                    <div class="nav" style="justify-content:center;margin-bottom:14px">
+                        @foreach (array_slice($pages, 0, 5) as $p)<a href="#">{{ $p['label'] }}</a>@endforeach
+                    </div>
+                    <p>{{ $content['footer_description'] ?? '' }}</p>
+                </div>
+            </footer>
+        @break
+
+        @default
+            <footer class="site">
+                <div class="wrap">
+                    <p class="brand" style="color:#fff;margin-bottom:10px">{{ $project->mosque_name }}</p>
+                    <p>{{ $content['footer_description'] ?? '' }}</p>
+                </div>
+            </footer>
+    @endswitch
 </div>
 </body>
 </html>
