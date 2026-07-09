@@ -81,6 +81,14 @@ class Project extends Model
         return max(0, $this->quota_ai_total - $this->quota_ai_used);
     }
 
+    /** Top-up kuota AI (+N) oleh admin — dengan audit (§8.7). */
+    public function topUpAiQuota(int $amount, ?string $actorId = null): void
+    {
+        $this->increment('quota_ai_total', $amount);
+
+        AuditLog::record('admin', $actorId, 'quota.topup', $this, ['amount' => $amount]);
+    }
+
     // --- Relationships ---
 
     public function lead(): BelongsTo

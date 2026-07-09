@@ -3,14 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Enums\ProjectStatus;
-use App\Mail\SubmittedMail;
 use App\Models\AuditLog;
 use App\Models\Project;
 use App\Services\CompletenessService;
+use App\Services\Notifier;
 use App\Support\WizardSteps;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 
 // §5.2 P3 — Semak & Hantar.
@@ -60,11 +59,8 @@ class SemakController extends Controller
             $project->transitionTo(ProjectStatus::Submitted, 'pic');
         }
 
-        // Notifikasi admin.
-        $adminEmail = config('reka.admin_notify_email');
-        if (filled($adminEmail)) {
-            Mail::to($adminEmail)->queue(new SubmittedMail($project));
-        }
+        // Notifikasi admin (§13).
+        app(Notifier::class)->submitted($project);
 
         AuditLog::record('pic', null, 'project.submitted', $project);
 

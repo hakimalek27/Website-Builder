@@ -4,11 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Enums\GenerationStatus;
 use App\Exceptions\GateException;
-use App\Mail\ApprovedMail;
 use App\Services\ApprovalService;
+use App\Services\Notifier;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 
 // §5.2 P9 — kelulusan draf (snapshot beku).
@@ -52,10 +51,7 @@ class ApprovalController extends Controller
             return back()->with('error', $e->getMessage());
         }
 
-        $adminEmail = config('reka.admin_notify_email');
-        if (filled($adminEmail)) {
-            Mail::to($adminEmail)->queue(new ApprovedMail($project));
-        }
+        app(Notifier::class)->approved($project);
 
         return redirect()->route('pic.status', ['token' => $request->route('token')])
             ->with('success', 'Draf telah diluluskan. Terima kasih!');

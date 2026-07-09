@@ -14,6 +14,7 @@ use App\Services\Ai\DraftContentValidator;
 use App\Services\Ai\DraftValidationException;
 use App\Services\Ai\PromptBuilder;
 use App\Services\DraftRenderer;
+use App\Services\Notifier;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -113,6 +114,14 @@ class GenerateDraftJob implements ShouldQueue
                 AuditLog::record('system', null, 'generation.succeeded', $generation, [
                     'tokens_in' => $result->tokensIn, 'tokens_out' => $result->tokensOut,
                 ]);
+
+                // §8.6 langkah 6 — notifikasi PIC (WA + mail). Pautan sebenar = pautan
+                // borang PIC sedia ada (token plaintext tidak disimpan, §11.1).
+                app(Notifier::class)->generationSucceeded(
+                    $project,
+                    $generation,
+                    'pautan borang anda',
+                );
 
                 return;
             } catch (DraftValidationException|AiException $e) {

@@ -13,3 +13,6 @@ Schedule::command('reka:prune')->daily();
 
 // §4.2 — tandakan projek dengan token luput sebagai expired (harian).
 Schedule::command('reka:sweep-expired')->daily();
+
+// §13 — reminder wizard idle & amaran token hampir luput (harian).
+Schedule::command('reka:reminders')->dailyAt('09:00');
