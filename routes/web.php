@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\MinatController;
+use App\Http\Controllers\PicController;
 use Illuminate\Support\Facades\Route;
 
 // --- Awam (tiada auth) — §5.1 ---
@@ -17,3 +18,13 @@ Route::get('/minat/terima-kasih', [MinatController::class, 'thanks'])->name('min
 // Notis privasi / terma dwibahasa — kandungan penuh dibina Fasa 9.
 Route::view('/privasi', 'legal.privasi')->name('privasi');
 Route::view('/terma', 'legal.terma')->name('terma');
+
+// --- PIC (bertoken) — §5.2. Middleware resolve.invitation ---
+
+Route::prefix('/b/{token}')->middleware('resolve.invitation')->name('pic.')->group(function () {
+    Route::get('/', [PicController::class, 'home'])->name('home'); // P1
+
+    // P2 wizard langkah — dibina Fasa 4 (placeholder 501).
+    Route::get('/langkah/{step}', fn () => abort(501, 'Wizard langkah dibina pada Fasa 4.'))
+        ->whereNumber('step')->name('step');
+});

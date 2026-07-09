@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\ResolveInvitation;
 use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -14,6 +15,11 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // §11.3 — header keselamatan pada SEMUA respons (web + admin).
         $middleware->append(SecurityHeaders::class);
+
+        // §5.2 — resolusi token PIC.
+        $middleware->alias([
+            'resolve.invitation' => ResolveInvitation::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

@@ -10,3 +10,6 @@ Artisan::command('inspire', function () {
 
 // §12.8 — pemadaman berkala mengikut tempoh penyimpanan PDPA (harian).
 Schedule::command('reka:prune')->daily();
+
+// §4.2 — tandakan projek dengan token luput sebagai expired (harian).
+Schedule::command('reka:sweep-expired')->daily();
