@@ -82,7 +82,7 @@ it('submits, notifies admin, and auto-queues the first draft when complete (§4.
     $project->update(['status' => ProjectStatus::InProgress]);
 
     $this->post("/b/{$token}/hantar")
-        ->assertRedirect(route('pic.semak', ['token' => $token]))
+        ->assertRedirect(route('pic.jana', ['token' => $token]))   // Fasa 13: PIC terus ke progres jana
         ->assertSessionHas('success');
 
     expect($project->fresh()->status)->toBe(ProjectStatus::Submitted);

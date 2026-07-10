@@ -4,9 +4,7 @@ use App\Enums\AiDriver;
 use App\Enums\GenerationStatus;
 use App\Enums\GenerationType;
 use App\Enums\ProjectStatus;
-use App\Enums\Tier;
 use App\Models\AiProvider;
-use App\Models\ProjectSection;
 use App\Models\Setting;
 use App\Services\DraftGenerationService;
 use Database\Seeders\DesignPackageSeeder;
@@ -16,6 +14,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 // §Fasa 13 W4 — saluran HTML dua-peringkat (jurutera prompt → jana HTML).
+// Helper htmlProviders/htmlReadyProject/validHtmlBody/fakeTwoStage ditakrif dalam tests/Pest.php.
 
 beforeEach(function () {
     $this->seed(DesignPackageSeeder::class);
@@ -23,53 +22,6 @@ beforeEach(function () {
     Setting::put('draft_pipeline', 'html');
     Setting::put('html_max_tokens', '30000');
 });
-
-function htmlProviders(): void
-{
-    AiProvider::factory()->create([
-        'name' => 'GPT Jurutera', 'driver' => AiDriver::OpenAiCompatible, 'base_url' => 'https://engineer.test/v1',
-        'model' => 'gpt-5.5', 'is_prompt_engineer' => true,
-        'meta' => ['rate_in_per_mtok' => 5.0, 'rate_out_per_mtok' => 30.0, 'currency' => 'USD'],
-    ]);
-    AiProvider::factory()->create([
-        'name' => 'GLM Draf', 'driver' => AiDriver::OpenAiCompatible, 'base_url' => 'https://glm.test/v1',
-        'model' => 'glm-5.2', 'is_default' => true,
-        'meta' => ['rate_in_per_mtok' => 1.40, 'rate_out_per_mtok' => 4.40, 'currency' => 'USD'],
-    ]);
-}
-
-function htmlReadyProject(): array
-{
-    [$project, $token] = picSession(['status' => ProjectStatus::Submitted, 'tier' => Tier::SurauRingkas]);
-    enablePages($project, ['utama', 'hubungi']);
-    ProjectSection::create(['project_id' => $project->id, 'section_key' => 'step_1', 'data' => [
-        'official_name' => 'Masjid Ujian', 'city' => 'KL', 'state' => 'W.P. Kuala Lumpur',
-        'phone_primary' => '0341491818', 'email' => 'surau@test.my', 'logo_status' => 'teks_sahaja',
-    ]]);
-    ProjectSection::create(['project_id' => $project->id, 'section_key' => 'step_2', 'data' => ['mood' => 'tenang_khusyuk']]);
-    ProjectSection::create(['project_id' => $project->id, 'section_key' => 'step_6', 'data' => ['hero_mode' => 'stok_sementara']]);
-    $project->invitation()->update(['pic_phone' => '60123456789', 'pic_email' => 'pic@test.my']);
-
-    return [$project, $token];
-}
-
-function validHtmlBody(): string
-{
-    return '<!DOCTYPE html><html lang="ms"><head><meta charset="utf-8"><title>Masjid Ujian</title>'
-        .'<link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">'
-        .'<style>body{font-family:Inter}</style></head>'
-        .'<body><header>Masjid Ujian</header><section id="hero"><h1>Selamat Datang</h1></section>'
-        .'<section id="hubungi">[[CONTACT_STRIP]]</section></body></html>';
-}
-
-function fakeTwoStage(string $html, int $glmStatus = 200): void
-{
-    Http::fake([
-        'engineer.test/*' => Http::response(['choices' => [['message' => ['content' => 'PROMPT: bina draf HTML Masjid Ujian, warna hijau, letak [[CONTACT_STRIP]].']]], 'usage' => ['prompt_tokens' => 4000, 'completion_tokens' => 2000]]),
-        'glm.test/*' => Http::response(['choices' => [['message' => ['content' => $html]]], 'usage' => ['prompt_tokens' => 3000, 'completion_tokens' => 20000]], $glmStatus),
-        'gw.test/*' => Http::response(['success' => true]),
-    ]);
-}
 
 it('generates an HTML draft via the two-stage pipeline', function () {
     Setting::put('whatsapp_gateway_url', 'https://gw.test');

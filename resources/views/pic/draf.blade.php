@@ -51,16 +51,28 @@
 
         {{-- Bar tindakan --}}
         @unless ($project->isFrozen())
-            <div class="mt-4 grid gap-2 sm:grid-cols-4">
+            @php
+                $isHtml = ($generation->input_snapshot['pipeline'] ?? null) === 'html';
+                $bakiAi = $project->remainingAiQuota();
+            @endphp
+            <div class="mt-4 grid gap-2 {{ $isHtml ? 'sm:grid-cols-3' : 'sm:grid-cols-4' }}">
                 <a href="{{ route('pic.lulus', ['token' => $token]) }}"
                     class="btn btn-primary">
                     {!! \App\Support\Lucide::svg('Check', 2.5, 'h-4 w-4') !!} Luluskan
                 </a>
-                <form method="POST" action="{{ route('pic.tweak.reka.render', ['token' => $token]) }}">@csrf
-                    <button type="submit" class="btn btn-outline btn-block">Tweak Reka Bentuk (Percuma)</button>
-                </form>
-                <a href="{{ route('pic.tweak.kandungan', ['token' => $token]) }}"
-                    class="btn btn-outline">Tweak Kandungan (AI — baki {{ $project->remainingAiQuota() }})</a>
+                {{-- Saluran HTML: reka bentuk diubah melalui Tweak Kandungan (AI) — tiada render-semula percuma. --}}
+                @unless ($isHtml)
+                    <form method="POST" action="{{ route('pic.tweak.reka.render', ['token' => $token]) }}">@csrf
+                        <button type="submit" class="btn btn-outline btn-block">Tweak Reka Bentuk (Percuma)</button>
+                    </form>
+                @endunless
+                @if ($bakiAi > 0)
+                    <a href="{{ route('pic.tweak.kandungan', ['token' => $token]) }}"
+                        class="btn btn-outline">Tweak Kandungan (AI — baki {{ $bakiAi }})</a>
+                @else
+                    <a href="{{ route('pic.status', ['token' => $token]) }}"
+                        class="btn btn-outline">Perubahan AI habis — Hantar Nota Admin</a>
+                @endif
                 <a href="{{ route('pic.status', ['token' => $token]) }}"
                     class="btn btn-ghost">
                     {!! \App\Support\Lucide::svg('Send', 2, 'h-4 w-4') !!} Hantar Nota

@@ -70,13 +70,15 @@ class SemakController extends Controller
         AuditLog::record('pic', null, 'project.submitted', $project);
 
         // Auto-jana draf pertama (Fasa 11). Kes logo/hero belum dimuat naik → jana manual kemudian.
-        $redirect = redirect()->route('pic.semak', ['token' => $request->route('token')]);
         try {
             app(DraftGenerationService::class)->request($project, GenerationType::Initial, 'pic', picBaseUrl: url('/b/'.$request->route('token')));
 
-            return $redirect->with('success', 'Maklumat dihantar. Draf contoh sedang dijana secara automatik — anda akan dimaklumkan sebaik siap.');
+            // Fasa 13: bawa PIC terus ke Jana Draf supaya nampak progres langsung (bukan tertanya-tanya).
+            return redirect()->route('pic.jana', ['token' => $request->route('token')])
+                ->with('success', 'Maklumat dihantar. Draf contoh sedang dijana — ikuti kemajuan di sini.');
         } catch (GateException $e) {
-            return $redirect->with('warning', 'Borang dihantar. '.$e->getMessage().' Jana draf di halaman Jana Draf apabila sedia.');
+            return redirect()->route('pic.semak', ['token' => $request->route('token')])
+                ->with('warning', 'Borang dihantar. '.$e->getMessage().' Jana draf di halaman Jana Draf apabila sedia.');
         }
     }
 }

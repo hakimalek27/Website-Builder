@@ -14,10 +14,11 @@
                     @endphp
                     <div class="rounded-2xl bg-cream p-4 ring-1 ring-sand">
                         <div class="flex items-center justify-between text-xs font-medium text-ink/55">
-                            <span class="flex items-center gap-1.5">{!! \App\Support\Lucide::svg('Sparkles', 1.75, 'h-3.5 w-3.5 text-brand-600') !!} Jana AI</span>
+                            <span class="flex items-center gap-1.5">{!! \App\Support\Lucide::svg('Sparkles', 1.75, 'h-3.5 w-3.5 text-brand-600') !!} Jana / Perubahan AI</span>
                             <span>{{ $aiUsed }}/{{ $this->project->quota_ai_total }}</span>
                         </div>
                         <x-ui.progress :value="(int) round($aiUsed / $aiTotal * 100)" class="mt-2 h-1.5" />
+                        <p class="mt-2 text-[0.7rem] text-ink/50">Perubahan AI berbaki: <span class="font-semibold text-brand-700">{{ $this->project->remainingAiQuota() }}</span></p>
                     </div>
                     <div class="rounded-2xl bg-cream p-4 ring-1 ring-sand">
                         <div class="flex items-center justify-between text-xs font-medium text-ink/55">
@@ -44,6 +45,14 @@
             </div>
         </div>
     </div>
+
+    {{-- Makluman jika penjanaan terakhir gagal --}}
+    @if (! $this->activeGeneration && optional($this->generations->first())->status === App\Enums\GenerationStatus::Failed)
+        <div class="mt-4 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+            {!! \App\Support\Lucide::svg('TriangleAlert', 2, 'h-5 w-5 shrink-0 text-red-500') !!}
+            <span>Penjanaan terakhir tidak berjaya — <strong>pihak admin telah dimaklumkan</strong> dan akan menyemak. Anda boleh cuba jana semula, atau hantar nota di menu Status &amp; Nota.</span>
+        </div>
+    @endif
 
     {{-- Progres semasa penjanaan --}}
     @if ($this->activeGeneration)

@@ -23,7 +23,13 @@
         <div class="rounded-2xl bg-white p-6 shadow-soft ring-1 ring-sand">
             <label class="label">Bahagian untuk diubah</label>
             <div class="mt-3 grid gap-2 sm:grid-cols-2">
-                @foreach ([
+                @foreach (($isHtml ?? false) ? [
+                    'warna' => 'Warna & tema',
+                    'susun_atur' => 'Susun atur / reka letak',
+                    'teks' => 'Teks / kandungan',
+                    'imej' => 'Imej & ikon',
+                    'lain' => 'Lain-lain',
+                ] : [
                     'nada' => 'Nada penulisan',
                     'tajuk_hero' => 'Tajuk hero',
                     'perenggan_tentang' => 'Perenggan tentang',

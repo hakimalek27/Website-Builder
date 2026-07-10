@@ -24,6 +24,16 @@ class DesignRerenderService
             throw new GateException('Draf telah diluluskan — baca-sahaja.');
         }
 
+        // Saluran HTML (§Fasa 13) tiada output_json untuk render semula — perubahan reka bentuk
+        // dibuat melalui Tweak Kandungan (AI) yang mengubah HTML terus.
+        $latestDraft = $project->generations()
+            ->where('status', GenerationStatus::Succeeded)
+            ->whereNotNull('rendered_path')
+            ->latest()->first();
+        if ($latestDraft && ($latestDraft->input_snapshot['pipeline'] ?? null) === 'html') {
+            throw new GateException('Tweak reka bentuk tidak tersedia untuk draf HTML — guna Tweak Kandungan (AI).');
+        }
+
         $cap = (int) (Setting::get('default_design_quota') ?? 5);
         if ($project->quota_design_used >= $cap) {
             throw new GateException("Kuota render reka bentuk ({$cap}) telah habis.");

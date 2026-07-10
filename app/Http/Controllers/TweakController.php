@@ -6,6 +6,8 @@ use App\Enums\GenerationStatus;
 use App\Enums\GenerationType;
 use App\Exceptions\GateException;
 use App\Models\AuditLog;
+use App\Models\Generation;
+use App\Models\Project;
 use App\Models\TweakRequest;
 use App\Services\DesignRerenderService;
 use App\Services\DraftGenerationService;
@@ -35,7 +37,12 @@ class TweakController extends Controller
 
     public function kandungan(Request $request): View
     {
-        return view('pic.tweak-kandungan', ['token' => $request->route('token')]);
+        $project = $request->attributes->get('project');
+
+        return view('pic.tweak-kandungan', [
+            'token' => $request->route('token'),
+            'isHtml' => ($this->lastDraft($project)?->input_snapshot['pipeline'] ?? null) === 'html',
+        ]);
     }
 
     public function kandunganSubmit(Request $request, DraftGenerationService $service): RedirectResponse
@@ -48,15 +55,18 @@ class TweakController extends Controller
             'message' => ['required', 'string', 'max:600'],
         ]);
 
-        $last = $project->generations()
-            ->where('status', GenerationStatus::Succeeded)->whereNotNull('output_json')->latest()->first();
+        $last = $this->lastDraft($project);
+        $isHtml = ($last?->input_snapshot['pipeline'] ?? null) === 'html';
+
+        // Saluran html: hantar base_generation_id (job baca HTML dari rendered_path — payload kecil).
+        // Saluran shell (legasi): hantar output_json semasa.
+        $payload = $isHtml
+            ? ['categories' => $data['categories'] ?? [], 'message' => $data['message'], 'base_generation_id' => $last?->id]
+            : ['categories' => $data['categories'] ?? [], 'message' => $data['message'], 'current_json' => $last?->output_json ?? []];
 
         try {
-            $generation = $service->request($project, GenerationType::ContentTweak, 'pic', [
-                'categories' => $data['categories'] ?? [],
-                'message' => $data['message'],
-                'current_json' => $last?->output_json ?? [],
-            ], picBaseUrl: url('/b/'.$request->route('token')));
+            $generation = $service->request($project, GenerationType::ContentTweak, 'pic', $payload,
+                picBaseUrl: url('/b/'.$request->route('token')));
 
             TweakRequest::create([
                 'project_id' => $project->id,
@@ -72,5 +82,14 @@ class TweakController extends Controller
         } catch (GateException $e) {
             return back()->with('error', $e->getMessage());
         }
+    }
+
+    /** Draf berjaya terkini (mana-mana saluran — ada rendered_path). */
+    private function lastDraft(Project $project): ?Generation
+    {
+        return $project->generations()
+            ->where('status', GenerationStatus::Succeeded)
+            ->whereNotNull('rendered_path')
+            ->latest()->first();
     }
 }

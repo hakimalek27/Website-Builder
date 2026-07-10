@@ -184,12 +184,15 @@ class GenerateDraftJob implements ShouldBeEncrypted, ShouldQueue
             $req2 = $builder->stage2Request($project, $prompt);
         } else {
             $base = Generation::find($this->tweak['base_generation_id'] ?? null);
-            if ($base === null || blank($base->rendered_path) || ! Storage::disk('local')->exists($base->rendered_path)) {
+            // Guna HTML MENTAH bertoken (tiada PII) — BUKAN draf siap — supaya bank/telefon/nama
+            // TIDAK dihantar ke AI semasa tweak (§12.7).
+            $rawPath = $base?->input_snapshot['raw_path'] ?? null;
+            if ($base === null || blank($rawPath) || ! Storage::disk('local')->exists($rawPath)) {
                 $this->fail($generation, 'Draf asas untuk tweak tidak ditemui.');
 
                 return;
             }
-            $currentHtml = Storage::disk('local')->get($base->rendered_path);
+            $currentHtml = Storage::disk('local')->get($rawPath);
             $this->snapshotMerge($generation, [
                 'stage1' => ['source' => 'tweak', 'base_generation_id' => $base->id],
                 'tweak' => ['categories' => $this->tweak['categories'] ?? [], 'message' => $this->tweak['message'] ?? ''],
@@ -216,10 +219,16 @@ class GenerateDraftJob implements ShouldBeEncrypted, ShouldQueue
                 $tokensOut += $res2->tokensOut;
                 $costTotal += $this->cost($res2->tokensIn, $res2->tokensOut, $provider);
 
-                $clean = $validator->validate($res2->content);
+                $clean = $validator->validate($res2->content);   // HTML mentah bertoken (tiada PII)
 
                 $generation->update(['progress_step' => 4]);
                 $version = $this->nextVersion($project);
+
+                // Simpan HTML mentah bertoken untuk tweak masa depan (elak hantar PII ke AI, §12.7).
+                $rawPath = "drafts/{$project->id}/{$generation->id}.raw.html";
+                Storage::disk('local')->put($rawPath, $clean);
+
+                // Draf akhir: sisip data verbatim (bank/AJK/hubungi) — render LOKAL sahaja.
                 $final = $finisher->finish($project, $clean, $version);
                 $path = "drafts/{$project->id}/{$generation->id}.html";
                 Storage::disk('local')->put($path, $final);
@@ -234,6 +243,7 @@ class GenerateDraftJob implements ShouldBeEncrypted, ShouldQueue
                     'finished_at' => now(),
                 ]);
                 $this->snapshotMerge($generation, [
+                    'raw_path' => $rawPath,
                     'stage2' => ['provider' => $provider->name, 'model' => $provider->model, 'tokens_in' => $res2->tokensIn, 'tokens_out' => $res2->tokensOut, 'attempts' => $attempt],
                 ]);
 

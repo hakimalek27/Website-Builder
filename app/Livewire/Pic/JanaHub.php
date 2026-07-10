@@ -90,8 +90,11 @@ class JanaHub extends Component
 
     public function render()
     {
+        // Label progres ikut saluran generation aktif (§Fasa 13).
+        $isHtml = ($this->activeGeneration?->input_snapshot['pipeline'] ?? null) === 'html';
+
         return view('livewire.pic.jana-hub', [
-            'progressSteps' => trans('reka.progress_steps'),
+            'progressSteps' => $isHtml ? trans('reka.progress_steps_html') : trans('reka.progress_steps'),
         ]);
     }
 }
