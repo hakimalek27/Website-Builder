@@ -60,5 +60,15 @@ it('applies card style, divider and animations when set', function () {
 
     expect($html)->toContain('card-terapung')
         ->toContain('divider-garis-emas')
-        ->toContain('has-anim');
+        ->toContain('has-anim-fade');   // §Fasa 14: legasi bool true → varian fade
+});
+
+it('maps animation variants to body classes (§Fasa 14)', function () {
+    // Semak kelas BODY (definisi CSS .has-anim-* sentiasa hadir dalam stylesheet).
+    expect(renderDraftWith(['animations' => 'zoom']))->toContain('<body class="card-lembut has-anim-zoom ');
+
+    // false / tiada / nilai luar allowlist → body tiada kelas animasi.
+    expect(renderDraftWith(['animations' => false]))->toContain('<body class="card-lembut"');
+    expect(renderDraftWith(['animations' => 'tiada']))->toContain('<body class="card-lembut"');
+    expect(renderDraftWith(['animations' => 'melompat']))->toContain('<body class="card-lembut"');
 });

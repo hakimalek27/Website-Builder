@@ -150,9 +150,17 @@
                     </div>
                 @endforeach
             </div>
-            <label class="mt-3 flex items-center gap-2 text-sm">
-                <input type="checkbox" wire:model.live="data.animations" class="h-4 w-4 accent-brand-600"> Animasi halus (fade masuk semasa skrol)
-            </label>
+            <div class="mt-3">
+                <span class="text-xs text-ink/60">Animasi (masuk semasa skrol)</span>
+                <div class="mt-1 flex flex-wrap gap-1.5">
+                    @foreach (['tiada' => 'Tiada', 'fade' => 'Fade masuk', 'zoom' => 'Zoom masuk'] as $v => $lbl)
+                        <label class="cursor-pointer">
+                            <input type="radio" wire:model.live="data.animations" value="{{ $v }}" class="peer sr-only">
+                            <span class="block rounded-lg border border-sand px-2 py-1 text-xs transition peer-checked:border-brand-600 peer-checked:bg-brand-50 peer-checked:ring-1 peer-checked:ring-brand-600/20">{{ $lbl }}</span>
+                        </label>
+                    @endforeach
+                </div>
+            </div>
         </div>
 
         {{-- Elemen Islamik --}}
@@ -184,18 +192,22 @@
     {{-- Pratonton hidup (kanan) — §7.5 --}}
     <div class="lg:sticky lg:top-20 lg:self-start">
         <p class="mb-2 text-xs font-medium text-ink/50">Pratonton langsung</p>
-        <x-design-preview
-            :tokens="$this->previewTokens()"
-            :fonts="$this->previewFonts()"
-            :icon-weight="$data['icon_style']['weight'] ?? 'sederhana'"
-            :icon-container="$data['icon_style']['container'] ?? 'bulat-cair'"
-            :mosque-name="$mosqueName"
-            :layout="$data['layout_home'] ?? 'hero-tengah'"
-            :mood="$data['mood'] ?? null"
-            :card="$data['card_style'] ?? 'lembut'"
-            :header="$data['header_style'] ?? 'padat'"
-            :footer="$data['footer_style'] ?? 'ringkas'"
-            :divider="$data['divider'] ?? 'tiada'"
-        />
+        {{-- wire:key ikut varian animasi → morphdom ganti subtree supaya animasi main semula bila ditukar (§Fasa 14). --}}
+        <div wire:key="preview-anim-{{ $data['animations'] ?? 'tiada' }}">
+            <x-design-preview
+                :tokens="$this->previewTokens()"
+                :fonts="$this->previewFonts()"
+                :icon-weight="$data['icon_style']['weight'] ?? 'sederhana'"
+                :icon-container="$data['icon_style']['container'] ?? 'bulat-cair'"
+                :mosque-name="$mosqueName"
+                :layout="$data['layout_home'] ?? 'hero-tengah'"
+                :mood="$data['mood'] ?? null"
+                :card="$data['card_style'] ?? 'lembut'"
+                :header="$data['header_style'] ?? 'padat'"
+                :footer="$data['footer_style'] ?? 'ringkas'"
+                :divider="$data['divider'] ?? 'tiada'"
+                :animations="$data['animations'] ?? 'tiada'"
+            />
+        </div>
     </div>
 </div>

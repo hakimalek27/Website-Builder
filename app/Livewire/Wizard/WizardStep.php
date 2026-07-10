@@ -11,6 +11,7 @@ use App\Models\Invitation;
 use App\Models\Project;
 use App\Models\ProjectPage;
 use App\Models\ProjectSection;
+use App\Services\DesignResolver;
 use App\Services\UploadService;
 use App\Support\FontPairs;
 use App\Support\Moods;
@@ -74,6 +75,11 @@ class WizardStep extends Component
 
         $section = $project->sections()->where('section_key', $this->sectionKey())->first();
         $this->data = $section?->data ?? [];
+
+        // §Fasa 14 — normalkan animasi legasi (boolean) → varian string untuk radio L2.
+        if ($this->step === 2 && is_bool($this->data['animations'] ?? null)) {
+            $this->data['animations'] = $this->data['animations'] ? 'fade' : 'tiada';
+        }
 
         if ($this->step === 3 && ! isset($this->data['pages'])) {
             // Inisialisasi dari project_pages (preset §6.11 telah diapply di L0).
@@ -563,7 +569,7 @@ class WizardStep extends Component
                 'footer_style' => ['nullable', 'string', 'max:40'],
                 'card_style' => ['nullable', 'string', 'max:40'],
                 'divider' => ['nullable', 'string', 'max:40'],
-                'animations' => ['nullable', 'boolean'],
+                'animations' => ['nullable', Rule::in(DesignResolver::ANIMATIONS)],
                 'palette_mode' => ['nullable', 'in:pakej,custom'],
                 'custom_primary' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
                 'custom_accent' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],

@@ -10,6 +10,7 @@
     'header' => 'padat',
     'footer' => 'ringkas',
     'divider' => 'tiada',
+    'animations' => 'tiada',
 ])
 @php
     $t = array_merge([
@@ -41,8 +42,22 @@
     $headerCenter = $header === 'tengah';
 @endphp
 <div class="overflow-hidden rounded-2xl border border-[#EFE8DC] shadow-sm"
-     data-header="{{ $header }}" data-footer="{{ $footer }}" data-divider="{{ $divider }}"
+     data-header="{{ $header }}" data-footer="{{ $footer }}" data-divider="{{ $divider }}" data-animation="{{ $animations }}"
      style="background: {{ $t['bg'] }}; color: {{ $t['ink'] }}; font-family: '{{ $fonts['body'] ?? 'Plus Jakarta Sans Variable' }}', ui-sans-serif, sans-serif;">
+    @if ($animations !== 'tiada')
+    {{-- Animasi pratonton (varian fade/zoom) — berskop, hormati reduced-motion (§Fasa 14) --}}
+    <style>
+    @keyframes rkFadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+    @keyframes rkZoomIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+    @media(prefers-reduced-motion:no-preference){
+    [data-animation="fade"] .rk-sec{animation:rkFadeUp .5s both}
+    [data-animation="zoom"] .rk-sec{animation:rkZoomIn .5s both}
+    [data-animation] .rk-sec:nth-child(2){animation-delay:.08s}
+    [data-animation] .rk-sec:nth-child(3){animation-delay:.16s}
+    [data-animation] .rk-sec:nth-child(4){animation-delay:.24s}
+    }
+    </style>
+    @endif
     {{-- Header masjid (varian: padat / gradien / tengah) --}}
     <div @class(['px-4 py-3', 'flex items-center justify-between' => ! $headerCenter, 'text-center' => $headerCenter]) style="{{ $headerBg }}">
         <span class="truncate font-bold" style="{{ $displayFont }}">{{ $mosqueName ?: 'Nama Masjid Anda' }}</span>
@@ -51,6 +66,7 @@
 
     {{-- Hero — berubah ikut susun atur pilihan (pratonton hidup) --}}
     <div class="px-4 py-5">
+        <div class="rk-sec">
         @switch($layout)
             @case('hero-belah')
                 <div class="flex items-center gap-3">
@@ -99,6 +115,7 @@
                     <p class="mt-1 text-xs" style="opacity:.7;">{{ $sample }}</p>
                 </div>
         @endswitch
+        </div>
 
         {{-- Pembatas seksyen (varian: garis-emas / lengkung) --}}
         @if ($divider === 'garis-emas')
@@ -112,7 +129,7 @@
         @endif
 
         {{-- Kad waktu solat contoh (data HIASAN) --}}
-        <div class="mt-3 px-3 py-2 text-xs" style="{{ $cardStyle }} background: {{ $t['bgAlt'] }};">
+        <div class="rk-sec mt-3 px-3 py-2 text-xs" style="{{ $cardStyle }} background: {{ $t['bgAlt'] }};">
             <div class="flex items-center justify-between">
                 <span style="opacity:.6;">Waktu solat (contoh)</span>
                 <span class="font-semibold" style="color: {{ $t['primary'] }};">Maghrib 19:29</span>
@@ -120,7 +137,7 @@
         </div>
 
         {{-- Kad khidmat dengan ikon gaya pilihan --}}
-        <div class="mt-3 flex items-center gap-3 px-3 py-2" style="{{ $cardStyle }}">
+        <div class="rk-sec mt-3 flex items-center gap-3 px-3 py-2" style="{{ $cardStyle }}">
             <span class="flex h-9 w-9 items-center justify-center" style="{{ $containerStyle }}">
                 {!! \App\Support\Lucide::svg('HeartHandshake', $stroke, 'w-5 h-5') !!}
             </span>
@@ -131,7 +148,7 @@
         </div>
 
         {{-- Butang primary + accent --}}
-        <div class="mt-4 flex gap-2">
+        <div class="rk-sec mt-4 flex gap-2">
             <span class="rounded-lg px-3 py-1.5 text-xs font-semibold text-white" style="background: {{ $t['primary'] }};">Infaq Sekarang</span>
             <span class="rounded-lg px-3 py-1.5 text-xs font-semibold" style="background: {{ $t['accent'] }}; color: {{ $t['primaryDark'] }};">Hubungi</span>
         </div>

@@ -15,7 +15,7 @@
     $footer = $footer ?? 'ringkas';
     $cardStyle = $cardStyle ?? 'lembut';
     $divider = $divider ?? 'tiada';
-    $animations = $animations ?? false;
+    $animations = $animations ?? 'tiada';
     $showPrayer = $showPrayer ?? true;
     $verbatim = $verbatim ?? [];       // data wizard render LOKAL (AJK/bank/hubungi)
     $heroImage = $heroImage ?? null;
@@ -141,13 +141,17 @@ footer.ftr-tengah-jenama{padding:52px 0}
 footer.ftr-tiga-lajur{text-align:left}
 footer.ftr-tiga-lajur .cols{display:grid;grid-template-columns:2fr 1fr 1fr;gap:28px;text-align:left}
 footer.ftr-tiga-lajur .cols a{display:block;opacity:.85;font-size:.85rem;margin-top:4px}
-/* Animasi halus (hormati reduced-motion) */
+/* Animasi halus (hormati reduced-motion) — varian fade / zoom */
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-@media(prefers-reduced-motion:no-preference){.has-anim .section{animation:fadeUp .7s both}}
+@keyframes zoomIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:no-preference){
+.has-anim-fade .section{animation:fadeUp .7s both}
+.has-anim-zoom .section{animation:zoomIn .6s both}
+}
 @media(max-width:720px){.grid-3,.grid-2{grid-template-columns:1fr}.prayer-grid{grid-template-columns:repeat(3,1fr)}.hero h1{font-size:2rem}.ftr-tiga-lajur .cols{grid-template-columns:1fr}}
 </style>
 </head>
-<body class="card-{{ $cardStyle }}@if ($animations) has-anim @endif" data-layout="{{ $layout }}" data-header="{{ $header }}">
+<body class="card-{{ $cardStyle }}@if ($animations !== 'tiada') has-anim-{{ $animations }} @endif" data-layout="{{ $layout }}" data-header="{{ $header }}">
 <div class="draft-banner">DRAF SAMPEL — BUKAN LAMAN SEBENAR · Dijana {{ $generatedAt }} · Versi {{ $version }}</div>
 <div class="watermark"></div>
 

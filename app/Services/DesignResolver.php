@@ -23,7 +23,9 @@ class DesignResolver
 
     public const DIVIDERS = ['tiada', 'garis-emas', 'lengkung'];
 
-    /** @return array{tokens:array<string,string>, fonts:array<string,string>, layout:string, icon_style:array, header:string, footer:string, card:string, divider:string, animations:bool} */
+    public const ANIMATIONS = ['tiada', 'fade', 'zoom'];
+
+    /** @return array{tokens:array<string,string>, fonts:array<string,string>, layout:string, icon_style:array, header:string, footer:string, card:string, divider:string, animations:string} */
     public function resolve(Project $project): array
     {
         $design = $project->design;
@@ -63,8 +65,18 @@ class DesignResolver
             'footer' => $this->pick($overrides['footer_style'] ?? $variants['footer'] ?? null, self::FOOTERS, 'ringkas'),
             'card' => $this->pick($overrides['card_style'] ?? $variants['card'] ?? null, self::CARDS, 'lembut'),
             'divider' => $this->pick($overrides['divider'] ?? $variants['divider'] ?? null, self::DIVIDERS, 'tiada'),
-            'animations' => (bool) ($overrides['animations'] ?? false),
+            'animations' => $this->animationVariant($overrides['animations'] ?? null),
         ];
+    }
+
+    /** Legasi: boolean lama (true→fade, false→tiada) atau string varian; nilai luar allowlist → tiada. */
+    private function animationVariant(mixed $value): string
+    {
+        if (is_bool($value)) {
+            return $value ? 'fade' : 'tiada';
+        }
+
+        return in_array($value, self::ANIMATIONS, true) ? $value : 'tiada';
     }
 
     /** Pulangkan $value jika dalam allowlist, jika tidak $default. */

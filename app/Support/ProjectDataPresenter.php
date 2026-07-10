@@ -22,7 +22,7 @@ class ProjectDataPresenter
         'youtube_url' => 'YouTube', 'tiktok_url' => 'TikTok', 'logo_status' => 'Status logo',
         'design_package' => 'Pakej reka bentuk', 'mood' => 'Nada', 'font_pair' => 'Pasangan font', 'layout_home' => 'Susun atur',
         'header_style' => 'Gaya pengepala', 'footer_style' => 'Gaya pengaki', 'card_style' => 'Gaya kad', 'divider' => 'Pembatas',
-        'animations' => 'Animasi halus', 'palette_mode' => 'Mod palet', 'custom_primary' => 'Warna primer', 'custom_accent' => 'Warna aksen',
+        'animations' => 'Animasi', 'palette_mode' => 'Mod palet', 'custom_primary' => 'Warna primer', 'custom_accent' => 'Warna aksen',
         'arabic_font' => 'Font Arab', 'islamic_elements' => 'Elemen Islamik', 'icon_style' => 'Gaya ikon',
         'pages' => 'Halaman dipilih', 'custom' => 'Halaman tersuai',
         'cms_updater' => 'Pengemas kini kandungan', 'payment_gateway' => 'Gerbang pembayaran', 'gateway_status' => 'Status gerbang',

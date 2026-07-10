@@ -118,7 +118,11 @@ class HtmlPromptBuilder
             'kad' => $d['card'],
             'pembatas' => $d['divider'],
             'gaya_ikon' => $d['icon_style'],
-            'animasi' => $d['animations'],
+            'animasi' => match ($d['animations']) {
+                'fade' => 'fade masuk halus semasa skrol (CSS sahaja — @keyframes opacity/translateY, hormati prefers-reduced-motion, TIADA JavaScript)',
+                'zoom' => 'zoom masuk halus (CSS sahaja — @keyframes scale 0.94→1 + opacity, hormati prefers-reduced-motion, TIADA JavaScript)',
+                default => 'tiada animasi',
+            },
             'nada' => Moods::prompt((string) data_get($step2, 'mood', 'tenang_khusyuk')),
             'elemen_islamik' => array_filter([
                 'corak_geometri' => (bool) data_get($step2, 'islamic_elements.corak_geometri', false),
