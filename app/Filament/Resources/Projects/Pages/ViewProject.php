@@ -12,6 +12,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Illuminate\Support\Js;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ViewProject extends ViewRecord
@@ -72,6 +73,31 @@ class ViewProject extends ViewRecord
                 ->color('gray')
                 ->visible(fn (Project $record) => $record->latestDraft !== null)
                 ->url(fn (Project $record) => $record->latestDraft ? route('admin.draf', $record->latestDraft) : null, shouldOpenInNewTab: true),
+
+            // Salin prompt jurutera terkini ke papan klip (§Fasa 14) — terus tampal ke Claude Code.
+            Action::make('salinPrompt')
+                ->label('Salin Prompt')
+                ->icon('heroicon-o-clipboard-document')
+                ->color('gray')
+                ->visible(fn (Project $record): bool => self::latestEngineeredPrompt($record) !== null)
+                ->action(function (Project $record, $livewire): void {
+                    $prompt = self::latestEngineeredPrompt($record);
+                    if ($prompt === null) {
+                        return;
+                    }
+                    // Clipboard API perlu konteks selamat (localhost/HTTPS); guard elak ralat senyap.
+                    $livewire->js('(navigator.clipboard ? navigator.clipboard.writeText('.Js::from($prompt).') : Promise.reject())');
+                    Notification::make()->title('Prompt disalin — tampal ke Claude Code')->success()->send();
+                }),
         ];
+    }
+
+    /** Prompt jurutera daripada penjanaan HTML terkini (corak sama BriefBuilder). */
+    private static function latestEngineeredPrompt(Project $record): ?string
+    {
+        return $record->generations()->latest()->get()
+            ->map(fn ($g) => $g->input_snapshot['engineered_prompt'] ?? null)
+            ->filter()
+            ->first();
     }
 }

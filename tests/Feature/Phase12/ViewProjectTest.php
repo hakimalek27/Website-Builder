@@ -63,6 +63,27 @@ it('lets admin reply to a note and notifies the PIC', function () {
     $this->assertDatabaseHas('notification_logs', ['project_id' => $project->id, 'event' => 'note.admin_replied']);
 });
 
+it('shows and copies the engineered prompt when one exists (§Fasa 14)', function () {
+    [$project] = adminProject();
+    Generation::factory()->succeeded()->for($project)->create([
+        'input_snapshot' => ['pipeline' => 'html', 'engineered_prompt' => 'Bina draf HTML Masjid Ujian.'],
+    ]);
+
+    Livewire::test(ViewProject::class, ['record' => $project->id])
+        ->assertActionVisible('salinPrompt')
+        ->callAction('salinPrompt')
+        ->assertHasNoActionErrors();
+});
+
+it('hides the copy-prompt action when no prompt exists (§Fasa 14)', function () {
+    [$project] = adminProject();
+    // Hanya penjanaan shell (tiada engineered_prompt).
+    Generation::factory()->succeeded()->for($project)->create(['input_snapshot' => ['pipeline' => 'shell']]);
+
+    Livewire::test(ViewProject::class, ['record' => $project->id])
+        ->assertActionHidden('salinPrompt');
+});
+
 it('serves the admin draft route to authed users and blocks guests', function () {
     Storage::fake('local');
     [$project] = adminProject();
