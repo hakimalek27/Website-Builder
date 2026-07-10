@@ -193,6 +193,9 @@
             :layout="$data['layout_home'] ?? 'hero-tengah'"
             :mood="$data['mood'] ?? null"
             :card="$data['card_style'] ?? 'lembut'"
+            :header="$data['header_style'] ?? 'padat'"
+            :footer="$data['footer_style'] ?? 'ringkas'"
+            :divider="$data['divider'] ?? 'tiada'"
         />
     </div>
 </div>

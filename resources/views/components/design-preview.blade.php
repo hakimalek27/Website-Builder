@@ -7,6 +7,9 @@
     'layout' => 'hero-tengah',
     'mood' => null,
     'card' => 'lembut',
+    'header' => 'padat',
+    'footer' => 'ringkas',
+    'divider' => 'tiada',
 ])
 @php
     $t = array_merge([
@@ -31,13 +34,19 @@
     };
     $sample = $mood ? \App\Support\Moods::sample($mood) : 'Laman rasmi komuniti anda.';
     $displayFont = "font-family: '".($fonts['display'] ?? 'serif')."', serif;";
+    // Gaya header (3 varian).
+    $headerBg = $header === 'gradien'
+        ? 'background:linear-gradient(120deg,'.$t['primaryDark'].','.$t['primary'].');color:#fff;'
+        : 'background:'.$t['primaryDark'].';color:#fff;';
+    $headerCenter = $header === 'tengah';
 @endphp
 <div class="overflow-hidden rounded-2xl border border-[#EFE8DC] shadow-sm"
+     data-header="{{ $header }}" data-footer="{{ $footer }}" data-divider="{{ $divider }}"
      style="background: {{ $t['bg'] }}; color: {{ $t['ink'] }}; font-family: '{{ $fonts['body'] ?? 'Plus Jakarta Sans Variable' }}', ui-sans-serif, sans-serif;">
-    {{-- Header masjid --}}
-    <div class="flex items-center justify-between px-4 py-3" style="background: {{ $t['primaryDark'] }}; color:#fff;">
+    {{-- Header masjid (varian: padat / gradien / tengah) --}}
+    <div @class(['px-4 py-3', 'flex items-center justify-between' => ! $headerCenter, 'text-center' => $headerCenter]) style="{{ $headerBg }}">
         <span class="truncate font-bold" style="{{ $displayFont }}">{{ $mosqueName ?: 'Nama Masjid Anda' }}</span>
-        <span class="hidden gap-3 text-xs opacity-80 sm:flex"><span>Utama</span><span>Aktiviti</span><span>Hubungi</span></span>
+        <span @class(['gap-3 text-xs opacity-80', 'hidden sm:flex' => ! $headerCenter, 'mt-1 flex justify-center' => $headerCenter])><span>Utama</span><span>Aktiviti</span><span>Hubungi</span></span>
     </div>
 
     {{-- Hero — berubah ikut susun atur pilihan (pratonton hidup) --}}
@@ -91,6 +100,17 @@
                 </div>
         @endswitch
 
+        {{-- Pembatas seksyen (varian: garis-emas / lengkung) --}}
+        @if ($divider === 'garis-emas')
+            <div class="my-3 flex items-center justify-center gap-1.5" aria-hidden="true">
+                <span style="height:2px;width:56px;background:{{ $t['accent'] }};display:block;"></span>
+                <span style="color:{{ $t['accent'] }};font-size:.6rem;">&#9670;</span>
+                <span style="height:2px;width:56px;background:{{ $t['accent'] }};display:block;"></span>
+            </div>
+        @elseif ($divider === 'lengkung')
+            <div class="my-2 h-3" style="background:{{ $t['bgAlt'] }};border-radius:0 0 50% 50%/0 0 100% 100%;" aria-hidden="true"></div>
+        @endif
+
         {{-- Kad waktu solat contoh (data HIASAN) --}}
         <div class="mt-3 px-3 py-2 text-xs" style="{{ $cardStyle }} background: {{ $t['bgAlt'] }};">
             <div class="flex items-center justify-between">
@@ -116,4 +136,25 @@
             <span class="rounded-lg px-3 py-1.5 text-xs font-semibold" style="background: {{ $t['accent'] }}; color: {{ $t['primaryDark'] }};">Hubungi</span>
         </div>
     </div>
+
+    {{-- Footer mini (varian: ringkas / tengah-jenama / tiga-lajur) --}}
+    @switch($footer)
+        @case('tiga-lajur')
+            <div class="grid grid-cols-3 gap-2 px-4 py-3 text-[0.6rem]" style="background: {{ $t['primaryDark'] }}; color:#fff;">
+                <div><div class="mb-1 font-semibold" style="{{ $displayFont }}">{{ $mosqueName }}</div><div style="opacity:.6;">Ringkasan…</div></div>
+                <div><div class="h-1.5 w-8 rounded" style="background:#ffffff3a;"></div><div class="mt-1 h-1.5 w-6 rounded" style="background:#ffffff3a;"></div></div>
+                <div><div class="h-1.5 w-8 rounded" style="background:#ffffff3a;"></div><div class="mt-1 h-1.5 w-6 rounded" style="background:#ffffff3a;"></div></div>
+            </div>
+        @break
+
+        @case('tengah-jenama')
+            <div class="px-4 py-4 text-center" style="background: {{ $t['primaryDark'] }}; color:#fff;">
+                <div class="text-sm font-bold" style="{{ $displayFont }}">{{ $mosqueName }}</div>
+                <div class="mt-1 flex justify-center gap-2 text-[0.6rem]" style="opacity:.7;"><span>Utama</span><span>Aktiviti</span><span>Hubungi</span></div>
+            </div>
+        @break
+
+        @default
+            <div class="px-4 py-3 text-center text-[0.65rem]" style="background: {{ $t['primaryDark'] }}; color:#fff; opacity:.9;">&copy; {{ $mosqueName }}</div>
+    @endswitch
 </div>

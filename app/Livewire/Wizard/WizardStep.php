@@ -445,6 +445,7 @@ class WizardStep extends Component
         $overrides = array_filter([
             'palette' => $custom['tokens'] ?? ($this->data['palette'] ?? null),
             'font_pair' => $this->data['font_pair'] ?? null,
+            'arabic_font' => $this->data['arabic_font'] ?? null,   // §Fasa 13: dulu tak disalin → DesignResolver abai
             'icon_style' => $this->data['icon_style'] ?? null,
             'layout' => $this->data['layout_home'] ?? null,
             'header_style' => $this->data['header_style'] ?? null,
@@ -556,6 +557,7 @@ class WizardStep extends Component
                 'design_package' => ['required', Rule::exists('design_packages', 'key')],
                 'mood' => ['required', Rule::in(Moods::keys())],
                 'font_pair' => ['nullable', Rule::in(FontPairs::keys())],
+                'arabic_font' => ['nullable', 'string', 'max:60'],
                 'layout_home' => ['nullable', 'string', 'max:40'],
                 'header_style' => ['nullable', 'string', 'max:40'],
                 'footer_style' => ['nullable', 'string', 'max:40'],
