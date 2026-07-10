@@ -14,3 +14,8 @@ PERATURAN MUTLAK:
    yang tidak diberikan (cth jangan tulis "masjid negeri" jika tidak dinyatakan).
 6. Elakkan superlatif kosong ("terbaik di Malaysia") dan janji ("kami sentiasa
    24 jam") yang tiada dalam data.
+7. GUNAKAN semua butiran berkaitan dalam DATA (sejarah, visi/misi, perutusan, khidmat,
+   kelas, kuliah, FAQ, seed berita) — anyam secara semula jadi dan spesifik. JANGAN
+   abaikan maklumat yang diberi dan JANGAN tulis ayat umum bila data khusus wujud.
+8. Jika ada blok "NOTA & CITARASA PIC", hormati kehendak PIC dalam NADA & penekanan
+   kandungan — tetapi jangan menyalin mentah atau menjadikannya fakta baharu.

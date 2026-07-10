@@ -21,12 +21,17 @@ class DraftContentValidator
         'meta' => ['title' => 60, 'description' => 160],
         'hero' => ['eyebrow' => 40, 'headline' => 60, 'subheadline' => 140, 'cta_primary_label' => 20, 'cta_secondary_label' => 20],
         'about' => ['heading' => 60, '_items' => ['stats' => ['label' => 20, 'value' => 12]]],
+        // Fasa 12 W6 — kunci baharu (kedua-dua tier).
+        'visi_misi' => ['visi' => 300, 'misi' => 400, 'moto' => 120],
+        'perutusan' => ['heading' => 60, 'quote' => 500],
+        'faq' => ['_max' => 8, '_each' => ['q' => 120, 'a' => 400]],
         'services' => ['_each' => ['title' => 40, 'blurb' => 160]],
         'facilities' => ['_each' => ['title' => 40, 'blurb' => 140]],
-        'kuliah' => ['heading' => 60, 'intro' => 200],
-        'infaq' => ['heading' => 60, 'paragraph' => 240],
-        'announcements' => ['_each' => ['title' => 70, 'date_label' => 20, 'excerpt' => 140]],
-        'visitor_info' => ['heading' => 60, 'paragraph' => 240],
+        // Fasa 12 W6 — had masjid dilonggarkan (240→400, 200→300) selari schemaFor.
+        'kuliah' => ['heading' => 60, 'intro' => 300],
+        'infaq' => ['heading' => 60, 'paragraph' => 400],
+        'announcements' => ['_max' => 6, '_each' => ['title' => 70, 'date_label' => 20, 'excerpt' => 140]],
+        'visitor_info' => ['heading' => 60, 'paragraph' => 400],
         // NGO / pertubuhan (Fasa 11) — aditif; dikuatkuasa hanya bila diminta.
         'programs' => ['_each' => ['title' => 40, 'blurb' => 160]],
         // Perenggan NGO 240→1000: GLM-5.2 hasilkan perenggan lebih panjang (Derma/Sukarelawan/
@@ -103,6 +108,10 @@ class DraftContentValidator
             }
 
             if (isset($spec['_each']) && is_array($content[$key])) {
+                // Potong lebihan item (jangan gagal) — cth faq maks 8, announcements maks 6.
+                if (isset($spec['_max']) && count($content[$key]) > $spec['_max']) {
+                    $content[$key] = array_slice($content[$key], 0, $spec['_max']);
+                }
                 foreach ($content[$key] as $i => $item) {
                     $content[$key][$i] = $this->capFields($item, $spec['_each'], "{$key}[{$i}]");
                 }
