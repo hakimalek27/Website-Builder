@@ -141,11 +141,11 @@ function validHtmlBody(): string
 }
 
 /** Http::fake dua-peringkat: engineer.test (prompt), glm.test (HTML), gw.test (gateway WA). */
-function fakeTwoStage(string $html, int $glmStatus = 200): void
+function fakeTwoStage(string $html, int $glmStatus = 200, string $finishReason = 'stop'): void
 {
     Http::fake([
-        'engineer.test/*' => Http::response(['choices' => [['message' => ['content' => 'PROMPT: bina draf HTML Masjid Ujian, warna hijau, letak [[CONTACT_STRIP]].']]], 'usage' => ['prompt_tokens' => 4000, 'completion_tokens' => 2000]]),
-        'glm.test/*' => Http::response(['choices' => [['message' => ['content' => $html]]], 'usage' => ['prompt_tokens' => 3000, 'completion_tokens' => 20000]], $glmStatus),
+        'engineer.test/*' => Http::response(['choices' => [['message' => ['content' => 'PROMPT: bina draf HTML Masjid Ujian, warna hijau, letak [[CONTACT_STRIP]].'], 'finish_reason' => 'stop']], 'usage' => ['prompt_tokens' => 4000, 'completion_tokens' => 2000]]),
+        'glm.test/*' => Http::response(['choices' => [['message' => ['content' => $html], 'finish_reason' => $finishReason]], 'usage' => ['prompt_tokens' => 3000, 'completion_tokens' => 20000]], $glmStatus),
         'gw.test/*' => Http::response(['success' => true]),
     ]);
 }

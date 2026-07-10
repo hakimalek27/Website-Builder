@@ -69,7 +69,14 @@ class OpenAiCompatibleClient implements AiClient
             content: $content,
             tokensIn: (int) $response->json('usage.prompt_tokens', 0),
             tokensOut: (int) $response->json('usage.completion_tokens', 0),
+            finishReason: $this->normalizeFinish($response->json('choices.0.finish_reason')),
         );
+    }
+
+    /** Normalkan finish_reason OpenAI-compatible ('length' = terpotong). Kosong → null. */
+    private function normalizeFinish(mixed $reason): ?string
+    {
+        return is_string($reason) && $reason !== '' ? $reason : null;
     }
 
     private function send(string $base, int $timeout, string $apiKey, array $payload): Response

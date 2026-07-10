@@ -49,6 +49,17 @@ class AnthropicClient implements AiClient
             content: $content,
             tokensIn: (int) $response->json('usage.input_tokens', 0),
             tokensOut: (int) $response->json('usage.output_tokens', 0),
+            finishReason: $this->normalizeFinish($response->json('stop_reason')),
         );
+    }
+
+    /** Normalkan stop_reason Anthropic → sentinel sama seperti OpenAI ('max_tokens'→'length'). */
+    private function normalizeFinish(mixed $reason): ?string
+    {
+        if (! is_string($reason) || $reason === '') {
+            return null;
+        }
+
+        return $reason === 'max_tokens' ? 'length' : $reason;
     }
 }

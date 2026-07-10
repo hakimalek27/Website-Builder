@@ -9,5 +9,8 @@ final class AiResult
         public string $content,
         public int $tokensIn,
         public int $tokensOut,
+        // §Fasa 14 — sebab model berhenti (dinormalkan): 'length' = output terpotong
+        // (had token dicapai), 'stop' = selesai normal, null jika endpoint tak lapor.
+        public ?string $finishReason = null,
     ) {}
 }

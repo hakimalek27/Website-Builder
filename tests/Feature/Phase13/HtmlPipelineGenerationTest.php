@@ -44,6 +44,8 @@ it('generates an HTML draft via the two-stage pipeline', function () {
     expect(round((float) $gen->cost_estimate, 4))->toBe(0.1722); // P1 0.08 + P2 0.0922
     expect($project->fresh()->quota_ai_used)->toBe(1);
     expect($project->fresh()->status)->toBe(ProjectStatus::DraftReady);
+    expect($gen->input_snapshot['stage1']['finish_reason'])->toBe('stop');   // §Fasa 14
+    expect($gen->input_snapshot['stage2']['finish_reason'])->toBe('stop');
 
     // Draf disimpan + verbatim + chrome DRAF disisip pelayan.
     $html = Storage::disk('local')->get($gen->rendered_path);
@@ -124,4 +126,24 @@ it('retries only stage 2 on validation failure and records wasted cost', functio
 
     // Kos terbazir direkod (bukan sifar); kuota tidak dicaj.
     expect((float) $gen->cost_estimate)->toBeGreaterThan(0);
+});
+
+it('fails early and retries when stage 2 output is truncated (finish_reason length)', function () {
+    Mail::fake();
+    htmlProviders();
+    // HTML sah struktur TETAPI model lapor terpotong → gagal awal sebelum validasi.
+    fakeTwoStage(validHtmlBody(), finishReason: 'length');
+    [$project] = htmlReadyProject();
+
+    app(DraftGenerationService::class)->request($project, GenerationType::Initial);
+
+    $gen = $project->fresh()->generations()->first();
+    expect($gen->status)->toBe(GenerationStatus::Failed);
+    expect($gen->error)->toContain('terpotong');
+    expect($project->fresh()->quota_ai_used)->toBe(0);
+
+    // Peringkat 1 SEKALI; peringkat 2 diulang 3× (jimat token jurutera prompt).
+    expect(Http::recorded(fn ($r) => str_contains($r->url(), 'engineer.test')))->toHaveCount(1);
+    expect(Http::recorded(fn ($r) => str_contains($r->url(), 'glm.test')))->toHaveCount(3);
+    expect((float) $gen->cost_estimate)->toBeGreaterThan(0);   // kos terbazir direkod
 });

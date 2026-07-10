@@ -179,7 +179,7 @@ class GenerateDraftJob implements ShouldBeEncrypted, ShouldQueue
             $costTotal += $costP1;
             $this->snapshotMerge($generation, [
                 'engineered_prompt' => $prompt,
-                'stage1' => ['source' => 'ai', 'provider' => $engineer->name, 'model' => $engineer->model, 'tokens_in' => $res1->tokensIn, 'tokens_out' => $res1->tokensOut, 'cost' => $costP1],
+                'stage1' => ['source' => 'ai', 'provider' => $engineer->name, 'model' => $engineer->model, 'tokens_in' => $res1->tokensIn, 'tokens_out' => $res1->tokensOut, 'cost' => $costP1, 'finish_reason' => $res1->finishReason],
             ]);
             $req2 = $builder->stage2Request($project, $prompt);
         } else {
@@ -219,6 +219,12 @@ class GenerateDraftJob implements ShouldBeEncrypted, ShouldQueue
                 $tokensOut += $res2->tokensOut;
                 $costTotal += $this->cost($res2->tokensIn, $res2->tokensOut, $provider);
 
+                // Kesan terpotong AWAL (§Fasa 14): finish_reason=length bermakna had token dicapai
+                // → jangan bazir masa validasi struktur; jatuh ke retry seperti kegagalan validasi.
+                if ($res2->finishReason === 'length') {
+                    throw new DraftValidationException('Output HTML terpotong (had token model dicapai) — cuba jana semula.');
+                }
+
                 $clean = $validator->validate($res2->content);   // HTML mentah bertoken (tiada PII)
 
                 $generation->update(['progress_step' => 4]);
@@ -244,7 +250,7 @@ class GenerateDraftJob implements ShouldBeEncrypted, ShouldQueue
                 ]);
                 $this->snapshotMerge($generation, [
                     'raw_path' => $rawPath,
-                    'stage2' => ['provider' => $provider->name, 'model' => $provider->model, 'tokens_in' => $res2->tokensIn, 'tokens_out' => $res2->tokensOut, 'attempts' => $attempt],
+                    'stage2' => ['provider' => $provider->name, 'model' => $provider->model, 'tokens_in' => $res2->tokensIn, 'tokens_out' => $res2->tokensOut, 'attempts' => $attempt, 'finish_reason' => $res2->finishReason],
                 ]);
 
                 $this->succeedCommon($project, $generation);

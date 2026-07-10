@@ -139,8 +139,13 @@ class ProjectInfolist
                 $lines[] = '- **Sumber:** tweak daripada draf sebelumnya';
             }
             if ($s2 !== []) {
-                $lines[] = '- **Peringkat 2 (jana HTML):** '.($s2['model'] ?? '—').' · '
+                $henti = ($s2['finish_reason'] ?? null);
+                $line = '- **Peringkat 2 (jana HTML):** '.($s2['model'] ?? '—').' · '
                     .($s2['tokens_in'] ?? 0).'/'.($s2['tokens_out'] ?? 0).' tok · '.($s2['attempts'] ?? 1).' percubaan';
+                if (is_string($henti) && $henti !== '' && $henti !== 'stop') {
+                    $line .= ' · henti: '.$henti;
+                }
+                $lines[] = $line;
             }
             if (! empty($snap['tweak'])) {
                 $cats = implode(', ', $snap['tweak']['categories'] ?? []);
