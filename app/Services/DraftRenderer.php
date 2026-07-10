@@ -75,6 +75,27 @@ class DraftRenderer
     }
 
     /**
+     * Data verbatim (BUKAN AI) untuk saluran HTML (§Fasa 13) — bungkus verbatimData().
+     * Guna semula logik sama supaya bank/AJK/hubungi identik dengan shell.
+     *
+     * @return array<string,mixed>
+     */
+    public function verbatimFor(Project $project): array
+    {
+        $sections = $project->sections()->get()->mapWithKeys(fn ($s) => [$s->section_key => $s->data])->all();
+
+        return $this->verbatimData($project, $sections);
+    }
+
+    /** Imej hero data-URI untuk saluran HTML (§Fasa 13) — bungkus heroImage(). */
+    public function heroImageFor(Project $project): ?string
+    {
+        $sections = $project->sections()->get()->mapWithKeys(fn ($s) => [$s->section_key => $s->data])->all();
+
+        return $this->heroImage($project, $sections);
+    }
+
+    /**
      * Data verbatim (BUKAN AI) dirender LOKAL sahaja dalam draf: perutusan nama/jawatan,
      * AJK (cap 12), bank infaq/derma, hubungi + sosial (step_1). TIDAK dihantar ke AI.
      *

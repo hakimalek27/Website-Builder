@@ -73,6 +73,26 @@ class PromptBuilder
     }
 
     /**
+     * Konteks minimum (PII-min §12.7) untuk saluran HTML (§Fasa 13): DATA organisasi +
+     * blok NOTA & CITARASA + mood + isNgo. Guna semula minimizedData()/notesBlock() yang
+     * SAMA seperti build() → jaminan PII-min identik. build() tidak terjejas.
+     *
+     * @return array{data: array<string,mixed>, notes: string, mood: string, is_ngo: bool}
+     */
+    public function minimizedContext(Project $project): array
+    {
+        $sections = $project->sections()->get()->mapWithKeys(fn ($s) => [$s->section_key => $s->data])->all();
+        $enabledPages = $project->pages()->where('enabled', true)->pluck('page_key')->all();
+
+        return [
+            'data' => $this->minimizedData($project, $sections, $enabledPages),
+            'notes' => $this->notesBlock($project, $sections),
+            'mood' => (string) data_get($sections, 'step_2.mood', 'tenang_khusyuk'),
+            'is_ngo' => $project->tier->isNgo(),
+        ];
+    }
+
+    /**
      * DATA diminimumkan PII (§12.7): TIADA telefon/emel individu, no. akaun bank penuh,
      * nama+telefon PIC, IC, no. pendaftaran. Bandar/negeri sahaja (bukan alamat/GPS penuh).
      */
