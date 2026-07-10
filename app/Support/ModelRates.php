@@ -78,6 +78,8 @@ final class ModelRates
             'anthropic/claude-sonnet-5' => [3.0, 15.0],
             'deepseek/deepseek-chat' => [0.14, 0.28],
             'google/gemini-2.5-pro' => [1.25, 10.0],
+            'z-ai/glm-5.2' => [1.40, 4.40],
+            'z-ai/glm-4.6' => [0.60, 2.20],
         ],
         // Ollama = tempatan (percuma).
         'ollama' => [

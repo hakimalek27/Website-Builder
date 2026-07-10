@@ -31,6 +31,7 @@ class AiProvidersTable
                     ->state(fn (AiProvider $r) => ($r->meta['rate_in_per_mtok'] ?? '—').' / '.($r->meta['rate_out_per_mtok'] ?? '—')),
                 IconColumn::make('is_active')->label('Aktif')->boolean(),
                 IconColumn::make('is_default')->label('Default')->boolean(),
+                IconColumn::make('is_prompt_engineer')->label('Jurutera')->boolean(),
             ])
             ->recordActions([
                 // Uji Sambungan — panggilan mini sebenar (§5.3).

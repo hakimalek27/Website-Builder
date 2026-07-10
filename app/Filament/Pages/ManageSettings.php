@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Models\Setting;
 use App\Services\WhatsappGateway;
 use BackedEnum;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -50,6 +51,8 @@ class ManageSettings extends Page
             'default_design_quota' => (string) (Setting::get('default_design_quota') ?? '5'),
             'invitation_default_days' => (string) (Setting::get('invitation_default_days') ?? '30'),
             'admin_notify_email' => (string) (Setting::get('admin_notify_email') ?? ''),
+            'draft_pipeline' => (string) (Setting::get('draft_pipeline') ?? 'shell'),
+            'html_max_tokens' => (string) (Setting::get('html_max_tokens') ?? '30000'),
         ]);
     }
 
@@ -70,6 +73,21 @@ class ManageSettings extends Page
                             ->placeholder('Peranti 60174627287 (pilihan)'),
                         TextInput::make('admin_notify_phone')->label('Telefon Admin (notifikasi)')
                             ->placeholder('60189030363'),
+                    ]),
+                Section::make('Saluran Draf (Enjin Penjanaan)')
+                    ->description('Pilih cara draf dijana. HTML dua-peringkat: GPT jana prompt lengkap → GLM jana laman HTML statik yang boleh diklik.')
+                    ->columns(2)
+                    ->schema([
+                        Select::make('draft_pipeline')->label('Saluran draf')
+                            ->options([
+                                'shell' => 'Shell (JSON + templat) — klasik',
+                                'html' => 'HTML dua-peringkat (GPT → GLM)',
+                            ])
+                            ->native(false)
+                            ->helperText('Peringkat 1 (Jurutera Prompt) & Peringkat 2 (Default) diset di Penyedia AI.'),
+                        TextInput::make('html_max_tokens')->label('Had token draf HTML')
+                            ->numeric()->minValue(1000)
+                            ->helperText('Output HTML besar — 30000 disyorkan. Hanya untuk saluran HTML.'),
                     ]),
                 Section::make('Penjanaan & Kuota')
                     ->description('Kawalan cooldown penjanaan draf & kuota lalai projek baharu.')
@@ -142,5 +160,10 @@ class ManageSettings extends Page
         Setting::put('default_design_quota', (string) max(1, (int) ($s['default_design_quota'] ?? 1)));
         Setting::put('invitation_default_days', (string) max(1, (int) ($s['invitation_default_days'] ?? 1)));
         Setting::put('admin_notify_email', ($s['admin_notify_email'] ?? null) ?: null);
+
+        // Saluran draf — whitelist (nilai tak sah jatuh ke 'shell' selamat).
+        $pipeline = in_array($s['draft_pipeline'] ?? 'shell', ['shell', 'html'], true) ? $s['draft_pipeline'] : 'shell';
+        Setting::put('draft_pipeline', $pipeline);
+        Setting::put('html_max_tokens', (string) max(1000, (int) ($s['html_max_tokens'] ?? 30000)));
     }
 }

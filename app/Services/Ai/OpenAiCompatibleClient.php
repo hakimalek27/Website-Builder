@@ -17,12 +17,14 @@ use Throwable;
  */
 class OpenAiCompatibleClient implements AiClient
 {
-    public function complete(string $system, string $user, AiProvider $cfg): AiResult
+    public function complete(string $system, string $user, AiProvider $cfg, array $options = []): AiResult
     {
         $base = rtrim($cfg->base_url ?: 'https://api.openai.com/v1', '/');
         $timeout = $cfg->timeout_s ?: 90;
 
         $modern = $this->usesCompletionTokenParam((string) $cfg->model);
+        $maxTokens = (int) ($options['max_tokens'] ?? $cfg->max_tokens);
+        $wantsJson = ($options['json'] ?? true) !== false;
 
         $payload = [
             'model' => $cfg->model,
@@ -30,10 +32,13 @@ class OpenAiCompatibleClient implements AiClient
                 ['role' => 'system', 'content' => $system],
                 ['role' => 'user', 'content' => $user],
             ],
-            'response_format' => ['type' => 'json_object'],
         ];
+        // Saluran HTML (§Fasa 13) minta teks bebas → jangan paksa json_object.
+        if ($wantsJson) {
+            $payload['response_format'] = ['type' => 'json_object'];
+        }
         // gpt-5.x & siri reasoning (o1/o3/o4) guna 'max_completion_tokens' + hanya temperature lalai.
-        $payload[$modern ? 'max_completion_tokens' : 'max_tokens'] = $cfg->max_tokens;
+        $payload[$modern ? 'max_completion_tokens' : 'max_tokens'] = $maxTokens;
         if (! $modern) {
             $payload['temperature'] = (float) $cfg->temperature;
         }

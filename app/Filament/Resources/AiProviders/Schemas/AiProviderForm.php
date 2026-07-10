@@ -104,7 +104,9 @@ class AiProviderForm
                     ->default(['rate_in_per_mtok' => '', 'rate_out_per_mtok' => '', 'currency' => 'USD']),
                 Toggle::make('is_active')->label('Aktif')->default(true),
                 Toggle::make('is_default')->label('Default')->default(false)
-                    ->helperText('Hanya satu provider boleh jadi default.'),
+                    ->helperText('Hanya satu provider boleh jadi default. Menjana draf (Peringkat 2 saluran HTML).'),
+                Toggle::make('is_prompt_engineer')->label('Jurutera Prompt (Peringkat 1)')->default(false)
+                    ->helperText('Hanya satu. Menjana prompt lengkap untuk draf HTML; draf sebenar dijana oleh penyedia Default. Cadangan: OpenAI gpt-5.5.'),
             ]);
     }
 }

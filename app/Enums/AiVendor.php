@@ -73,7 +73,7 @@ enum AiVendor: string
         return match ($this) {
             self::OpenAi => ['gpt-5.5', 'gpt-5.4-mini', 'gpt-5.4-nano', 'gpt-5-chat-latest', 'gpt-5', 'gpt-4.1', 'gpt-4o', 'gpt-4o-mini'],
             self::Anthropic => ['claude-opus-4-8', 'claude-sonnet-5', 'claude-haiku-4-5-20251001', 'claude-fable-5'],
-            self::OpenRouter => ['openai/gpt-5.5', 'anthropic/claude-sonnet-5', 'deepseek/deepseek-chat', 'google/gemini-2.5-pro', 'z-ai/glm-4.6', 'x-ai/grok-4', 'meta-llama/llama-3.3-70b-instruct', 'qwen/qwen-2.5-72b-instruct'],
+            self::OpenRouter => ['openai/gpt-5.5', 'z-ai/glm-5.2', 'anthropic/claude-sonnet-5', 'deepseek/deepseek-chat', 'google/gemini-2.5-pro', 'z-ai/glm-4.6', 'x-ai/grok-4', 'meta-llama/llama-3.3-70b-instruct', 'qwen/qwen-2.5-72b-instruct'],
             self::DeepSeek => ['deepseek-chat', 'deepseek-reasoner', 'deepseek-v4-pro', 'deepseek-v4-flash'],
             self::Zhipu => ['glm-5.2', 'glm-5.1', 'glm-4.7', 'glm-4.6', 'glm-4.5-air', 'glm-4.5-flash'],
             self::Groq => ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'openai/gpt-oss-120b', 'moonshotai/kimi-k2-instruct', 'qwen/qwen3-32b'],

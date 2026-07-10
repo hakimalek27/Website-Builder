@@ -24,6 +24,14 @@ return [
         'Menjana paparan draf…',
     ],
 
+    // Saluran HTML dua-peringkat (§Fasa 13).
+    'progress_steps_html' => [
+        'Menyusun maklumat & reka bentuk…',
+        'AI sedang menjana prompt reka…',
+        'AI sedang menjana draf HTML…',
+        'Menyemak & menyiapkan paparan…',
+    ],
+
     // Consent PDPA (L9, penuh) — {business} disuntik.
     'consent_pdpa' => 'Saya bersetuju maklumat yang diberikan diproses oleh :business bagi tujuan penyediaan cadangan dan pembinaan laman web masjid, termasuk pemprosesan kandungan oleh penyedia perkhidmatan AI pihak ketiga yang mungkin berada di luar Malaysia, selaras dengan Notis Privasi.',
 

@@ -11,9 +11,11 @@ use Throwable;
  */
 class AnthropicClient implements AiClient
 {
-    public function complete(string $system, string $user, AiProvider $cfg): AiResult
+    public function complete(string $system, string $user, AiProvider $cfg, array $options = []): AiResult
     {
         $base = rtrim($cfg->base_url ?: 'https://api.anthropic.com', '/');
+        // 'json' diabaikan (Anthropic tiada response_format); max_tokens boleh di-override (§Fasa 13).
+        $maxTokens = (int) ($options['max_tokens'] ?? $cfg->max_tokens);
 
         try {
             $response = Http::timeout($cfg->timeout_s ?: 90)
@@ -24,7 +26,7 @@ class AnthropicClient implements AiClient
                 ])
                 ->post($base.'/v1/messages', [
                     'model' => $cfg->model,
-                    'max_tokens' => $cfg->max_tokens,
+                    'max_tokens' => $maxTokens,
                     'system' => $system,
                     'messages' => [
                         ['role' => 'user', 'content' => $user],

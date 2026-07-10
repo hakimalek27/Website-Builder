@@ -30,17 +30,24 @@ class AiProvider extends Model
             'meta' => 'array',
             'is_active' => 'boolean',
             'is_default' => 'boolean',
+            'is_prompt_engineer' => 'boolean',
         ];
     }
 
     protected static function booted(): void
     {
-        // Hanya satu provider boleh jadi default (§5.3).
         static::saved(function (self $provider) {
+            // Hanya satu provider boleh jadi default (§5.3).
             if ($provider->is_default) {
                 static::query()->whereKeyNot($provider->getKey())
                     ->where('is_default', true)
                     ->update(['is_default' => false]);
+            }
+            // Hanya satu provider boleh jadi Jurutera Prompt (§Fasa 13).
+            if ($provider->is_prompt_engineer) {
+                static::query()->whereKeyNot($provider->getKey())
+                    ->where('is_prompt_engineer', true)
+                    ->update(['is_prompt_engineer' => false]);
             }
         });
     }
@@ -54,5 +61,11 @@ class AiProvider extends Model
     public static function default(): ?self
     {
         return static::query()->where('is_default', true)->where('is_active', true)->first();
+    }
+
+    /** Provider Jurutera Prompt aktif — Peringkat 1 saluran HTML (§Fasa 13). */
+    public static function promptEngineer(): ?self
+    {
+        return static::query()->where('is_prompt_engineer', true)->where('is_active', true)->first();
     }
 }

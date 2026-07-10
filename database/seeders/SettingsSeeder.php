@@ -22,6 +22,10 @@ class SettingsSeeder extends Seeder
         Setting::put('whatsapp_gateway_url', 'https://wassap.wehdah.my');
         Setting::put('whatsapp_session_id', null);
 
+        // Saluran draf HTML dua-peringkat (§Fasa 13) — lalai untuk produksi/dev.
+        Setting::put('draft_pipeline', 'html');
+        Setting::put('html_max_tokens', '30000');
+
         // Nilai sulit (kunci API gateway — ditampal melalui Tetapan admin, JANGAN commit).
         Setting::put('whatsapp_api_key', null, encrypted: true);
     }
