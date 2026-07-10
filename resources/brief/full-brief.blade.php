@@ -75,10 +75,48 @@ _Tiada nota._
 ## Sejarah Penjanaan AI
 
 @forelse ($generations as $g)
-- {{ $g->created_at->format('d/m/Y H:i') }} · {{ $g->type->value }} · **{{ $g->status->value }}** · token {{ $g->tokens_in }}/{{ $g->tokens_out }} · USD {{ number_format((float) $g->cost_estimate, 4) }}
+@php
+    $snap = $g->input_snapshot ?? [];
+    $isHtml = ($snap['pipeline'] ?? null) === 'html';
+    $stageLine = '';
+    if ($isHtml && ! empty($snap['stage1']['model'])) {
+        $s1 = $snap['stage1'];
+        $stageLine = '  - P1 '.$s1['model'].': '.($s1['tokens_in'] ?? 0).'/'.($s1['tokens_out'] ?? 0).' tok · USD '.number_format((float) ($s1['cost'] ?? 0), 4);
+        if (! empty($snap['stage2']['model'])) {
+            $s2 = $snap['stage2'];
+            $stageLine .= ' · P2 '.$s2['model'].': '.($s2['tokens_in'] ?? 0).'/'.($s2['tokens_out'] ?? 0).' tok';
+        }
+    }
+@endphp
+- {{ $g->created_at->format('d/m/Y H:i') }} · {{ $g->type->value }}{{ $isHtml ? ' (HTML)' : '' }} · **{{ $g->status->value }}** · token {{ $g->tokens_in }}/{{ $g->tokens_out }} · USD {{ number_format((float) $g->cost_estimate, 4) }}
+@if ($stageLine !== '')
+{!! $stageLine !!}
+@endif
 @empty
 - _Belum ada penjanaan._
 @endforelse
+
+@if (! empty($engineeredPrompt))
+---
+
+## Prompt Jurutera Terkini (saluran HTML — GPT jana prompt ini untuk GLM)
+
+> Guna prompt ini untuk menjana semula / memperhalusi laman pengeluaran dengan AI.
+
+~~~~
+{!! $engineeredPrompt !!}
+~~~~
+@endif
+
+@if ($tweaks->isNotEmpty())
+---
+
+## Thread Tweak PIC
+
+@foreach ($tweaks as $tw)
+- {{ $tw->created_at->format('d/m/Y H:i') }} · **{{ implode(', ', $tw->categories ?? []) ?: 'umum' }}** — {{ $tw->message }}
+@endforeach
+@endif
 
 ---
 

@@ -81,4 +81,6 @@ Route::prefix('/b/{token}')->middleware('resolve.invitation')->name('pic.')->gro
 Route::middleware('web')->prefix('/admin-fail')->name('admin.')->group(function () {
     Route::get('/aset/{asset}', [AdminFileController::class, 'asset'])->name('aset');
     Route::get('/draf/{generation}', [AdminFileController::class, 'draft'])->name('draf');
+    Route::get('/prompt/{generation}', [AdminFileController::class, 'prompt'])->name('prompt');           // §Fasa 13
+    Route::get('/draf/{generation}/muat', [AdminFileController::class, 'draftDownload'])->name('draf.muat'); // §Fasa 13
 });

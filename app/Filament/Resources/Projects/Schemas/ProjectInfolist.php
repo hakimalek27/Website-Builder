@@ -9,6 +9,7 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 /**
  * Fasa 12 W2 — paparan penuh butiran projek untuk admin (semua data wizard, aset,
@@ -119,6 +120,48 @@ class ProjectInfolist
             $draf = ($g->status->value === 'succeeded' && $g->rendered_path) ? '[lihat]('.route('admin.draf', $g).')' : '—';
             $lines[] = "| {$g->created_at->format('d/m H:i')} | {$g->type->value} | {$g->status->value} | {$g->tokens_in}/{$g->tokens_out} | "
                 .number_format((float) $g->cost_estimate, 4)." | {$draf} |";
+        }
+
+        // Butiran saluran HTML (§Fasa 13): prompt jurutera + pecahan kos 2 peringkat + tweak.
+        foreach ($gens as $g) {
+            $snap = $g->input_snapshot ?? [];
+            if (($snap['pipeline'] ?? null) !== 'html') {
+                continue;
+            }
+            $s1 = $snap['stage1'] ?? [];
+            $s2 = $snap['stage2'] ?? [];
+            $lines[] = "\n#### Draf HTML · {$g->created_at->format('d/m/Y H:i')} ({$g->status->value})";
+
+            if (($s1['source'] ?? null) === 'ai') {
+                $lines[] = '- **Peringkat 1 (jurutera prompt):** '.($s1['model'] ?? '—').' · '
+                    .($s1['tokens_in'] ?? 0).'/'.($s1['tokens_out'] ?? 0).' tok · USD '.number_format((float) ($s1['cost'] ?? 0), 4);
+            } elseif (($s1['source'] ?? null) === 'tweak') {
+                $lines[] = '- **Sumber:** tweak daripada draf sebelumnya';
+            }
+            if ($s2 !== []) {
+                $lines[] = '- **Peringkat 2 (jana HTML):** '.($s2['model'] ?? '—').' · '
+                    .($s2['tokens_in'] ?? 0).'/'.($s2['tokens_out'] ?? 0).' tok · '.($s2['attempts'] ?? 1).' percubaan';
+            }
+            if (! empty($snap['tweak'])) {
+                $cats = implode(', ', $snap['tweak']['categories'] ?? []);
+                $lines[] = '- **Arahan tweak:** '.($cats !== '' ? "({$cats}) " : '').($snap['tweak']['message'] ?? '');
+            }
+
+            $dl = [];
+            if (filled($snap['engineered_prompt'] ?? null)) {
+                $dl[] = '[muat turun prompt]('.route('admin.prompt', $g).')';
+            }
+            if ($g->rendered_path) {
+                $dl[] = '[muat turun HTML]('.route('admin.draf.muat', $g).')';
+            }
+            if ($dl !== []) {
+                $lines[] = '- '.implode(' · ', $dl);
+            }
+
+            // Pratonton prompt (penuh: muat turun) — pagar ~~~~ kerana prompt mungkin ada ```.
+            if (filled($snap['engineered_prompt'] ?? null)) {
+                $lines[] = "\n**Prompt jurutera (pratonton):**\n\n~~~~\n".Str::limit((string) $snap['engineered_prompt'], 800)."\n~~~~";
+            }
         }
 
         return implode("\n", $lines);

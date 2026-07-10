@@ -18,12 +18,20 @@ class BriefBuilder
 
     public function markdown(Project $project): string
     {
+        $generations = $project->generations()->latest()->get();
+        // Prompt jurutera terkini (saluran HTML §Fasa 13) — untuk admin bina laman pengeluaran.
+        $engineeredPrompt = $generations
+            ->map(fn ($g) => $g->input_snapshot['engineered_prompt'] ?? null)
+            ->filter()->first();
+
         return View::make('brief::full-brief', [
             'project' => $project,
             'spec' => $this->specBuilder->build($project, $project->approval),
             'blocks' => ProjectDataPresenter::all($project),   // penuh, tidak bermask
             'notes' => $project->notes()->oldest()->get(),
-            'generations' => $project->generations()->latest()->get(),
+            'generations' => $generations,
+            'tweaks' => $project->tweakRequests()->oldest()->get(),
+            'engineeredPrompt' => $engineeredPrompt,
         ])->render();
     }
 
