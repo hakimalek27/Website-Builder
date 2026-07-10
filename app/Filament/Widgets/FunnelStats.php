@@ -29,7 +29,8 @@ class FunnelStats extends StatsOverviewWidget
             Stat::make('Dihantar', Project::where('status', ProjectStatus::Submitted)->count())->color('warning'),
             Stat::make('Draf sedia', Project::where('status', ProjectStatus::DraftReady)->count()),
             Stat::make('Diluluskan', Project::where('status', ProjectStatus::Approved)->count())->color('success'),
-            Stat::make('Kos AI bulan ini', 'RM '.number_format((float) $monthCost, 2)),
+            Stat::make('Kos AI bulan ini', 'USD '.number_format((float) $monthCost, 2))
+                ->description('Kadar model dalam USD (§8.8)'),
             Stat::make('Queue', "{$pendingJobs} menunggu / {$failedJobs} gagal")
                 ->color($failedJobs > 0 ? 'danger' : 'success'),
         ];

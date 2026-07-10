@@ -32,6 +32,24 @@ it('switches driver to anthropic for the Anthropic vendor', function () {
         ]);
 });
 
+it('auto-fills USD rates when a known model is chosen (Fasa 12 W5)', function () {
+    Livewire::test(CreateAiProvider::class)
+        ->fillForm(['vendor' => 'openai'])
+        ->fillForm(['model' => 'gpt-5.5'])
+        ->assertFormSet([
+            'meta' => ['rate_in_per_mtok' => '5', 'rate_out_per_mtok' => '30', 'currency' => 'USD'],
+        ]);
+});
+
+it('leaves rates blank for an unpriced model (Fasa 12 W5)', function () {
+    Livewire::test(CreateAiProvider::class)
+        ->fillForm(['vendor' => 'mistral'])
+        ->fillForm(['model' => 'mistral-large-latest'])
+        ->assertFormSet([
+            'meta' => ['rate_in_per_mtok' => '', 'rate_out_per_mtok' => '', 'currency' => 'USD'],
+        ]);
+});
+
 it('saves a GLM (Zhipu) provider with only vendor, key and model supplied', function () {
     Livewire::test(CreateAiProvider::class)
         ->fillForm([

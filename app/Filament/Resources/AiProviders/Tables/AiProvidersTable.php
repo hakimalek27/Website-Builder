@@ -27,6 +27,8 @@ class AiProvidersTable
                     ->formatStateUsing(fn ($state) => $state instanceof AiVendor ? $state->label() : $state),
                 TextColumn::make('driver')->label('Driver')->badge(),
                 TextColumn::make('model')->label('Model'),
+                TextColumn::make('kadar')->label('Kadar USD/MTok')
+                    ->state(fn (AiProvider $r) => ($r->meta['rate_in_per_mtok'] ?? '—').' / '.($r->meta['rate_out_per_mtok'] ?? '—')),
                 IconColumn::make('is_active')->label('Aktif')->boolean(),
                 IconColumn::make('is_default')->label('Default')->boolean(),
             ])

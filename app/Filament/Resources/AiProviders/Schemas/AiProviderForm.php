@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\AiProviders\Schemas;
 
 use App\Enums\AiVendor;
+use App\Support\ModelRates;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -65,15 +66,40 @@ class AiProviderForm
                             : null;
                     }),
 
+                // Pilih model → auto-isi kadar harga (bila diketahui). Kadar kekal boleh diedit.
                 TextInput::make('model')->label('Model')->required()
                     ->placeholder('pilih dari senarai atau taip sendiri')
                     ->datalist(fn (Get $get): array => AiVendor::tryFrom((string) $get('vendor'))?->models() ?? [])
-                    ->helperText('Klik untuk cadangan, atau taip mana-mana ID model penyedia.'),
+                    ->live(onBlur: true)
+                    ->afterStateUpdated(function ($state, Get $get, Set $set): void {
+                        $rates = ModelRates::for((string) $get('vendor'), (string) $state);
+                        if ($rates !== null) {
+                            $set('meta', [
+                                'rate_in_per_mtok' => (string) $rates['in'],
+                                'rate_out_per_mtok' => (string) $rates['out'],
+                                'currency' => 'USD',
+                            ]);
+                        }
+                    })
+                    ->helperText(function (Get $get): HtmlString {
+                        $rates = ModelRates::for((string) $get('vendor'), (string) $get('model'));
+                        $src = ModelRates::source((string) $get('vendor'));
+                        if ($rates !== null) {
+                            $s = 'Kadar auto: USD '.$rates['in'].' masuk / '.$rates['out'].' keluar per juta token (rujuk '.ModelRates::AS_OF.')';
 
-                TextInput::make('max_tokens')->label('Max tokens')->numeric()->default(3000),
+                            return new HtmlString($src
+                                ? $s.' — <a href="'.e($src).'" target="_blank" rel="noopener" class="underline">sumber</a>. Boleh diedit.'
+                                : $s.'. Boleh diedit.');
+                        }
+
+                        return new HtmlString('Tiada kadar auto untuk model ini — isi kadar dalam "Kadar harga" di bawah (USD/juta token, §8.8).');
+                    }),
+
+                TextInput::make('max_tokens')->label('Max tokens')->numeric()->default(5000)
+                    ->helperText('Model reasoning terbaru guna banyak token — 5000+ disyorkan.'),
                 TextInput::make('temperature')->label('Temperature')->numeric()->step(0.1)->default(0.7),
                 TextInput::make('timeout_s')->label('Timeout (saat)')->numeric()->default(90),
-                KeyValue::make('meta')->label('Kadar harga (§8.8)')
+                KeyValue::make('meta')->label('Kadar harga (USD / juta token, §8.8)')
                     ->keyLabel('Kunci')->valueLabel('Nilai')
                     ->default(['rate_in_per_mtok' => '', 'rate_out_per_mtok' => '', 'currency' => 'USD']),
                 Toggle::make('is_active')->label('Aktif')->default(true),

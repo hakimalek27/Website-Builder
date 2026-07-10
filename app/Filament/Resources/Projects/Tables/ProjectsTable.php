@@ -25,7 +25,7 @@ class ProjectsTable
                 TextColumn::make('status')->label('Status')->badge(),
                 TextColumn::make('quota_ai_used')->label('Kuota AI')
                     ->formatStateUsing(fn ($state, Project $r) => "{$state}/{$r->quota_ai_total}"),
-                TextColumn::make('cost')->label('Kos (RM)')
+                TextColumn::make('cost')->label('Kos AI (USD)')
                     ->state(fn (Project $r) => number_format((float) $r->generations()->sum('cost_estimate'), 2)),
                 TextColumn::make('updated_at')->label('Aktif')->since(),
             ])
