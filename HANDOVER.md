@@ -1,6 +1,6 @@
 # HANDOVER — REKA (Website Builder)
 
-Kemas kini terakhir: **10 Julai 2026** · Branch: `main` · Remote: `github.com/hakimalek27/Website-Builder`
+Kemas kini terakhir: **11 Julai 2026** · Branch: `main` · Remote: `github.com/hakimalek27/Website-Builder`
 
 REKA — platform tempahan & penjanaan draf laman web **masjid, surau & NGO/pertubuhan Islam**.
 Stack: **Laravel 13.19 · PHP 8.4 · Filament v4.11 · Livewire 3 · Tailwind 4 · Pest** (dev: SQLite).
@@ -9,9 +9,23 @@ Stack: **Laravel 13.19 · PHP 8.4 · Filament v4.11 · Livewire 3 · Tailwind 4 
 
 ## Status semasa
 
-- **Fasa 0–10 siap** + **rombakan UI/UX Premium Islamik-Moden** + **Fasa 11** (11 commit: pepijat, NGO, pelbagaian design, auto-jana, WhatsApp Wehdah) + **pembetulan pasca-audit** (`eca8f80`, `d027778`).
-- **146 ujian Pest hijau** (535 assertions) · `pint` bersih · `npm run build` bersih · `migrate:fresh --seed` bersih.
+- **Fasa 0–10** + **rombakan UI/UX** + **Fasa 11** + **pembetulan pasca-audit** (`eca8f80`, `d027778`) + **fix AiClient OpenAI moden** (`f61ddec`) + **Fasa 12** (7 commit: `806d17a`→`ca674c1`).
+- **180 ujian Pest hijau** (648 assertions) · `pint` bersih · `npm run build` bersih.
 - Semua kerja **di-push ke `main`**.
+
+### Fasa 12 — Visibiliti, Brief, Nota→AI, Kos Model & Pengayaan Prompt (11 Jul 2026)
+
+Menyelesaikan 6 aduan product owner. Pelan: `~/.claude/plans/kemaskini-ui-ux-setiap-cozy-muffin.md`.
+
+1. **`806d17a` W1 nav PIC** — `layouts/pic` + `components/pic/nav`: bar nav status-aware (Utama/Borang/Semak/Jana Draf/Draf/Status); `Project::latestDraft()`; baris "Draf terdahulu" JanaHub kini pautan; kad pintasan home. (Aduan: halaman Jana Draf tak boleh ditemui.)
+2. **`578fd60` W1 deep-link WA** — `DraftGenerationService::request(picBaseUrl)` → `GenerateDraftJob` bina pautan draf sebenar dalam WA (bukan string mati); `GenerateDraftJob`+`SendWhatsappJob` `ShouldBeEncrypted`.
+3. **`6a3908c` W5 kos** — `ModelRates` (harga rasmi USD/MTok: gpt-5.5 5/30, opus-4-8 5/25, glm-5.2 1.40/4.40 + lain); `AiProviderForm` auto-isi kadar bila model dipilih; label kos jelas **USD** (bukan RM); `max_tokens` default 5000.
+4. **`42566ee` W4+W6 prompt** — **punca 'draf tak lengkap'**: prompt hanya bawa subset minimum. Kini `minimizedData` v2 (sejarah/visi-misi/perutusan/khidmat/kelas/kuliah/FAQ/seed/program penuh, PII-min kekal); `requestedKeys` +visi_misi/perutusan/faq, `announcements` bergerbang seed; `PiiScrubber` + blok NOTA & CITARASA PIC (step-7 rujukan + step-9 free_notes + nota PIC); system prompt +peraturan 7&8.
+5. **`3a16bbf` W6 shell** — `DraftRenderer` verbatim (perutusan nama/AJK cap12/bank/hubungi dari wizard — render LOKAL, bukan AI) + hero data-URI (upload ≤1.5MB); `shell.blade` seksyen Perutusan/Visi-Misi/AJK/FAQ/bank/hubungi.
+6. **`17927f7` W2 admin** — `ViewProject` + `ProjectInfolist` (9 Section: SEMUA data wizard/aset/draf-kos/nota via `ProjectDataPresenter` Markdown); balas nota (+WA PIC, event `note.admin_replied`); `AdminFileController` route `admin.aset`/`admin.draf`.
+7. **`ca674c1` W3 brief** — `BriefBuilder` + `resources/brief/full-brief.blade`: brief MD LENGKAP (ARAHAN AI PEMBINA + org penuh + kandungan verbatim + bank + nota + QA) muat turun dari admin (submitted+); Semak PIC papar nilai (bank bermask).
+
+**Keputusan direkod:** pengayaan prompt kedua-dua tier · kos papar USD sahaja · balasan nota admin → WA PIC · validator NGO perenggan kekal 1000 (skema panduan ≤600). **Tiada migration baharu.**
 
 ### Pembetulan pasca-Fasa 11 (audit, 10 Jul 2026)
 
