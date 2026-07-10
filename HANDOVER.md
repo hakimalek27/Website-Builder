@@ -1,6 +1,6 @@
 # HANDOVER — REKA (Website Builder)
 
-Kemas kini terakhir: **11 Julai 2026** · Branch: `main` · Remote: `github.com/hakimalek27/Website-Builder`
+Kemas kini terakhir: **12 Julai 2026** · Branch: `main` · Remote: `github.com/hakimalek27/Website-Builder`
 
 REKA — platform tempahan & penjanaan draf laman web **masjid, surau & NGO/pertubuhan Islam**.
 Stack: **Laravel 13.19 · PHP 8.4 · Filament v4.11 · Livewire 3 · Tailwind 4 · Pest** (dev: SQLite).
@@ -9,9 +9,23 @@ Stack: **Laravel 13.19 · PHP 8.4 · Filament v4.11 · Livewire 3 · Tailwind 4 
 
 ## Status semasa
 
-- **Fasa 0–10** + **rombakan UI/UX** + **Fasa 11** + **pembetulan pasca-audit** (`eca8f80`, `d027778`) + **fix AiClient OpenAI moden** (`f61ddec`) + **Fasa 12** (7 commit: `806d17a`→`ca674c1`).
-- **180 ujian Pest hijau** (648 assertions) · `pint` bersih · `npm run build` bersih.
+- **Fasa 0–10** + **rombakan UI/UX** + **Fasa 11** + **pembetulan pasca-audit** (`eca8f80`, `d027778`) + **fix AiClient OpenAI moden** (`f61ddec`) + **Fasa 12** (7 commit: `806d17a`→`ca674c1`) + **Fasa 13** (7 commit: `22b159a`→`0a5a172`).
+- **226 ujian Pest hijau** (786 assertions) · `pint` bersih · `npm run build` bersih.
 - Semua kerja **di-push ke `main`**.
+
+### Fasa 13 — Saluran Draf HTML Dua-Peringkat (12 Jul 2026)
+
+Saluran draf baharu: **Peringkat 1** penyedia "Jurutera Prompt" (OpenAI **gpt-5.5**) jana SATU prompt lengkap → **Peringkat 2** penyedia Default (OpenRouter **glm-5.2**) jana **draf HTML statik** (boleh klik). Mod boleh-tukar (`Setting draft_pipeline` shell/html) — saluran lama **kekal**.
+
+1. **`22b159a` W1 asas** — `AiClient::complete(..., $options)` (json/max_tokens); `ai_providers.is_prompt_engineer` (satu, `AiProvider::promptEngineer()`); ManageSettings/Seeder (`draft_pipeline`=html, `html_max_tokens`=30000); `progress_steps_html`; ModelRates + `z-ai/glm-5.2`; `DB_QUEUE_RETRY_AFTER=360`.
+2. **`47a53d9` W2 prompt** — `prompt-engineer-system.txt` + `html-draft-system.txt`; `HtmlPromptBuilder` (engineer/stage2/tweak — KONTEKS PII-min + reka bentuk DesignResolver + halaman + placeholder + nota); `PromptBuilder::minimizedContext()`; `DraftRenderer::verbatimFor()/heroImageFor()`.
+3. **`f874ddd` W3 validasi/finisher** — `HtmlDraftValidator` (ekstrak doc, tolak Arab/JS/URL-luar/>400KB); `HtmlDraftFinisher` (ganti placeholder `[[...]]` verbatim + noindex+banner+watermark+"— DRAF"); 5 partial (bank/contact/ajk/prayer/verse).
+4. **`dfd3126` W4 job** — `GenerateDraftJob` cabang `handleShell`/`handleHtml` (P1 jurutera→P2 HTML, retry HANYA P2); `DraftGenerationService::resolvePipeline()`+`pipelineMode()`; `Notifier::generationFailed`+WA admin.
+5. **`f25b6f2` W5 PIC UX** — tweak HTML (base_generation_id; HTML **mentah bertoken** ke AI, bukan draf PII); `DesignRerenderService` guard html; JanaHub label saluran + baki + banner gagal; SemakController → `pic.jana`.
+6. **`87f8145` W6 admin** — `AdminFileController::prompt()/draftDownload()` (route `admin.prompt`/`admin.draf.muat`); ProjectInfolist per-gen html (sumber/kos P1-P2/prompt/tweak); Brief + "Prompt Jurutera" + "Thread Tweak".
+7. **`0a5a172` W7 pratonton** — design-preview varian header/footer/pembatas + fix `arabic_font` tak disalin ke overrides.
+
+**Keputusan owner:** mod boleh-tukar · had tweak = kuota sedia ada (3 = 1 jana + 2 tweak) · **jurutera prompt gagal/tak diset → GAGAL TERUS** (mail+WA admin) · **TIADA migration enum** (pipeline dalam `input_snapshot`) · **PII-min §12.7 kedua-dua peringkat** (bank/telefon/nama tak ke AI — placeholder server) · CSP `raw` draf kekal. **Anggaran kos/jana penuh ~USD 0.44** (1 jana + 2 tweak).
 
 ### Fasa 12 — Visibiliti, Brief, Nota→AI, Kos Model & Pengayaan Prompt (11 Jul 2026)
 
@@ -71,6 +85,7 @@ Admin pilih vendor → base URL + driver auto → API key + model. OpenAI/Anthro
 
 ## Tindakan tertunggak sebelum go-live (bukan bug)
 
+- **Saluran HTML (Fasa 13) — konfigur 2 penyedia AI** di admin **Penyedia AI**: (1) OpenAI `gpt-5.5` + toggle **Jurutera Prompt**; (2) OpenRouter `z-ai/glm-5.2` + toggle **Default** (cadang `timeout_s`=180 kerana output HTML besar). Kunci API tampal via borang (encrypted) — **JANGAN commit**. Tetapan **Saluran draf** = `HTML` (sudah lalai seed). Tanpa penyedia Jurutera Prompt, penjanaan **gagal terus** (mail+WA admin).
 - **Kunci API WhatsApp** (`whatsapp_api_key`) — tampal melalui borang **Tetapan admin** (encrypted DB). **JANGAN commit.** Kemudian tekan "Uji Hantar" (mesej sampai 60189030363 dari peranti 60174627287).
 - **Migration tier→string** (`2026_07_11_000002`) — sudah lulus SQLite dev; **jalankan `php artisan migrate --pretend` di staging MySQL** sebelum deploy produksi (sahkan `MODIFY COLUMN VARCHAR(40)` kekalkan nilai).
 - `verse_library` seed = `PENDING_MANUAL_ENTRY` — **Azan WAJIB** isi teks Arab sebenar Surah At-Taubah:18 (R6 §9.2). Jangan taip dari ingatan.
@@ -81,7 +96,7 @@ Admin pilih vendor → base URL + driver auto → API key + model. OpenAI/Anthro
 ## Perintah penting
 
 ```bash
-php artisan test                 # 144 ujian Pest
+php artisan test                 # 226 ujian Pest
 php artisan migrate:fresh --seed # skema + seed (59 zon, 14 pakej, verse, 9 settings)
 npm run build                    # aset (guna ini untuk ujian browser tempatan)
 vendor/bin/pint --dirty          # format PHP

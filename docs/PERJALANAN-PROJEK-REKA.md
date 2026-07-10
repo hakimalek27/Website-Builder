@@ -2,7 +2,7 @@
 
 > Catatan lengkap perjalanan projek **REKA** (platform tempahan & penjanaan draf laman web masjid, surau & NGO/pertubuhan Islam milik **Wehdah Solution**) — dari pembinaan awal, audit visual, sehingga demo hujung-ke-hujung mengisi wizard sebagai PIC untuk **PERKIB**.
 >
-> Kemas kini terakhir: **11 Julai 2026** (Fasa 12) · Branch `main` · Remote `github.com/hakimalek27/Website-Builder`
+> Kemas kini terakhir: **12 Julai 2026** (Fasa 13) · Branch `main` · Remote `github.com/hakimalek27/Website-Builder`
 > Stack: Laravel 13.19 · PHP 8.4 · Filament v4.11 · Livewire 3 · Tailwind 4 · Pest · Intervention Image v4 (dev: SQLite)
 
 ---
@@ -139,6 +139,40 @@ Pengayaan prompt **kedua-dua tier** · kos papar **USD sahaja** (tiada penukaran
 
 ### Nota
 Setiap commit gate `pint` + `php artisan test` penuh (+`npm run build` bila blade). Walkthrough Chrome manual (langkah verifikasi pelan) **tidak** dibuat — alat interaktif extension Chrome bermasalah sepanjang sesi; liputan penuh oleh 180 ujian automasi (8 fail ujian baharu Fasa 12: PicNav/DeepLink/ModelRates/PromptEnrichment/NotesInPrompt/ShellEnrichment/ViewProject/BriefBuilder).
+
+---
+
+## BAHAGIAN F — Fasa 13: Saluran Draf HTML Dua-Peringkat (12 Jul 2026)
+
+Owner mahu draf yang lebih **cantik & telus**: bukan lagi JSON→templat tetap, tetapi **HTML sebenar** yang PIC boleh klik-klik. Aliran dua-peringkat:
+
+> **PIC hantar → GPT-5.5 (Jurutera Prompt) susun prompt lengkap → GLM-5.2 (Default) jana draf HTML statik → PIC lihat/klik/tweak → admin nampak SEMUA (prompt, kod, kos, tweak).**
+
+### Kaedah — 3 agen Explore + 1 agen Plan (selari)
+Saluran sedia ada dipetakan dengan 3 agen Explore serentak (saluran jana penuh · penyedia/tetapan/admin · prompt/design/validator), kemudian 1 agen Plan reka pelaksanaan. **Penemuan teras:** saluran lama mengandaikan **output JSON** (`DraftContentValidator` + Blade `shell`), jadi HTML statik perlu **laluan validasi + render + CSP tersendiri** — bukan sekadar tukar prompt.
+
+### 7 commit (`22b159a`→`0a5a172`, 226 ujian)
+| Commit | Bidang | Ringkasan |
+|---|---|---|
+| `22b159a` | **W1 asas** | `AiClient::complete($options)` (json/max_tokens); `is_prompt_engineer` (satu, `promptEngineer()`); Setting `draft_pipeline`(shell/html)+`html_max_tokens`; `progress_steps_html`; ModelRates `z-ai/glm-5.2`; `DB_QUEUE_RETRY_AFTER=360`. |
+| `47a53d9` | **W2 prompt** | `prompt-engineer-system.txt`+`html-draft-system.txt`; `HtmlPromptBuilder` (KONTEKS PII-min + reka bentuk hex/fon/varian + halaman + PLACEHOLDER + nota); `PromptBuilder::minimizedContext()`; `DraftRenderer::verbatimFor/heroImageFor`. |
+| `f874ddd` | **W3 validasi/finisher** | `HtmlDraftValidator` (ekstrak doctype→</html>, tolak Arab/`<script>`/URL-luar/>400KB); `HtmlDraftFinisher` (ganti `[[...]]` verbatim + noindex/banner/watermark/"— DRAF"); 5 partial. |
+| `dfd3126` | **W4 job** | `GenerateDraftJob` cabang `handleShell`/`handleHtml` (P1→P2, retry HANYA P2 jimat token); `resolvePipeline`/`pipelineMode`; `Notifier` WA-gagal admin. |
+| `f25b6f2` | **W5 PIC UX** | tweak HTML (guna HTML **mentah bertoken**, bukan draf PII → §12.7); guard tweak-reka; JanaHub label saluran + baki + banner gagal; submit → `pic.jana` (progres langsung). |
+| `87f8145` | **W6 admin** | `AdminFileController::prompt/draftDownload`; ProjectInfolist per-gen html (sumber/kos P1-P2/prompt/tweak); Brief "Prompt Jurutera" + "Thread Tweak". |
+| `0a5a172` | **W7 pratonton** | design-preview varian header/footer/pembatas + fix `arabic_font` tak disalin ke overrides. |
+
+### Keputusan owner direkod
+Mod **boleh-tukar** (saluran lama kekal) · had tweak = **kuota sedia ada** (3 = 1 jana + 2 tweak) · jurutera prompt gagal/tak diset → **GAGAL TERUS** (mail+WA admin, kuota tak dicaj) · **PII-min §12.7 kedua-dua peringkat** (bank/telefon/nama TIDAK ke AI — masuk HTML melalui **placeholder `[[...]]`** diganti server; tweak hantar HTML **mentah bertoken**) · **TIADA migration enum** (pipeline dalam `input_snapshot`) · anggaran **~USD 0.44/jana penuh**.
+
+### Nota teknikal Fasa 13
+1. **Dua provider berperanan:** `is_default` (P2 jana HTML) + `is_prompt_engineer` (P1 jana prompt) — kedua dikuatkuasa "satu sahaja" via `AiProvider::booted()`.
+2. **CSP `raw` draf kekal** (`default-src 'none'`; style-src Google Fonts; img-src self+data:) → HTML tanpa JS + fon Google berfungsi; `sandbox=""` anchor-nav masih jalan.
+3. **Retry pintar:** engineered prompt disimpan sebaik P1 siap; kegagalan validasi ulang **HANYA P2** (elak bazir token GPT-5.5). Kos = jumlah 2 peringkat; gagal muktamad rekod kos terbazir.
+4. **HTML mentah bertoken** disimpan (`{gen}.raw.html`) selain draf siap (`{gen}.html`) — supaya tweak hantar versi TANPA PII ke GLM.
+5. **Placeholder verbatim:** `[[CONTACT_STRIP]]`(wajib)·`[[BANK_BLOCK]]`·`[[AJK_GRID]]`·`[[PERUTUSAN_NAMA]]`·`[[HERO_IMAGE]]`·`[[WAKTU_SOLAT]]`·`[[AYAT_ARAB]]` (masjid). Token wajib hilang → fallback sebelum `</body>`; token yatim dibuang.
+6. **Gotcha docblock:** urutan `*/` dalam komen (cth `on*/`) menutup blok komen awal → parse error. Elak.
+7. **`file_upload`/Chrome interaktif** masih bermasalah — liputan penuh via **226 ujian automasi** (Phase13: AiClientOptions/PromptEngineerProvider/SettingsPipeline/HtmlPromptBuilder/HtmlValidator/HtmlFinisher/HtmlPipelineGeneration/HtmlTweak/PipelineUx/AdminHtmlVisibility/Step2Preview).
 
 ---
 
