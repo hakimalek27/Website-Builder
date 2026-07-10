@@ -2,7 +2,7 @@
 
 > Catatan lengkap perjalanan projek **REKA** (platform tempahan & penjanaan draf laman web masjid, surau & NGO/pertubuhan Islam milik **Wehdah Solution**) — dari pembinaan awal, audit visual, sehingga demo hujung-ke-hujung mengisi wizard sebagai PIC untuk **PERKIB**.
 >
-> Kemas kini terakhir: **10 Julai 2026** · Branch `main` · Remote `github.com/hakimalek27/Website-Builder`
+> Kemas kini terakhir: **11 Julai 2026** (Fasa 12) · Branch `main` · Remote `github.com/hakimalek27/Website-Builder`
 > Stack: Laravel 13.19 · PHP 8.4 · Filament v4.11 · Livewire 3 · Tailwind 4 · Pest · Intervention Image v4 (dev: SQLite)
 
 ---
@@ -113,6 +113,32 @@ URL draf penuh: `/b/{token}/draf/{generation}/penuh`
 - **Kunci API WhatsApp:** tampal via Tetapan admin (encrypted) + "Uji Hantar".
 - **`verse_library`:** Azan isi teks Arab sebenar At-Taubah:18 (jangan taip dari ingatan).
 - **Migrasi `tier→string`:** `php artisan migrate --pretend` di staging MySQL sebelum deploy.
+
+---
+
+## BAHAGIAN E — Fasa 12: Visibiliti, Brief, Nota→AI, Kos Model & Pengayaan Prompt (11 Jul 2026)
+
+Selepas demo PERKIB, product owner laporkan **6 aduan**. Diselesaikan dalam **7 commit** (`806d17a`→`ca674c1`), **146→180 ujian**. Pelan penuh: `~/.claude/plans/kemaskini-ui-ux-setiap-cozy-muffin.md`.
+
+### Kaedah — 3 agen Explore + 1 agen Plan (selari)
+Aduan owner disiasat dengan 3 agen Explore serentak (navigasi PIC · admin/kos/brief · **audit mendalam saluran prompt**), kemudian 1 agen Plan reka pelaksanaan. **Penemuan teras audit:** data wizard mengalir ke **3 sink berasingan** — (A) prompt AI = subset minimum, (B) render draf = output AI + blok statik, (C) spec.json/handover = SEMUA data tapi hanya selepas kelulusan. Langkah 7 (rujukan), free_notes L9, visi_misi, perutusan, AJK, FAQ, seed berita **tidak pernah sampai ke AI**; `announcements`/`membership` diminta **tanpa data** → AI paksa tulis ayat generik. Inilah punca sebenar "draf tak lengkap & tak menarik".
+
+### 7 commit
+| Commit | Bidang | Ringkasan |
+|---|---|---|
+| `806d17a` | **W1 nav PIC** | Bar nav status-aware (`components/pic/nav`) di semua halaman PIC; `Project::latestDraft()`; baris "Draf terdahulu" JanaHub jadi pautan; kad pintasan home. (Aduan: Jana Draf tak boleh ditemui.) |
+| `578fd60` | **W1 deep-link WA** | `DraftGenerationService::request(picBaseUrl)` → `GenerateDraftJob` bina pautan draf sebenar dalam WA (bukan string mati); job `ShouldBeEncrypted` (payload bawa token). |
+| `6a3908c` | **W5 kos** | `app/Support/ModelRates.php` (harga rasmi USD/MTok: gpt-5.5 5/30, opus-4-8 5/25, glm-5.2 1.40/4.40 + lain, di-fetch WebSearch); `AiProviderForm` auto-isi kadar; label kos **USD** (betulkan RM tanpa penukaran); `max_tokens` 5000. |
+| `42566ee` | **W4+W6 prompt** | `PromptBuilder::minimizedData` v2 perkaya (sejarah/visi-misi/perutusan/khidmat/kelas/kuliah/FAQ/seed/program penuh, PII-min kekal); `requestedKeys` +visi_misi/perutusan/faq, `announcements` bergerbang seed; `PiiScrubber` + blok NOTA & CITARASA PIC; system prompt +peraturan 7&8. |
+| `3a16bbf` | **W6 shell** | `DraftRenderer` verbatim (perutusan nama/AJK cap12/bank/hubungi = render LOKAL, BUKAN ke AI) + hero data-URI (upload ≤1.5MB); `shell.blade` seksyen Perutusan/Visi-Misi/AJK/FAQ/bank/hubungi. |
+| `17927f7` | **W2 admin** | `ViewProject`+`ProjectInfolist` (9 Section — SEMUA data wizard/aset/draf-kos/nota via `ProjectDataPresenter` Markdown); balas nota (+WA PIC, event `note.admin_replied`=13); `AdminFileController` route `admin.aset`/`admin.draf`. |
+| `ca674c1` | **W3 brief** | `BriefBuilder`+`resources/brief/full-brief.blade` = brief MD LENGKAP (ARAHAN AI PEMBINA + org penuh + kandungan verbatim + bank + nota + QA) muat turun admin (submitted+); Semak PIC papar nilai (bank bermask). |
+
+### Keputusan owner direkod
+Pengayaan prompt **kedua-dua tier** · kos papar **USD sahaja** (tiada penukaran RM) · balasan nota admin → **WhatsApp PIC** · validator NGO perenggan kekal **1000** (skema panduan ≤600) · **TIADA migration baharu**. PII-min §12.7 kekal (bank/telefon/PIC **tak** ke AI; bank dirender LOKAL dalam draf sahaja).
+
+### Nota
+Setiap commit gate `pint` + `php artisan test` penuh (+`npm run build` bila blade). Walkthrough Chrome manual (langkah verifikasi pelan) **tidak** dibuat — alat interaktif extension Chrome bermasalah sepanjang sesi; liputan penuh oleh 180 ujian automasi (8 fail ujian baharu Fasa 12: PicNav/DeepLink/ModelRates/PromptEnrichment/NotesInPrompt/ShellEnrichment/ViewProject/BriefBuilder).
 
 ---
 
