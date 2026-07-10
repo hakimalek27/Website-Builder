@@ -34,7 +34,7 @@ class DraftGenerationService
      */
     public function request(Project $project, GenerationType $type, string $createdBy = 'pic', ?array $tweak = null, ?string $picBaseUrl = null): Generation
     {
-        $generation = DB::transaction(function () use ($project, $type, $createdBy) {
+        $generation = DB::transaction(function () use ($project, $type, $createdBy, $tweak) {
             /** @var Project $locked */
             $locked = Project::query()->whereKey($project->id)->lockForUpdate()->firstOrFail();
 
@@ -72,6 +72,8 @@ class DraftGenerationService
                 'type' => $type,
                 'status' => GenerationStatus::Queued,
                 'created_by' => $createdBy,
+                // Saluran ditentukan semasa cipta; job hanya membaca (§Fasa 13).
+                'input_snapshot' => ['pipeline' => $this->resolvePipeline($type, $tweak)],
             ]);
 
             AuditLog::record($createdBy, null, 'generation.requested', $generation, ['type' => $type->value]);
@@ -83,6 +85,29 @@ class DraftGenerationService
         GenerateDraftJob::dispatch($generation->id, $tweak, $picBaseUrl)->onQueue('ai');
 
         return $generation;
+    }
+
+    /**
+     * Saluran generation (§Fasa 13). Initial → tetapan; ContentTweak → ikut bentuk draf asas
+     * (base_generation_id = html; current_json legasi = shell).
+     *
+     * @param  array<string,mixed>|null  $tweak
+     */
+    private function resolvePipeline(GenerationType $type, ?array $tweak): string
+    {
+        if ($type === GenerationType::ContentTweak) {
+            return isset($tweak['base_generation_id']) ? 'html' : 'shell';
+        }
+
+        return self::pipelineMode();
+    }
+
+    /** Mod saluran draf semasa (whitelist; nilai tak sah → 'shell' selamat). */
+    public static function pipelineMode(): string
+    {
+        $mode = Setting::get('draft_pipeline') ?? 'shell';
+
+        return in_array($mode, ['shell', 'html'], true) ? $mode : 'shell';
     }
 
     private function assertCooldown(Project $project): void

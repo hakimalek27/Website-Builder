@@ -104,6 +104,11 @@ class Notifier
     public function generationFailed(Generation $generation): void
     {
         $this->mail($this->adminEmail(), new GenerationFailedMail($generation), $generation->project, 'generation.failed');
+        // §Fasa 13: makluman WA segera kepada admin (draf gagal — mungkin perlu betulkan Penyedia AI).
+        $name = $generation->project?->mosque_name ?? 'projek';
+        $msg = "REKA: Penjanaan draf {$name} GAGAL — ".Str::limit((string) $generation->error, 100).'. Semak Penyedia AI.';
+        $this->whatsapp($this->adminPhoneOrNull(), $msg, $generation->project, 'generation.failed',
+            new AdminAlertMail('Penjanaan gagal', $msg), $this->adminEmail());
     }
 
     public function quotaExhausted(Project $project, string $note): void

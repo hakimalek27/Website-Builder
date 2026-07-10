@@ -8,6 +8,7 @@ use App\Models\AuditLog;
 use App\Models\Lead;
 use App\Models\NotificationLog;
 use App\Models\ProjectSection;
+use App\Models\Setting;
 use App\Services\ApprovalService;
 use App\Services\DesignRerenderService;
 use App\Services\HandoverExporter;
@@ -29,6 +30,7 @@ it('runs the full funnel end to end and exports a valid handover package', funct
     $this->seed(VerseLibrarySeeder::class);
     $this->seed(JakimZoneSeeder::class);
     $this->seed(SettingsSeeder::class);
+    Setting::put('draft_pipeline', 'shell'); // aliran ini menguji shell → spec.json → handover (§Fasa 13)
     config()->set('reka.admin_notify_email', 'admin@reka.test');
 
     // 1. Lead (borang minat awam).
