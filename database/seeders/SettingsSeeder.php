@@ -12,21 +12,24 @@ class SettingsSeeder extends Seeder
 {
     public function run(): void
     {
+        // putIfMissing (§Fasa 14) — seed semula selamat: nilai sedia ada (mis. kunci API
+        // WhatsApp yang ditampal admin) TIDAK ditindih. Hanya kunci yang belum wujud diisi.
+
         // Nilai bukan sulit.
-        Setting::put('gen_cooldown_minutes', '5');
-        Setting::put('default_ai_quota', '3');
-        Setting::put('default_design_quota', '5');
-        Setting::put('invitation_default_days', '30');
-        Setting::put('admin_notify_email', config('reka.admin_notify_email'));
-        Setting::put('admin_notify_phone', '60189030363');
-        Setting::put('whatsapp_gateway_url', 'https://wassap.wehdah.my');
-        Setting::put('whatsapp_session_id', null);
+        Setting::putIfMissing('gen_cooldown_minutes', '5');
+        Setting::putIfMissing('default_ai_quota', '3');
+        Setting::putIfMissing('default_design_quota', '5');
+        Setting::putIfMissing('invitation_default_days', '30');
+        Setting::putIfMissing('admin_notify_email', config('reka.admin_notify_email'));
+        Setting::putIfMissing('admin_notify_phone', '60189030363');
+        Setting::putIfMissing('whatsapp_gateway_url', 'https://wassap.wehdah.my');
+        Setting::putIfMissing('whatsapp_session_id', null);
 
         // Saluran draf HTML dua-peringkat (§Fasa 13) — lalai untuk produksi/dev.
-        Setting::put('draft_pipeline', 'html');
-        Setting::put('html_max_tokens', '30000');
+        Setting::putIfMissing('draft_pipeline', 'html');
+        Setting::putIfMissing('html_max_tokens', '30000');
 
         // Nilai sulit (kunci API gateway — ditampal melalui Tetapan admin, JANGAN commit).
-        Setting::put('whatsapp_api_key', null, encrypted: true);
+        Setting::putIfMissing('whatsapp_api_key', null, encrypted: true);
     }
 }

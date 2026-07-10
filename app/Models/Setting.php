@@ -48,4 +48,16 @@ class Setting extends Model
             ],
         );
     }
+
+    /**
+     * Tulis nilai HANYA jika kunci belum wujud (seeder selamat diulang — jangan tindih
+     * konfigurasi admin). Guna exists() kerana nilai null yang sah (mis. whatsapp_api_key,
+     * whatsapp_session_id) tak boleh dibezakan dari "tiada baris" melalui get().
+     */
+    public static function putIfMissing(string $key, ?string $value, bool $encrypted = false): void
+    {
+        if (! static::query()->where('key', $key)->exists()) {
+            static::put($key, $value, $encrypted);
+        }
+    }
 }
