@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminFileController;
 use App\Http\Controllers\ApprovalController;
 use App\Http\Controllers\DraftController;
 use App\Http\Controllers\LandingController;
@@ -74,4 +75,10 @@ Route::prefix('/b/{token}')->middleware('resolve.invitation')->name('pic.')->gro
         ]);
     })->name('status');
     Route::post('/nota', [PicController::class, 'storeNote'])->name('nota');
+});
+
+// --- Fail admin (aset + draf dari panel) — sesi web + semakan auth dalam controller (Fasa 12 W2) ---
+Route::middleware('web')->prefix('/admin-fail')->name('admin.')->group(function () {
+    Route::get('/aset/{asset}', [AdminFileController::class, 'asset'])->name('aset');
+    Route::get('/draf/{generation}', [AdminFileController::class, 'draft'])->name('draf');
 });

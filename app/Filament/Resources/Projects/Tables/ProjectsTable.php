@@ -6,6 +6,7 @@ use App\Enums\ProjectStatus;
 use App\Models\Project;
 use App\Services\HandoverExporter;
 use Filament\Actions\Action;
+use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -31,6 +32,7 @@ class ProjectsTable
             ])
             ->defaultSort('updated_at', 'desc')
             ->recordActions([
+                ViewAction::make(),
                 // §14 — Eksport Pakej Serahan (approved+ sahaja).
                 Action::make('exportHandover')
                     ->label('Eksport Pakej Serahan')

@@ -58,7 +58,7 @@ it('falls back to mail and logs when WhatsApp fails (§13)', function () {
     Mail::assertQueued(SubmittedMail::class);
 });
 
-it('dispatches all twelve notification events (§13 + Fasa 11)', function () {
+it('dispatches all thirteen notification events (§13 + Fasa 11/12)', function () {
     Mail::fake();
     config()->set('reka.admin_notify_email', 'admin@reka.test');
     Setting::put('whatsapp_gateway_url', 'https://gw.example');
@@ -83,12 +83,13 @@ it('dispatches all twelve notification events (§13 + Fasa 11)', function () {
     $n->tokenExpiring($project);
     $n->leadReceived($lead);
     $n->noteAdded($project, $note);
+    $n->adminReplied($project, $note);
 
     $events = NotificationLog::pluck('event')->unique()->values()->all();
     foreach ([
         'invitation.sent', 'wizard.reminder', 'submitted', 'generation.succeeded',
         'generation.failed', 'quota.exhausted_note', 'approved', 'status.build_updated',
-        'token.expiring', 'lead.received', 'note.added',
+        'token.expiring', 'lead.received', 'note.added', 'note.admin_replied',
     ] as $event) {
         expect($events)->toContain($event);
     }

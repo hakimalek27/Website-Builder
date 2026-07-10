@@ -144,6 +144,15 @@ class Notifier
         $this->whatsapp($this->adminPhoneOrNull(), $msg, $project, 'note.added', new AdminAlertMail('Nota PIC', $msg), $this->adminEmail());
     }
 
+    /** Balasan admin kepada nota PIC (§5.2 P11, Fasa 12 W2) → WA kepada PIC. */
+    public function adminReplied(Project $project, Note $note): void
+    {
+        $msg = "REKA: Balasan admin untuk {$project->mosque_name} — ".Str::limit($note->body, 120)
+            .'. Lihat penuh di menu "Status & Nota" pautan borang anda.';
+        $this->whatsapp($this->picPhone($project), $msg, $project, 'note.admin_replied',
+            new AdminAlertMail('Balasan admin', $msg), $this->picEmail($project));
+    }
+
     private function adminPhoneOrNull(): ?string
     {
         return Setting::get('admin_notify_phone') ?: null;
