@@ -37,6 +37,9 @@ class PromptBuilder
             ."\n\nSKEMA OUTPUT (balas JSON SAHAJA, tepat mengikut kunci & had panjang):\n"
             .json_encode($schema, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 
+        // Nama khas & singkatan rasmi mesti kekal huruf demi huruf (elak AI 'membetulkan' cth PERKIB→PERKIP).
+        $user .= "\n\nEJAAN NAMA (WAJIB): Kekalkan setiap nama khas dan singkatan rasmi TEPAT seperti dalam DATA di atas — huruf demi huruf. JANGAN cipta, pendekkan, atau ubah singkatan pertubuhan.";
+
         if ($type === 'content_tweak' && $tweak !== null) {
             $user .= "\n\nARAHAN TWEAK:\n"
                 ."JSON semasa:\n".json_encode($tweak['current_json'] ?? [], JSON_UNESCAPED_UNICODE)."\n"

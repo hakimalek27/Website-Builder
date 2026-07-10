@@ -22,22 +22,32 @@ class OpenAiCompatibleClient implements AiClient
         $base = rtrim($cfg->base_url ?: 'https://api.openai.com/v1', '/');
         $timeout = $cfg->timeout_s ?: 90;
 
+        $modern = $this->usesCompletionTokenParam((string) $cfg->model);
+
         $payload = [
             'model' => $cfg->model,
-            'max_tokens' => $cfg->max_tokens,
-            'temperature' => (float) $cfg->temperature,
             'messages' => [
                 ['role' => 'system', 'content' => $system],
                 ['role' => 'user', 'content' => $user],
             ],
             'response_format' => ['type' => 'json_object'],
         ];
+        // gpt-5.x & siri reasoning (o1/o3/o4) guna 'max_completion_tokens' + hanya temperature lalai.
+        $payload[$modern ? 'max_completion_tokens' : 'max_tokens'] = $cfg->max_tokens;
+        if (! $modern) {
+            $payload['temperature'] = (float) $cfg->temperature;
+        }
 
         $response = $this->send($base, $timeout, $cfg->api_key, $payload);
 
-        // Jika ditolak (kemungkinan kerana response_format) → ulang tanpa medan itu.
-        if ($response->failed()) {
-            unset($payload['response_format']);
+        // Fallback adaptif: buang/tukar medan yang ditolak model/endpoint (maks 3 pusingan) —
+        // cth 'max_tokens'→'max_completion_tokens', temperature tak disokong, response_format ditolak.
+        for ($i = 0; $i < 3 && $response->failed(); $i++) {
+            $adapted = $this->adaptPayload($payload, (string) $response->body());
+            if ($adapted === $payload) {
+                break;
+            }
+            $payload = $adapted;
             $response = $this->send($base, $timeout, $cfg->api_key, $payload);
         }
 
@@ -66,5 +76,37 @@ class OpenAiCompatibleClient implements AiClient
         } catch (Throwable $e) {
             throw new AiException('Panggilan OpenAI-compatible gagal: '.$e->getMessage(), previous: $e);
         }
+    }
+
+    /** Model OpenAI gpt-5.x & siri reasoning (o1/o3/o4) — guna 'max_completion_tokens' + temperature lalai. */
+    private function usesCompletionTokenParam(string $model): bool
+    {
+        return (bool) preg_match('/\b(gpt-5|o[1-4])\b/i', $model);
+    }
+
+    /** Sesuaikan payload ikut mesej ralat 400 (medan tak disokong oleh model/endpoint). */
+    private function adaptPayload(array $payload, string $errorBody): array
+    {
+        if (str_contains($errorBody, 'max_completion_tokens') && array_key_exists('max_tokens', $payload)) {
+            $payload['max_completion_tokens'] = $payload['max_tokens'];
+            unset($payload['max_tokens']);
+        }
+        // Nilai token melebihi had model → turunkan ke had yang dilaporkan ("...at most N...").
+        if (preg_match('/at most ([0-9]+)/i', $errorBody, $m)) {
+            $cap = (int) $m[1];
+            foreach (['max_completion_tokens', 'max_tokens'] as $k) {
+                if (isset($payload[$k]) && (int) $payload[$k] > $cap) {
+                    $payload[$k] = $cap;
+                }
+            }
+        }
+        if (str_contains($errorBody, 'temperature') && array_key_exists('temperature', $payload)) {
+            unset($payload['temperature']);
+        }
+        if (str_contains($errorBody, 'response_format') && array_key_exists('response_format', $payload)) {
+            unset($payload['response_format']);
+        }
+
+        return $payload;
     }
 }

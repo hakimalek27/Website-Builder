@@ -29,9 +29,12 @@ class DraftContentValidator
         'visitor_info' => ['heading' => 60, 'paragraph' => 240],
         // NGO / pertubuhan (Fasa 11) — aditif; dikuatkuasa hanya bila diminta.
         'programs' => ['_each' => ['title' => 40, 'blurb' => 160]],
-        'volunteer' => ['heading' => 60, 'paragraph' => 240, 'cta_label' => 20],
-        'membership' => ['heading' => 60, 'paragraph' => 240],
-        'donate' => ['heading' => 60, 'paragraph' => 240],
+        // Perenggan NGO 240→1000: GLM-5.2 hasilkan perenggan lebih panjang (Derma/Sukarelawan/
+        // Keahlian). schemaFor kekal ≤240 (AI dipandu ringkas); validator kini terima ≤1000.
+        // Medan masjid kekal 240 (byte-identik).
+        'volunteer' => ['heading' => 60, 'paragraph' => 1000, 'cta_label' => 20],
+        'membership' => ['heading' => 60, 'paragraph' => 1000],
+        'donate' => ['heading' => 60, 'paragraph' => 1000],
         'footer_description' => 200,
     ];
 
@@ -94,33 +97,33 @@ class DraftContentValidator
             }
 
             if (is_int($spec)) {
-                $content[$key] = $this->cap($content[$key], $spec);
+                $content[$key] = $this->cap($content[$key], $spec, $key);
 
                 continue;
             }
 
             if (isset($spec['_each']) && is_array($content[$key])) {
                 foreach ($content[$key] as $i => $item) {
-                    $content[$key][$i] = $this->capFields($item, $spec['_each']);
+                    $content[$key][$i] = $this->capFields($item, $spec['_each'], "{$key}[{$i}]");
                 }
 
                 continue;
             }
 
-            $content[$key] = $this->capFields($content[$key], $spec);
+            $content[$key] = $this->capFields($content[$key], $spec, $key);
         }
 
         return $content;
     }
 
-    private function capFields(array $item, array $fieldLimits): array
+    private function capFields(array $item, array $fieldLimits, string $parent = ''): array
     {
         foreach ($fieldLimits as $field => $limit) {
             if ($field === '_items' && is_array($limit)) {
                 foreach ($limit as $subKey => $subLimits) {
                     if (isset($item[$subKey]) && is_array($item[$subKey])) {
                         foreach ($item[$subKey] as $j => $sub) {
-                            $item[$subKey][$j] = $this->capFields($sub, $subLimits);
+                            $item[$subKey][$j] = $this->capFields($sub, $subLimits, "{$parent}.{$subKey}[{$j}]");
                         }
                     }
                 }
@@ -128,7 +131,7 @@ class DraftContentValidator
                 continue;
             }
             if (isset($item[$field]) && is_string($item[$field])) {
-                $item[$field] = $this->cap($item[$field], $limit);
+                $item[$field] = $this->cap($item[$field], $limit, $parent !== '' ? "{$parent}.{$field}" : $field);
             }
         }
 
@@ -136,13 +139,13 @@ class DraftContentValidator
     }
 
     /** Potong lembut ke had; gagal jika >125% had (§8.4). */
-    private function cap(mixed $value, int $limit): string
+    private function cap(mixed $value, int $limit, string $field = '?'): string
     {
         $value = (string) $value;
         $len = mb_strlen($value);
 
         if ($len > (int) round($limit * 1.25)) {
-            throw new DraftValidationException("Medan melebihi 125% had ({$len} > {$limit}).");
+            throw new DraftValidationException("Medan '{$field}' melebihi 125% had ({$len} > {$limit}).");
         }
 
         return $len > $limit ? mb_substr($value, 0, $limit) : $value;
