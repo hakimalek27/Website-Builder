@@ -92,7 +92,19 @@
             <h3 class="mb-3 px-1 text-xs font-semibold tracking-wider text-ink/45 uppercase">Draf terdahulu</h3>
             <div class="space-y-2">
                 @foreach ($this->generations as $gen)
-                    <div class="flex items-center justify-between rounded-2xl bg-white px-4 py-3.5 shadow-xs ring-1 ring-sand">
+                    @php
+                        $isDraf = $gen->status === App\Enums\GenerationStatus::Succeeded && $gen->rendered_path;
+                        $statusLabel = match ($gen->status) {
+                            App\Enums\GenerationStatus::Succeeded => 'Berjaya',
+                            App\Enums\GenerationStatus::Failed => 'Gagal',
+                            default => 'Sedang dijana',
+                        };
+                    @endphp
+                    <{{ $isDraf ? 'a' : 'div' }} @if ($isDraf) href="{{ route('pic.draf', ['token' => $this->token, 'generation' => $gen->id]) }}" @endif
+                        @class([
+                            'flex items-center justify-between rounded-2xl bg-white px-4 py-3.5 shadow-xs ring-1 ring-sand',
+                            'transition hover:-translate-y-0.5 hover:shadow-soft hover:ring-brand-600/30' => $isDraf,
+                        ])>
                         <span class="flex items-center gap-3 text-sm">
                             <span class="grid h-8 w-8 place-items-center rounded-full bg-brand-50 text-brand-600">
                                 {!! \App\Support\Lucide::svg('FileText', 1.75, 'h-4 w-4') !!}
@@ -108,12 +120,15 @@
                                 'bg-brand-50 text-brand-700' => $gen->status === App\Enums\GenerationStatus::Succeeded,
                                 'bg-red-100 text-red-700' => $gen->status === App\Enums\GenerationStatus::Failed,
                                 'bg-gold-400/15 text-gold-700' => $gen->status->isActive(),
-                            ])>{{ $gen->status->value }}</span>
-                            @if ($gen->status === App\Enums\GenerationStatus::Succeeded)
-                                <span class="hidden text-xs font-medium text-brand-600 sm:inline">Draf sedia</span>
+                            ])>{{ $statusLabel }}</span>
+                            @if ($isDraf)
+                                <span class="flex items-center gap-1 text-xs font-medium text-brand-600">
+                                    <span class="hidden sm:inline">Lihat Draf</span>
+                                    {!! \App\Support\Lucide::svg('ChevronRight', 2, 'h-4 w-4') !!}
+                                </span>
                             @endif
                         </span>
-                    </div>
+                    </{{ $isDraf ? 'a' : 'div' }}>
                 @endforeach
             </div>
         </div>

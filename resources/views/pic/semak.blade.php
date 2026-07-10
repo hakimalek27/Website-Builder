@@ -24,9 +24,13 @@
         </div>
     @endif
     @if ($alreadySubmitted)
-        <div class="mb-4 flex items-center gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-800">
+        <div class="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-800">
             <span class="text-amber-500">{!! \App\Support\Lucide::svg('Info', 2, 'h-5 w-5') !!}</span>
-            Telah dihantar — anda masih boleh edit sehingga draf diluluskan.
+            <span class="flex-1">Telah dihantar — anda masih boleh edit sehingga draf diluluskan.</span>
+            <a href="{{ route('pic.jana', ['token' => $token]) }}"
+                class="flex shrink-0 items-center gap-1 rounded-lg bg-amber-500/15 px-3 py-1.5 font-medium text-amber-800 transition hover:bg-amber-500/25">
+                Pergi ke Jana Draf {!! \App\Support\Lucide::svg('ArrowRight', 2, 'h-4 w-4') !!}
+            </a>
         </div>
     @endif
 

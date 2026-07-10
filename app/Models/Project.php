@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\GenerationStatus;
 use App\Enums\ProjectStatus;
 use App\Enums\Tier;
 use App\Exceptions\InvalidStatusTransitionException;
@@ -129,6 +130,15 @@ class Project extends Model
     public function generations(): HasMany
     {
         return $this->hasMany(Generation::class);
+    }
+
+    /** Draf berjaya terkini (untuk pautan nav PIC & pintasan). */
+    public function latestDraft(): HasOne
+    {
+        return $this->hasOne(Generation::class)->ofMany(
+            ['created_at' => 'max'],
+            fn ($q) => $q->where('status', GenerationStatus::Succeeded)->whereNotNull('rendered_path'),
+        );
     }
 
     public function tweakRequests(): HasMany
