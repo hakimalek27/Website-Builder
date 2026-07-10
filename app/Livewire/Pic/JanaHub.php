@@ -81,7 +81,7 @@ class JanaHub extends Component
     public function generate(): void
     {
         try {
-            app(DraftGenerationService::class)->request($this->project, GenerationType::Initial, 'pic');
+            app(DraftGenerationService::class)->request($this->project, GenerationType::Initial, 'pic', picBaseUrl: url('/b/'.$this->token));
             unset($this->activeGeneration, $this->generations);
         } catch (GateException $e) {
             $this->addError('gate', $e->getMessage());

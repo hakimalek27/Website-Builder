@@ -16,6 +16,7 @@ use App\Services\Ai\PromptBuilder;
 use App\Services\DraftRenderer;
 use App\Services\Notifier;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeEncrypted;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -27,7 +28,7 @@ use Illuminate\Support\Str;
  * §8.6 — TUJUH langkah. $tries=1 (retry MANUAL dalam handle 30s/90s).
  * Kuota AI ditolak HANYA selepas berjaya. Gagal muktamad → refund (tidak disentuh) + mail admin.
  */
-class GenerateDraftJob implements ShouldQueue
+class GenerateDraftJob implements ShouldBeEncrypted, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -35,8 +36,11 @@ class GenerateDraftJob implements ShouldQueue
 
     public int $timeout = 300;
 
-    /** @param array<string,mixed>|null $tweak */
-    public function __construct(public string $generationId, public ?array $tweak = null) {}
+    /**
+     * @param  array<string,mixed>|null  $tweak
+     * @param  string|null  $picBaseUrl  URL asas PIC (cth /b/{token}) untuk deep-link WA — payload disulitkan (ShouldBeEncrypted).
+     */
+    public function __construct(public string $generationId, public ?array $tweak = null, public ?string $picBaseUrl = null) {}
 
     public function handle(PromptBuilder $promptBuilder, DraftContentValidator $validator, DraftRenderer $renderer, AiClientFactory $factory): void
     {
@@ -115,13 +119,12 @@ class GenerateDraftJob implements ShouldQueue
                     'tokens_in' => $result->tokensIn, 'tokens_out' => $result->tokensOut,
                 ]);
 
-                // §8.6 langkah 6 — notifikasi PIC (WA + mail). Pautan sebenar = pautan
-                // borang PIC sedia ada (token plaintext tidak disimpan, §11.1).
-                app(Notifier::class)->generationSucceeded(
-                    $project,
-                    $generation,
-                    'pautan borang anda',
-                );
+                // §8.6 langkah 6 — notifikasi PIC (WA + mail). Deep-link ke draf bila
+                // URL asas PIC dihantar oleh pemanggil (token plaintext tidak disimpan, §11.1).
+                $link = $this->picBaseUrl
+                    ? rtrim($this->picBaseUrl, '/')."/draf/{$generation->id}"
+                    : 'pautan borang anda (menu Jana Draf)';
+                app(Notifier::class)->generationSucceeded($project, $generation, $link);
 
                 return;
             } catch (DraftValidationException|AiException $e) {

@@ -42,6 +42,8 @@ it('auto-queues the first draft on submit when logo/hero are ready', function ()
 
     expect($project->fresh()->status)->toBe(ProjectStatus::Submitted);
     Queue::assertPushed(GenerateDraftJob::class);
+    // W1 — deep-link WA: job membawa URL asas PIC untuk pautan draf sebenar.
+    Queue::assertPushed(GenerateDraftJob::class, fn ($job) => $job->picBaseUrl === url("/b/{$token}"));
 });
 
 it('submits with a friendly warning (no job) when the logo is required but not uploaded', function () {

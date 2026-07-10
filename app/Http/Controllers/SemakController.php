@@ -70,7 +70,7 @@ class SemakController extends Controller
         // Auto-jana draf pertama (Fasa 11). Kes logo/hero belum dimuat naik → jana manual kemudian.
         $redirect = redirect()->route('pic.semak', ['token' => $request->route('token')]);
         try {
-            app(DraftGenerationService::class)->request($project, GenerationType::Initial, 'pic');
+            app(DraftGenerationService::class)->request($project, GenerationType::Initial, 'pic', picBaseUrl: url('/b/'.$request->route('token')));
 
             return $redirect->with('success', 'Maklumat dihantar. Draf contoh sedang dijana secara automatik — anda akan dimaklumkan sebaik siap.');
         } catch (GateException $e) {

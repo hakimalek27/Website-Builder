@@ -32,7 +32,7 @@ class DraftGenerationService
      *
      * @throws GateException
      */
-    public function request(Project $project, GenerationType $type, string $createdBy = 'pic', ?array $tweak = null): Generation
+    public function request(Project $project, GenerationType $type, string $createdBy = 'pic', ?array $tweak = null, ?string $picBaseUrl = null): Generation
     {
         $generation = DB::transaction(function () use ($project, $type, $createdBy) {
             /** @var Project $locked */
@@ -80,7 +80,7 @@ class DraftGenerationService
         });
 
         // Dispatch SELEPAS commit (elak job berjalan dalam transaksi kunci).
-        GenerateDraftJob::dispatch($generation->id, $tweak)->onQueue('ai');
+        GenerateDraftJob::dispatch($generation->id, $tweak, $picBaseUrl)->onQueue('ai');
 
         return $generation;
     }

@@ -56,7 +56,7 @@ class TweakController extends Controller
                 'categories' => $data['categories'] ?? [],
                 'message' => $data['message'],
                 'current_json' => $last?->output_json ?? [],
-            ]);
+            ], picBaseUrl: url('/b/'.$request->route('token')));
 
             TweakRequest::create([
                 'project_id' => $project->id,

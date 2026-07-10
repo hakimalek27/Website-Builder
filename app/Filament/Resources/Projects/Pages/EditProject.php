@@ -49,7 +49,7 @@ class EditProject extends EditRecord
 
                         // §13 — notifikasi PIC untuk kemas kini binaan.
                         if (in_array($target, [ProjectStatus::InBuild, ProjectStatus::InReview, ProjectStatus::Live], true)) {
-                            app(Notifier::class)->buildUpdated($record, $target->label(), 'pautan status anda');
+                            app(Notifier::class)->buildUpdated($record, $target->label(), 'pautan borang anda (menu Status)');
                         }
 
                         Notification::make()->title('Status dikemas kini')->success()->send();

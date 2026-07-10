@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Services\WhatsappGateway;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Mail\Mailable;
+use Illuminate\Contracts\Queue\ShouldBeEncrypted;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -15,7 +16,7 @@ use Illuminate\Support\Facades\Mail;
  * §13 — hantar WhatsApp melalui queue (tries=3, backoff=60). Kegagalan muktamad →
  * fallback mail + log (gateway sudah log). TIDAK menyekat aliran utama.
  */
-class SendWhatsappJob implements ShouldQueue
+class SendWhatsappJob implements ShouldBeEncrypted, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
