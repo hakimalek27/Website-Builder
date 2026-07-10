@@ -37,7 +37,11 @@ class DraftRenderer
         // Medan asal AI (mode butir_ringkas) untuk penanda "✎ Dijana AI".
         $aiFlags = $this->aiFlaggedSections($project);
 
+        $sections = $project->sections()->get()->mapWithKeys(fn ($s) => [$s->section_key => $s->data])->all();
+
         return view('draft.shell', [
+            'verbatim' => $this->verbatimData($project, $sections),   // AJK/bank/hubungi dari wizard (bukan AI) — render LOKAL
+            'heroImage' => $this->heroImage($project, $sections),
             'project' => $project,
             'content' => $content,
             'tokens' => $design['tokens'],
@@ -68,6 +72,82 @@ class DraftRenderer
         Storage::disk('local')->put($path, $html);
 
         return $path;
+    }
+
+    /**
+     * Data verbatim (BUKAN AI) dirender LOKAL sahaja dalam draf: perutusan nama/jawatan,
+     * AJK (cap 12), bank infaq/derma, hubungi + sosial (step_1). TIDAK dihantar ke AI.
+     *
+     * @param  array<string,mixed>  $sections
+     * @return array<string,mixed>
+     */
+    private function verbatimData(Project $project, array $sections): array
+    {
+        $l1 = $sections['step_1'] ?? [];
+        $l4 = $sections['step_4']['panels'] ?? [];
+        $out = [];
+
+        if (filled($l4['perutusan']['name'] ?? null)) {
+            $out['perutusan'] = ['name' => $l4['perutusan']['name'], 'role' => $l4['perutusan']['role'] ?? null];
+        }
+
+        $members = $l4['ajk']['members'] ?? [];
+        if (! empty($members)) {
+            $out['ajk'] = [
+                'members' => array_map(
+                    fn ($m) => ['name' => $m['name'] ?? null, 'position' => $m['position'] ?? null],
+                    array_slice(array_values($members), 0, 12),
+                ),
+                'total' => count($members),
+            ];
+        }
+
+        foreach (['infaq', 'derma'] as $bp) {
+            if (filled($l4[$bp]['bank_account'] ?? null)) {
+                $out['bank'] = [
+                    'bank_name' => $l4[$bp]['bank_name'] ?? null,
+                    'bank_account' => $l4[$bp]['bank_account'] ?? null,
+                    'account_holder' => $l4[$bp]['account_holder'] ?? null,
+                ];
+                break;
+            }
+        }
+
+        $address = trim(implode(', ', array_filter([$l1['address_line1'] ?? null, $l1['city'] ?? null, $l1['state'] ?? null])));
+        $out['contact'] = array_filter([
+            'phone' => $l1['phone_primary'] ?? null,
+            'email' => $l1['email'] ?? null,
+            'address' => $address ?: null,
+        ], fn ($v) => filled($v));
+
+        $out['socials'] = array_filter([
+            'facebook' => $l1['facebook_url'] ?? null,
+            'instagram' => $l1['instagram_url'] ?? null,
+            'youtube' => $l1['youtube_url'] ?? null,
+            'tiktok' => $l1['tiktok_url'] ?? null,
+        ], fn ($v) => filled($v));
+
+        return $out;
+    }
+
+    /**
+     * Imej hero sebagai data-URI (snapshot serba-lengkap) bila hero_mode=upload & aset ≤1.5MB.
+     * Lebih besar / tiada → null (fallback kecerunan CSS).
+     *
+     * @param  array<string,mixed>  $sections
+     */
+    private function heroImage(Project $project, array $sections): ?string
+    {
+        if (data_get($sections, 'step_6.hero_mode') !== 'upload') {
+            return null;
+        }
+
+        $asset = $project->assets()->where('kind', 'hero')->orderBy('sort')->first();
+        if ($asset === null || (int) $asset->size > 1_500_000 || ! Storage::disk('local')->exists($asset->path)) {
+            return null;
+        }
+
+        return 'data:'.($asset->mime ?: 'image/jpeg').';base64,'.base64_encode(Storage::disk('local')->get($asset->path));
     }
 
     /** Seksyen yang mengandungi kandungan mode AI (§9.4). */

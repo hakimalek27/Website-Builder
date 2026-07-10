@@ -17,6 +17,8 @@
     $divider = $divider ?? 'tiada';
     $animations = $animations ?? false;
     $showPrayer = $showPrayer ?? true;
+    $verbatim = $verbatim ?? [];       // data wizard render LOKAL (AJK/bank/hubungi)
+    $heroImage = $heroImage ?? null;
 
     // Gaya ikon kad khidmat.
     $iconStroke = \App\Support\Lucide::strokeForWeight($iconStyle['weight'] ?? 'sederhana');
@@ -88,6 +90,20 @@ h1,h2,h3{font-family:var(--font-display);line-height:1.2;color:var(--primary-dar
 .layout-hero-penuh h1,.layout-hero-penuh p{color:#fff}
 .layout-hero-penuh .eyebrow{background:rgba(255,255,255,.15);color:#fff}
 .layout-hero-mihrab .wrap{max-width:760px;background:var(--bg-alt);border-radius:280px 280px var(--radius) var(--radius);padding:64px 44px}
+/* Hero dengan imej muat naik (data-URI) */
+.hero.hero-img{background-size:cover;background-position:center}
+.hero.hero-img h1,.hero.hero-img p{color:#fff}
+.hero.hero-img .eyebrow{background:rgba(255,255,255,.18);color:#fff}
+/* Blok maklumat bank (verbatim) */
+.bank-card{max-width:420px;margin:22px auto 0;text-align:left}
+.bank-card .acc{font-size:1.05rem;font-weight:700;color:var(--primary);letter-spacing:.03em}
+/* FAQ */
+.faq details{background:#fff;border:1px solid var(--bg-alt);border-radius:var(--radius);padding:14px 20px;margin-bottom:10px}
+.faq summary{font-weight:700;cursor:pointer;color:var(--primary-dark)}
+.faq details p{margin-top:10px}
+/* Jalur hubungi */
+.contact-row{display:flex;gap:22px;justify-content:center;flex-wrap:wrap;font-size:.95rem}
+.contact-social{margin-top:14px;display:flex;gap:16px;justify-content:center;font-size:.85rem;opacity:.8}
 /* Pembatas seksyen */
 .divider-garis-emas{position:relative;height:2px;background:var(--accent);width:90px;margin:0 auto}
 .divider-garis-emas::after{content:"◆";position:absolute;top:-.7em;left:50%;transform:translateX(-50%);color:var(--accent);background:var(--bg);padding:0 10px;font-size:.7rem}
@@ -148,7 +164,8 @@ footer.ftr-tiga-lajur .cols a{display:block;opacity:.85;font-size:.85rem;margin-
     </header>
 
     {{-- Hero — susun atur ikut pilihan (§7) --}}
-    <section class="hero layout-{{ $layout }}">
+    <section class="hero layout-{{ $layout }}@if ($heroImage) hero-img @endif"
+        @if ($heroImage) style="background-image:linear-gradient(rgba(15,61,39,.72),rgba(15,61,39,.72)),url('{{ $heroImage }}')" @endif>
         <div class="wrap">
             @if ($showVerse)
                 <p class="arabic">{{ $verse->arabic_text }}</p>
@@ -200,6 +217,61 @@ footer.ftr-tiga-lajur .cols a{display:block;opacity:.85;font-size:.85rem;margin-
                         <div class="card stat"><span class="value">{{ $stat['value'] ?? '' }}</span><span class="label">{{ $stat['label'] ?? '' }}</span></div>
                     @endforeach
                 </div>
+            </div>
+        </section>
+    @endif
+
+    {{-- Perutusan (quote AI + nama/jawatan verbatim) --}}
+    @if (! empty($content['perutusan']) || ! empty($verbatim['perutusan']))
+        <section class="section">
+            <div class="wrap center" style="max-width:760px">
+                <span class="eyebrow">Perutusan</span>
+                <h2 style="margin:12px 0">{{ $content['perutusan']['heading'] ?? 'Perutusan' }}</h2>
+                @if (! empty($content['perutusan']['quote']))
+                    <p style="font-size:1.1rem;font-style:italic">"{{ $content['perutusan']['quote'] }}"</p>
+                @endif
+                @if (! empty($verbatim['perutusan']))
+                    <p style="margin-top:16px;font-weight:700">{{ $verbatim['perutusan']['name'] }}</p>
+                    <p style="opacity:.65;font-size:.85rem">{{ $verbatim['perutusan']['role'] ?? '' }}</p>
+                @endif
+                @if (in_array('perutusan', $aiFlags, true))<p class="ai-flag">✎ Dijana AI — sila semak</p>@endif
+            </div>
+        </section>
+    @endif
+
+    {{-- Visi & Misi --}}
+    @if (! empty($content['visi_misi']))
+        <section class="section section-alt">
+            <div class="wrap">
+                <h2 class="center" style="margin-bottom:28px">Visi &amp; Misi</h2>
+                <div class="grid grid-2">
+                    @if (! empty($content['visi_misi']['visi']))
+                        <div class="card"><h3>Visi</h3><p>{{ $content['visi_misi']['visi'] }}</p></div>
+                    @endif
+                    @if (! empty($content['visi_misi']['misi']))
+                        <div class="card"><h3>Misi</h3><p>{{ $content['visi_misi']['misi'] }}</p></div>
+                    @endif
+                </div>
+                @if (! empty($content['visi_misi']['moto']))
+                    <p class="center" style="margin-top:20px;font-style:italic;color:var(--primary)">"{{ $content['visi_misi']['moto'] }}"</p>
+                @endif
+            </div>
+        </section>
+    @endif
+
+    {{-- Jawatankuasa (AJK verbatim) --}}
+    @if (! empty($verbatim['ajk']['members']))
+        <section class="section">
+            <div class="wrap">
+                <h2 class="center" style="margin-bottom:28px">Jawatankuasa</h2>
+                <div class="grid grid-3">
+                    @foreach ($verbatim['ajk']['members'] as $m)
+                        <div class="card center"><h3 style="font-size:1rem">{{ $m['name'] }}</h3><p style="opacity:.65;font-size:.85rem">{{ $m['position'] ?? '' }}</p></div>
+                    @endforeach
+                </div>
+                @if ($verbatim['ajk']['total'] > count($verbatim['ajk']['members']))
+                    <p class="center" style="margin-top:16px;opacity:.6;font-size:.85rem">Senarai penuh ({{ $verbatim['ajk']['total'] }} ahli) akan dipaparkan di laman sebenar.</p>
+                @endif
             </div>
         </section>
     @endif
@@ -269,6 +341,14 @@ footer.ftr-tiga-lajur .cols a{display:block;opacity:.85;font-size:.85rem;margin-
                 <h2>{{ $content['infaq']['heading'] ?? 'Infaq' }}</h2>
                 <p style="max-width:640px;margin:12px auto 0">{{ $content['infaq']['paragraph'] ?? '' }}</p>
                 <div style="margin-top:20px"><span class="btn btn-primary">Infaq Sekarang</span></div>
+                @if (! empty($verbatim['bank']))
+                    <div class="card bank-card">
+                        <p style="font-weight:700;margin-bottom:6px">Maklumat Sumbangan</p>
+                        <p style="font-size:.9rem">{{ $verbatim['bank']['bank_name'] }}</p>
+                        <p class="acc">{{ $verbatim['bank']['bank_account'] }}</p>
+                        <p style="font-size:.85rem;opacity:.7">{{ $verbatim['bank']['account_holder'] }}</p>
+                    </div>
+                @endif
             </div>
         </section>
     @endif
@@ -280,6 +360,14 @@ footer.ftr-tiga-lajur .cols a{display:block;opacity:.85;font-size:.85rem;margin-
                 <h2>{{ $content['donate']['heading'] ?? 'Derma / Sumbangan' }}</h2>
                 <p style="max-width:640px;margin:12px auto 0">{{ $content['donate']['paragraph'] ?? '' }}</p>
                 <div style="margin-top:20px"><span class="btn btn-primary">Derma Sekarang</span></div>
+                @if (! empty($verbatim['bank']))
+                    <div class="card bank-card">
+                        <p style="font-weight:700;margin-bottom:6px">Maklumat Sumbangan</p>
+                        <p style="font-size:.9rem">{{ $verbatim['bank']['bank_name'] }}</p>
+                        <p class="acc">{{ $verbatim['bank']['bank_account'] }}</p>
+                        <p style="font-size:.85rem;opacity:.7">{{ $verbatim['bank']['account_holder'] }}</p>
+                    </div>
+                @endif
             </div>
         </section>
     @endif
@@ -326,6 +414,42 @@ footer.ftr-tiga-lajur .cols a{display:block;opacity:.85;font-size:.85rem;margin-
             <div class="wrap center">
                 <h2>{{ $content['visitor_info']['heading'] ?? 'Info Pelawat' }}</h2>
                 <p style="max-width:640px;margin:12px auto 0">{{ $content['visitor_info']['paragraph'] ?? '' }}</p>
+            </div>
+        </section>
+    @endif
+
+    {{-- Soalan Lazim (FAQ) --}}
+    @if (! empty($content['faq']))
+        <section class="section faq">
+            <div class="wrap" style="max-width:760px">
+                <h2 class="center" style="margin-bottom:28px">Soalan Lazim</h2>
+                @foreach ($content['faq'] as $f)
+                    <details>
+                        <summary>{{ $f['q'] ?? '' }}</summary>
+                        <p>{{ $f['a'] ?? '' }}</p>
+                    </details>
+                @endforeach
+            </div>
+        </section>
+    @endif
+
+    {{-- Jalur hubungi (verbatim step_1 — render LOKAL sahaja) --}}
+    @if (! empty($verbatim['contact']) || ! empty($verbatim['socials']))
+        <section class="section">
+            <div class="wrap center">
+                <h2 style="margin-bottom:16px">Hubungi Kami</h2>
+                <div class="contact-row">
+                    @if (! empty($verbatim['contact']['phone']))<span>☎ {{ $verbatim['contact']['phone'] }}</span>@endif
+                    @if (! empty($verbatim['contact']['email']))<span>✉ {{ $verbatim['contact']['email'] }}</span>@endif
+                    @if (! empty($verbatim['contact']['address']))<span>📍 {{ $verbatim['contact']['address'] }}</span>@endif
+                </div>
+                @if (! empty($verbatim['socials']))
+                    <div class="contact-social">
+                        @foreach ($verbatim['socials'] as $platform => $url)
+                            <a href="{{ $url }}">{{ ucfirst($platform) }}</a>
+                        @endforeach
+                    </div>
+                @endif
             </div>
         </section>
     @endif
