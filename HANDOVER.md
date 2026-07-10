@@ -1,6 +1,6 @@
 # HANDOVER — REKA (Website Builder)
 
-Kemas kini terakhir: **12 Julai 2026** · Branch: `main` · Remote: `github.com/hakimalek27/Website-Builder`
+Kemas kini terakhir: **11 Julai 2026** · Branch: `main` · Remote: `github.com/hakimalek27/Website-Builder`
 
 REKA — platform tempahan & penjanaan draf laman web **masjid, surau & NGO/pertubuhan Islam**.
 Stack: **Laravel 13.19 · PHP 8.4 · Filament v4.11 · Livewire 3 · Tailwind 4 · Pest** (dev: SQLite).
@@ -9,9 +9,24 @@ Stack: **Laravel 13.19 · PHP 8.4 · Filament v4.11 · Livewire 3 · Tailwind 4 
 
 ## Status semasa
 
-- **Fasa 0–10** + **rombakan UI/UX** + **Fasa 11** + **pembetulan pasca-audit** (`eca8f80`, `d027778`) + **fix AiClient OpenAI moden** (`f61ddec`) + **Fasa 12** (7 commit: `806d17a`→`ca674c1`) + **Fasa 13** (7 commit: `22b159a`→`0a5a172`).
-- **226 ujian Pest hijau** (786 assertions) · `pint` bersih · `npm run build` bersih.
+- **Fasa 0–10** + **rombakan UI/UX** + **Fasa 11** + **pembetulan pasca-audit** (`eca8f80`, `d027778`) + **fix AiClient OpenAI moden** (`f61ddec`) + **Fasa 12** (7 commit: `806d17a`→`ca674c1`) + **Fasa 13** (7 commit: `22b159a`→`0a5a172`) + **Fasa 14** (6 commit: `02c3e5c`→`9c534eb`).
+- **258 ujian Pest hijau** (878 assertions) · `pint` bersih · `npm run build` bersih.
 - Semua kerja **di-push ke `main`**.
+
+### Fasa 14 — QA Auto, Salin Prompt, finish_reason, Varian Animasi & Audit Admin (11 Jul 2026)
+
+Empat ciri dari senarai "cadangan masa depan" Fasa 13 + fix bug + audit admin.
+
+1. **`02c3e5c` W1 fix bug** — `Setting::putIfMissing()` (guard `exists()`, bukan `get()` — nilai null yang sah tidak ditindih); `SettingsSeeder` semua `put`→`putIfMissing` (seed semula pada DB terkonfigurasi **tidak lagi memadam kunci API WhatsApp**). Migration `is_prompt_engineer` dijalankan pada DB dev — betulkan QueryException "no such column" semasa edit Penyedia AI.
+2. **`2dc1285` W2 finish_reason** — `AiResult::$finishReason` (dinormalkan: OpenAI `length`, Anthropic `max_tokens`→`length`). `GenerateDraftJob::handleHtml` gagal awal bila P2 `finishReason==='length'` (sebelum validasi struktur) → makan 1 percubaan retry, jimat masa. Direkod dalam snapshot stage1/stage2; ProjectInfolist papar `henti: length`.
+3. **`0af9ba9` W3 QA auto** — `DraftQaService` (saluran HTML): (a) setiap halaman dipilih hadir sebagai `<section id="{page_key}">` (fallback label/hero); (b) kontras token WCAG AA (`ink/bg`, `primary/bg`, `putih/primary`, **`primaryDark/accent`** — bukan accent/bg yang hiasan); (c) kontras inline AI (lapor). Wire ke Job (**Throwable-safe, TIDAK menghalang draf**) → `snapshot['qa']` + `Notifier::qaFlagged` (WA+mail admin, event `qa.flagged`) bila ada isu. Prompt diketatkan `id="{page_key}"` deterministik. `PaletteDeriver::MIN_CONTRAST` public.
+4. **`37c7822` W4 Salin Prompt** — `Action 'salinPrompt'` di ViewProject header: salin prompt jurutera terkini ke papan klip (`$livewire->js(navigator.clipboard)`) + notifikasi. Visible bila prompt wujud. **Perlu konteks selamat** (localhost/HTTPS).
+5. **`20ac88c` W5 varian animasi** — `tiada`/`fade`/`zoom` (dulu boolean tunggal). `DesignResolver::ANIMATIONS` + `animationVariant()` (pemetaan legasi bool→string). step-2 radio 3 pilihan; pratonton kini terima `:animations`, `data-animation` + `<style>` berskop (reduced-motion-gated, `rk-sec`) + `wire:key` main semula. shell keyframes `zoomIn`; prompt HTML beri arahan gaya CSS-only. **TIADA migration** (overrides JSON; projek lama bool kekal berfungsi).
+6. **`9c534eb` W6 audit admin** — buang `CreateAction` mengelirukan di ListProjects (`canCreate=false`); `AdminAuditTest` boot-smoke SEMUA permukaan admin (Dashboard/4 resource/Settings/borang) tanpa 500 + regresi simpan AiProvider. Semakan visual langsung wizard L2 (radio + pratonton animasi) dalam browser sebenar.
+
+**Keputusan owner:** varian animasi = naik taraf 3 pilihan · QA = laporan + WA/mail bila ada isu (draf tak dihalang). **Anggaran kos/jana kekal ~USD 0.44.**
+
+**⚠ Audit admin LIVE (2FA) — untuk owner:** log masuk `/admin` + 2FA TOTP, kemudian semak setiap halaman/butang mengikut checklist W6 dalam pelan (`~/.claude/plans/kemaskini-ui-ux-setiap-cozy-muffin.md`). Audit peringkat-kod (boot-smoke) sudah lulus; ini pengesahan visual sahaja.
 
 ### Fasa 13 — Saluran Draf HTML Dua-Peringkat (12 Jul 2026)
 
@@ -85,6 +100,8 @@ Admin pilih vendor → base URL + driver auto → API key + model. OpenAI/Anthro
 
 ## Tindakan tertunggak sebelum go-live (bukan bug)
 
+- **Deploy: WAJIB `php artisan migrate`** selepas `git pull` (Fasa 14 — migration `is_prompt_engineer` mesti dijalankan; kalau tertinggal, edit Penyedia AI akan 500 "no such column"). Seeder kini idempoten (`putIfMissing`) — `db:seed --class=SettingsSeeder` selamat diulang, tidak menindih kunci API admin.
+- **Salin Prompt (Fasa 14) perlu HTTPS** di produksi — `navigator.clipboard` hanya berfungsi konteks selamat (localhost dev OK). Tanpa HTTPS, butang senyap (tiada ralat).
 - **Saluran HTML (Fasa 13) — konfigur 2 penyedia AI** di admin **Penyedia AI**: (1) OpenAI `gpt-5.5` + toggle **Jurutera Prompt**; (2) OpenRouter `z-ai/glm-5.2` + toggle **Default** (cadang `timeout_s`=180 kerana output HTML besar). Kunci API tampal via borang (encrypted) — **JANGAN commit**. Tetapan **Saluran draf** = `HTML` (sudah lalai seed). Tanpa penyedia Jurutera Prompt, penjanaan **gagal terus** (mail+WA admin).
 - **Kunci API WhatsApp** (`whatsapp_api_key`) — tampal melalui borang **Tetapan admin** (encrypted DB). **JANGAN commit.** Kemudian tekan "Uji Hantar" (mesej sampai 60189030363 dari peranti 60174627287).
 - **Migration tier→string** (`2026_07_11_000002`) — sudah lulus SQLite dev; **jalankan `php artisan migrate --pretend` di staging MySQL** sebelum deploy produksi (sahkan `MODIFY COLUMN VARCHAR(40)` kekalkan nilai).
@@ -96,7 +113,7 @@ Admin pilih vendor → base URL + driver auto → API key + model. OpenAI/Anthro
 ## Perintah penting
 
 ```bash
-php artisan test                 # 226 ujian Pest
+php artisan test                 # 258 ujian Pest
 php artisan migrate:fresh --seed # skema + seed (59 zon, 14 pakej, verse, 9 settings)
 npm run build                    # aset (guna ini untuk ujian browser tempatan)
 vendor/bin/pint --dirty          # format PHP

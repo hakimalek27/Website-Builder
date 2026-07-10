@@ -2,7 +2,7 @@
 
 > Catatan lengkap perjalanan projek **REKA** (platform tempahan & penjanaan draf laman web masjid, surau & NGO/pertubuhan Islam milik **Wehdah Solution**) — dari pembinaan awal, audit visual, sehingga demo hujung-ke-hujung mengisi wizard sebagai PIC untuk **PERKIB**.
 >
-> Kemas kini terakhir: **12 Julai 2026** (Fasa 13) · Branch `main` · Remote `github.com/hakimalek27/Website-Builder`
+> Kemas kini terakhir: **11 Julai 2026** (Fasa 14) · Branch `main` · Remote `github.com/hakimalek27/Website-Builder`
 > Stack: Laravel 13.19 · PHP 8.4 · Filament v4.11 · Livewire 3 · Tailwind 4 · Pest · Intervention Image v4 (dev: SQLite)
 
 ---
@@ -173,6 +173,41 @@ Mod **boleh-tukar** (saluran lama kekal) · had tweak = **kuota sedia ada** (3 =
 5. **Placeholder verbatim:** `[[CONTACT_STRIP]]`(wajib)·`[[BANK_BLOCK]]`·`[[AJK_GRID]]`·`[[PERUTUSAN_NAMA]]`·`[[HERO_IMAGE]]`·`[[WAKTU_SOLAT]]`·`[[AYAT_ARAB]]` (masjid). Token wajib hilang → fallback sebelum `</body>`; token yatim dibuang.
 6. **Gotcha docblock:** urutan `*/` dalam komen (cth `on*/`) menutup blok komen awal → parse error. Elak.
 7. **`file_upload`/Chrome interaktif** masih bermasalah — liputan penuh via **226 ujian automasi** (Phase13: AiClientOptions/PromptEngineerProvider/SettingsPipeline/HtmlPromptBuilder/HtmlValidator/HtmlFinisher/HtmlPipelineGeneration/HtmlTweak/PipelineUx/AdminHtmlVisibility/Step2Preview).
+
+---
+
+## BAHAGIAN G — Fasa 14: QA Auto, Salin Prompt, finish_reason, Varian Animasi & Audit Admin (11 Jul 2026)
+
+Empat ciri dari senarai "cadangan masa depan" Fasa 13, ditambah **fix bug dilaporkan** (`# IlluminateDatabaseQueryException.txt` di Desktop) dan **audit dashboard admin menyeluruh** ("jgn terlepas apa2").
+
+### Kaedah — 3 agen Explore + 1 agen Plan (selari)
+Tiga agen Explore serentak (aliran AI + hook QA · admin Filament + inventori audit · design-preview animasi), kemudian 1 agen Plan. **Penemuan yang mengubah skop:**
+- **Bug punca disahkan:** migration `2026_07_12_000001` (is_prompt_engineer) masih **Pending** pada DB dev — punca QueryException. Bug bonus: `SettingsSeeder` guna `put` → seed semula memadam kunci API WhatsApp.
+- **"Varian animasi" tak wujud:** sistem sedia ada cuma **checkbox boolean** (satu efek fadeUp) dan pratonton **langsung tak menunjukkannya** — owner pilih **naik taraf 3 varian**.
+- **Kontras `accent/bg` akan false-flag 100% draf** (pakej default `warisan_hijau` skor ≈2.1:1) → guna pasangan yang benar-benar dirender `primaryDark/accent`.
+
+### 6 commit (`02c3e5c`→`9c534eb`, 258 ujian)
+| Commit | Bidang | Ringkasan |
+|---|---|---|
+| `02c3e5c` | **W1 fix bug** | `Setting::putIfMissing()` (guard `exists()`); `SettingsSeeder` idempoten (tidak tindih kunci API admin). Migration dijalankan → betulkan QueryException edit Penyedia AI. |
+| `2dc1285` | **W2 finish_reason** | `AiResult::$finishReason` (normalkan `max_tokens`→`length`); `handleHtml` gagal awal bila P2 terpotong (jimat masa retry); rekod snapshot; ProjectInfolist `henti: length`. |
+| `0af9ba9` | **W3 QA auto** | `DraftQaService` (seksyen `id={page_key}` + kontras token WCAG `primaryDark/accent` + inline lapor); wire ke Job **Throwable-safe** (tak halang draf) → `snapshot['qa']` + `Notifier::qaFlagged` (event `qa.flagged`); prompt diketatkan id deterministik. |
+| `37c7822` | **W4 Salin Prompt** | `Action 'salinPrompt'` ViewProject → papan klip (`$livewire->js(navigator.clipboard)`) + notifikasi; visible bila prompt wujud. |
+| `20ac88c` | **W5 varian animasi** | `tiada`/`fade`/`zoom`: `DesignResolver::ANIMATIONS`+`animationVariant()` (legasi bool→string); radio L2; pratonton `data-animation`+`<style>` berskop `rk-sec`+`wire:key`; shell `zoomIn`; prompt arahan CSS-only. TIADA migration. |
+| `9c534eb` | **W6 audit admin** | buang `CreateAction` mengelirukan (ListProjects); `AdminAuditTest` boot-smoke semua permukaan + regresi simpan AiProvider. |
+
+### Keputusan owner direkod
+Animasi = **naik taraf 3 varian** (bukan sekadar pratonton toggle) · QA = **laporan + WA/mail admin bila ada isu** (draf TIDAK dihalang) · **TIADA migration** (varian animasi dalam overrides JSON; pipeline QA dalam `input_snapshot`).
+
+### Nota teknikal Fasa 14
+1. **Guard seeder `exists()`, bukan `get()`:** `whatsapp_session_id`/`api_key` memang di-seed **null** — `get()` tak boleh beza "baris null" vs "tiada baris"; hanya `exists()` betul.
+2. **QA WAJIB Throwable-safe:** dipanggil dalam blok berjaya selepas fail draf disimpan; bug regex TIDAK boleh menggagalkan draf sah atau membakar kuota (try/catch + `report()`).
+3. **finish_reason JANGAN bump max_tokens antara percubaan:** `OpenAiCompatibleClient::adaptPayload` sudah **turunkan** cap ("at most N") — bump akan berlawan; terpotong = isu konfigurasi `html_max_tokens`.
+4. **Livewire morph replay animasi:** tanpa `wire:key` pada wrapper pratonton (keyed ikut varian), morphdom hanya patch atribut → animasi CSS **tak main semula** bila ditukar.
+5. **`has-anim-fade` mengandungi substring `has-anim`:** ujian lama lulus **hampa** — kemas kini assertion semak kelas BODY tepat (definisi `.has-anim-*` sentiasa dalam stylesheet).
+6. **Legasi boolean animasi 3 tempat:** overrides (resolver `animationVariant`), data step_2 → radio (`WizardStep::mount` normalize), paparan presenter (cabang `is_bool` kekal Ya/Tidak).
+7. **Audit admin 2 lapis:** boot-smoke automasi (`AdminAuditTest` — semua resource/page/widget tanpa 500 + regresi bug sebenar) mengesahkan tiada 500; audit **visual** (2FA) diserah owner. Pratonton animasi W5 disahkan **langsung dalam browser** (radio → `data-animation="zoom"` → 4 `rk-sec` → `<style> rkZoomIn`).
+8. **Salin Prompt perlu konteks selamat:** `navigator.clipboard` undefined atas HTTP bukan-localhost — guard `if (navigator.clipboard)` elak ralat; produksi WAJIB HTTPS.
 
 ---
 
