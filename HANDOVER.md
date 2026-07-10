@@ -9,9 +9,16 @@ Stack: **Laravel 13.19 · PHP 8.4 · Filament v4.11 · Livewire 3 · Tailwind 4 
 
 ## Status semasa
 
-- **Fasa 0–10 siap** + **rombakan UI/UX Premium Islamik-Moden** + **Fasa 11** (11 commit: pepijat, NGO, pelbagaian design, auto-jana, WhatsApp Wehdah).
-- **144 ujian Pest hijau** (529 assertions) · `pint` bersih · `npm run build` bersih · `migrate:fresh --seed` bersih.
+- **Fasa 0–10 siap** + **rombakan UI/UX Premium Islamik-Moden** + **Fasa 11** (11 commit: pepijat, NGO, pelbagaian design, auto-jana, WhatsApp Wehdah) + **pembetulan pasca-audit** (`eca8f80`, `d027778`).
+- **146 ujian Pest hijau** (535 assertions) · `pint` bersih · `npm run build` bersih · `migrate:fresh --seed` bersih.
 - Semua kerja **di-push ke `main`**.
+
+### Pembetulan pasca-Fasa 11 (audit, 10 Jul 2026)
+
+1. **`eca8f80` fix(ngo):** render wizard **langkah 3/4** ikut tier — `step-3`/`step-4.blade` dulu guna `PageCatalog::meta()/panels()/clusters()` (masjid sahaja) → render NGO **500 "Undefined array key derma"**. Kini `WizardStep::render()` pass `metaFor/clustersFor/panelsFor($tier)`; blade guna `$pageMeta/$pageClusters/$pagePanels`. +2 ujian regresi HTTP.
+2. **`d027778` fix(dev+admin)** — ditemui semasa **audit visual Chrome hujung-ke-hujung**:
+   - **Vite dev `[::1]`:** `vite.config.js` set `server.host: '127.0.0.1'`. Tanpa ini Vite bind IPv6 & tulis `http://[::1]:5173` ke `public/hot` → `[::1]` bukan host-source CSP sah → **semua aset dev disekat, halaman awam runtuh tanpa gaya** bila `npm run dev`.
+   - **Tetapan berselerak:** `ManageSettings` guna kelas Tailwind arbitrari dalam blade (tak dikompil tema panel Filament). Tukar ke **Filament Schema** (`Section`+`TextInput`).
 
 ---
 
