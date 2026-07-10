@@ -17,6 +17,7 @@ use App\Services\Ai\DraftValidationException;
 use App\Services\Ai\HtmlDraftValidator;
 use App\Services\Ai\HtmlPromptBuilder;
 use App\Services\Ai\PromptBuilder;
+use App\Services\DraftQaService;
 use App\Services\DraftRenderer;
 use App\Services\HtmlDraftFinisher;
 use App\Services\Notifier;
@@ -28,6 +29,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Throwable;
 
 /**
  * §8.6 — TUJUH langkah. $tries=1 (retry MANUAL dalam handle 30s/90s).
@@ -239,6 +241,15 @@ class GenerateDraftJob implements ShouldBeEncrypted, ShouldQueue
                 $path = "drafts/{$project->id}/{$generation->id}.html";
                 Storage::disk('local')->put($path, $final);
 
+                // QA auto (§Fasa 14) — WAJIB Throwable-safe: bug QA TIDAK boleh menggagalkan
+                // draf yang sudah sah/tersimpan atau membakar kuota. Dipanggil selepas fail disimpan.
+                $qa = null;
+                try {
+                    $qa = app(DraftQaService::class)->analyse($project, $final);
+                } catch (Throwable $e) {
+                    report($e);
+                }
+
                 $generation->update([
                     'status' => GenerationStatus::Succeeded,
                     'output_json' => null,
@@ -248,12 +259,17 @@ class GenerateDraftJob implements ShouldBeEncrypted, ShouldQueue
                     'cost_estimate' => round($costTotal, 4),
                     'finished_at' => now(),
                 ]);
-                $this->snapshotMerge($generation, [
+                $this->snapshotMerge($generation, array_filter([
                     'raw_path' => $rawPath,
                     'stage2' => ['provider' => $provider->name, 'model' => $provider->model, 'tokens_in' => $res2->tokensIn, 'tokens_out' => $res2->tokensOut, 'attempts' => $attempt, 'finish_reason' => $res2->finishReason],
-                ]);
+                    'qa' => $qa,
+                ], fn ($v) => $v !== null));
 
                 $this->succeedCommon($project, $generation);
+
+                if (! empty($qa['issues'])) {
+                    app(Notifier::class)->qaFlagged($generation, $qa['issues']);
+                }
 
                 return;
             } catch (DraftValidationException|AiException $e) {

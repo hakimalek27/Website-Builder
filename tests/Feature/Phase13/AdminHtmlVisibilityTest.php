@@ -73,6 +73,36 @@ it('shows the prompt and cost breakdown in the admin infolist', function () {
         ->assertSee('Bina draf HTML Masjid Ujian');   // pratonton prompt
 });
 
+it('shows the QA verdict in the admin infolist', function () {
+    $this->actingAs(User::factory()->create());
+    [$project, $gen] = htmlGenProject();
+
+    // Draf dengan isu QA.
+    $snap = $gen->input_snapshot;
+    $snap['qa'] = ['passed' => false, 'issues' => [
+        ['type' => 'missing_section', 'page_key' => 'galeri', 'mesej' => 'Seksyen "Galeri" (galeri) tidak ditemui dalam draf.'],
+    ], 'checked_at' => now()->toIso8601String()];
+    $gen->update(['input_snapshot' => $snap]);
+
+    Livewire::test(ViewProject::class, ['record' => $project->id])
+        ->assertOk()
+        ->assertSee('QA')
+        ->assertSee('tidak ditemui');
+});
+
+it('shows the QA pass verdict in the admin infolist', function () {
+    $this->actingAs(User::factory()->create());
+    [$project, $gen] = htmlGenProject();
+
+    $snap = $gen->input_snapshot;
+    $snap['qa'] = ['passed' => true, 'issues' => [], 'checked_at' => now()->toIso8601String()];
+    $gen->update(['input_snapshot' => $snap]);
+
+    Livewire::test(ViewProject::class, ['record' => $project->id])
+        ->assertOk()
+        ->assertSee('lulus');
+});
+
 it('includes the engineered prompt and tweak thread in the brief', function () {
     [$project, $gen] = htmlGenProject();
     TweakRequest::create([

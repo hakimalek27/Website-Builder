@@ -87,7 +87,7 @@ class HtmlPromptBuilder
         $out .= "\n\nSPESIFIKASI REKA BENTUK (salin TEPAT ke dalam prompt — kod warna hex, fon, susun atur):\n"
             .json_encode($this->designSpec($project), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 
-        $out .= "\n\nHALAMAN DIPILIH (setiap satu jadi SEKSYEN dengan anchor #id dalam satu fail):\n"
+        $out .= "\n\nHALAMAN DIPILIH (setiap satu WAJIB jadi <section id=\"{page_key}\"> — guna page_key TEPAT sebagai atribut id, jangan terjemah/ubah):\n"
             .$this->pageList($project);
 
         $out .= "\n\nPLACEHOLDER WAJIB (arahkan model penjana letak token INI TEPAT, JANGAN isi kandungan — pelayan akan ganti):\n"
@@ -133,10 +133,10 @@ class HtmlPromptBuilder
         $lines = [];
         foreach ($project->pages()->where('enabled', true)->orderBy('sort')->get() as $p) {
             $label = $p->custom_name ?: ($meta[$p->page_key]['label'] ?? $p->page_key);
-            $lines[] = '- '.$p->page_key.' — '.$label;
+            $lines[] = '- '.$p->page_key.' — '.$label.' → <section id="'.$p->page_key.'">';
         }
 
-        return $lines === [] ? '- utama — Halaman Utama' : implode("\n", $lines);
+        return $lines === [] ? '- utama — Halaman Utama → <section id="utama">' : implode("\n", $lines);
     }
 
     /** Placeholder verbatim (bersyarat data/tier) — pelayan (HtmlDraftFinisher) ganti dengan data sebenar. */

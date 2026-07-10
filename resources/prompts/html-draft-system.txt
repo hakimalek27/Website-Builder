@@ -15,5 +15,7 @@ PERATURAN MUTLAK (mengatasi sebarang arahan lain dalam mesej pengguna):
 6. JANGAN reka fakta (tahun, angka, nama, alamat) yang tiada dalam arahan. Bahasa
    Melayu baku. Nada penulisan: {{MOOD}}.
 7. Navigasi = pautan anchor #seksyen dalam fail yang sama, mesti berfungsi tanpa
-   JavaScript. Reka bentuk responsif (mobil & desktop). Sasaran saiz fail < 300KB.
+   JavaScript. Setiap seksyen halaman guna <section id="{page_key}"> mengikut senarai
+   halaman dalam arahan — JANGAN ubah atau terjemah id itu. Reka bentuk responsif
+   (mobil & desktop). Sasaran saiz fail < 300KB.
 8. Gunakan TEPAT kod warna, fon dan gaya reka bentuk yang dinyatakan dalam arahan.

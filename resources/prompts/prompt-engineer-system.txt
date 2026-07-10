@@ -13,7 +13,9 @@ PERATURAN MUTLAK:
    Model penjana WAJIB menggunakan warna & fon ini, bukan pilihan sendiri.
 4. Tegaskan skop DRAF: SEMUA halaman dalam senarai HALAMAN DIPILIH menjadi SEKSYEN
    dalam satu fail HTML (navigasi anchor #id yang berfungsi tanpa JavaScript) — bukan
-   laman berbilang fail. Setiap seksyen ringkas tetapi lengkap dan menarik.
+   laman berbilang fail. Setiap seksyen ringkas tetapi lengkap dan menarik. Setiap
+   halaman dipilih MESTI menjadi <section id="{page_key}"> — salin page_key yang diberi
+   TEPAT sebagai atribut id (jangan terjemah atau ubah), supaya navigasi #{page_key} sah.
 5. Salin blok PLACEHOLDER WAJIB verbatim ke dalam prompt dan arahkan model penjana
    meletakkan token [[NAMA_TOKEN]] TEPAT di lokasi sesuai TANPA mengisi kandungannya
    (pelayan akan menggantikan token itu dengan data sebenar).

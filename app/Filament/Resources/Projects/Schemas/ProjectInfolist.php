@@ -152,6 +152,19 @@ class ProjectInfolist
                 $lines[] = '- **Arahan tweak:** '.($cats !== '' ? "({$cats}) " : '').($snap['tweak']['message'] ?? '');
             }
 
+            // QA auto (§Fasa 14) — semak seksyen & kontras.
+            if (! empty($snap['qa'])) {
+                $qa = $snap['qa'];
+                if ($qa['passed'] ?? false) {
+                    $lines[] = '- **QA:** ✅ lulus (seksyen & kontras)';
+                } else {
+                    $lines[] = '- **QA:** ⚠ '.count($qa['issues'] ?? []).' isu';
+                    foreach (($qa['issues'] ?? []) as $i) {
+                        $lines[] = '  - '.str_replace('|', '/', (string) ($i['mesej'] ?? ''));
+                    }
+                }
+            }
+
             $dl = [];
             if (filled($snap['engineered_prompt'] ?? null)) {
                 $dl[] = '[muat turun prompt]('.route('admin.prompt', $g).')';

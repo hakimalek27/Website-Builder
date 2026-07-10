@@ -48,6 +48,9 @@ it('builds an engineer request carrying design spec, page labels and placeholder
     // Halaman dipilih (label BM).
     expect($u)->toContain('Visi & Misi')->toContain('Infaq / Derma');
 
+    // §Fasa 14 — arahan id seksyen deterministik (page_key).
+    expect($u)->toContain('<section id="utama">')->toContain('<section id="infaq">');
+
     // Placeholder wajib + bersyarat.
     expect($u)->toContain('[[CONTACT_STRIP]]')
         ->toContain('[[BANK_BLOCK]]')

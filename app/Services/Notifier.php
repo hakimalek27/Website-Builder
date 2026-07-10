@@ -111,6 +111,16 @@ class Notifier
             new AdminAlertMail('Penjanaan gagal', $msg), $this->adminEmail());
     }
 
+    /** QA draf menemui isu (§Fasa 14) — makluman admin sahaja; draf TIDAK disekat. */
+    public function qaFlagged(Generation $generation, array $issues): void
+    {
+        $name = $generation->project?->mosque_name ?? 'projek';
+        $first = Str::limit((string) ($issues[0]['mesej'] ?? ''), 80);
+        $msg = "REKA: QA draf {$name} — ".count($issues)." isu dikesan ({$first}). Semak di panel admin.";
+        $this->whatsapp($this->adminPhoneOrNull(), $msg, $generation->project, 'qa.flagged',
+            new AdminAlertMail('QA draf', $msg), $this->adminEmail());
+    }
+
     public function quotaExhausted(Project $project, string $note): void
     {
         $this->whatsapp($this->adminPhoneOrNull(), "Nota kuota dari {$project->mosque_name}: {$note}", $project, 'quota.exhausted_note');

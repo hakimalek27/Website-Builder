@@ -8,7 +8,7 @@ namespace App\Support;
  */
 class PaletteDeriver
 {
-    private const MIN_CONTRAST = 4.5;
+    public const MIN_CONTRAST = 4.5;
 
     public static function isValidHex(?string $hex): bool
     {
