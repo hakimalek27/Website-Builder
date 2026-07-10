@@ -73,3 +73,24 @@ it('shows the NGO group and cards on step 0', function () {
         ->assertSee('Pertubuhan / NGO')
         ->assertSee('NGO (Komuniti)');
 });
+
+// Regression: step-3/step-4 blade dulu guna PageCatalog::meta()/panels()/clusters() (masjid sahaja)
+// → render NGO 500 "Undefined array key derma". Kini render() pass versi *For($tier).
+it('renders the NGO step 3 clusters and step 4 panels via HTTP', function () {
+    [$project, $token] = picSession(['tier' => Tier::NgoKomuniti]);
+    enablePages($project, ['utama', 'profil', 'program_utama', 'sukarelawan', 'keahlian', 'derma', 'hubungi']);
+
+    $ngoCluster = array_key_first(PageCatalog::clustersFor(Tier::NgoKomuniti));
+    $dermaLabel = PageCatalog::metaFor(Tier::NgoKomuniti)['derma']['label'];
+
+    $this->get("/b/{$token}/langkah/3")->assertOk()->assertSee($ngoCluster);
+    $this->get("/b/{$token}/langkah/4")->assertOk()->assertSee($dermaLabel);
+});
+
+it('still renders masjid step 3 and step 4 via HTTP (byte-path guard)', function () {
+    [$project, $token] = picSession(['tier' => Tier::MasjidKariah]);
+    enablePages($project, ['utama', 'hubungi', 'infaq']);
+
+    $this->get("/b/{$token}/langkah/3")->assertOk();
+    $this->get("/b/{$token}/langkah/4")->assertOk();
+});

@@ -1,7 +1,7 @@
 {{-- Langkah 3 — Struktur Halaman (§6 L3) --}}
 @php
     use App\Support\PageCatalog;
-    $meta = PageCatalog::meta();
+    // $pageMeta / $pageClusters di-pass dari WizardStep::render() (mengikut tier: masjid atau NGO).
     $selected = $data['pages'] ?? [];
     $enabledCount = count(array_unique(array_merge($selected, PageCatalog::MANDATORY)))
         + collect($data['custom'] ?? [])->filter(fn ($c) => filled($c['name'] ?? null))->count();
@@ -18,7 +18,7 @@
         <span class="text-sm font-medium">Halaman Utama <span class="text-xs text-gold-700">(wajib)</span></span>
     </label>
 
-    @foreach (PageCatalog::clusters() as $cluster => $keys)
+    @foreach ($pageClusters as $cluster => $keys)
         <div class="mb-4">
             <h3 class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink/50">{{ $cluster }}</h3>
             <div class="grid gap-2 sm:grid-cols-2">
@@ -30,10 +30,10 @@
                                class="mt-0.5 h-4 w-4 accent-brand-600">
                         <span class="flex-1">
                             <span class="block text-sm font-medium">
-                                {{ $meta[$key]['label'] }}
+                                {{ $pageMeta[$key]['label'] }}
                                 @if ($isMandatory) <span class="text-xs text-gold-700">(wajib)</span> @endif
                             </span>
-                            <span class="block text-xs text-ink/50" title="{{ $meta[$key]['tooltip'] }}">{{ $meta[$key]['tooltip'] }}</span>
+                            <span class="block text-xs text-ink/50" title="{{ $pageMeta[$key]['tooltip'] }}">{{ $pageMeta[$key]['tooltip'] }}</span>
                         </span>
                     </label>
                 @endforeach

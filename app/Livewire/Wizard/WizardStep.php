@@ -754,7 +754,12 @@ class WizardStep extends Component
         ];
 
         if (in_array($this->step, [3, 4], true)) {
-            $viewData['activePanels'] = $this->activePanels($this->resolveProject());
+            $project = $this->resolveProject();
+            $viewData['activePanels'] = $this->activePanels($project);
+            // Katalog mengikut tier — NGO ada kluster/panel/meta sendiri; masjid delegate verbatim.
+            $viewData['pageMeta'] = PageCatalog::metaFor($project->tier);
+            $viewData['pageClusters'] = PageCatalog::clustersFor($project->tier);
+            $viewData['pagePanels'] = PageCatalog::panelsFor($project->tier);
         }
 
         return view('livewire.wizard.wizard-step', $viewData);
