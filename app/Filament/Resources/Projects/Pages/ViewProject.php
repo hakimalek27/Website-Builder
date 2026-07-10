@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Projects\Pages;
 
 use App\Filament\Resources\Projects\ProjectResource;
 use App\Models\Project;
+use App\Services\BriefBuilder;
 use App\Services\Notifier;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
@@ -11,6 +12,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ViewProject extends ViewRecord
 {
@@ -51,6 +53,17 @@ class ViewProject extends ViewRecord
 
                     Notification::make()->title('Balasan dihantar kepada PIC')->success()->send();
                 }),
+
+            // Muat turun brief MD penuh (Fasa 12 W3).
+            Action::make('brief')
+                ->label('Muat Turun Brief (MD)')
+                ->icon('heroicon-o-document-text')
+                ->color('gray')
+                ->action(fn (Project $record): StreamedResponse => response()->streamDownload(
+                    fn () => print (app(BriefBuilder::class)->markdown($record)),
+                    app(BriefBuilder::class)->fileName($record),
+                    ['Content-Type' => 'text/markdown; charset=UTF-8'],
+                )),
 
             // Lihat draf terkini dalam panel.
             Action::make('lihatDraf')

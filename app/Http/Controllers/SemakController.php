@@ -10,6 +10,7 @@ use App\Models\Project;
 use App\Services\CompletenessService;
 use App\Services\DraftGenerationService;
 use App\Services\Notifier;
+use App\Support\ProjectDataPresenter;
 use App\Support\WizardSteps;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -35,6 +36,7 @@ class SemakController extends Controller
             'result' => $completeness->compute($project),
             'steps' => WizardSteps::all(),
             'sections' => $sections,
+            'stepBlocks' => ProjectDataPresenter::all($project, maskPii: true),
             'maskedBank' => $maskedBank,
             'alreadySubmitted' => in_array($project->status, [
                 ProjectStatus::Submitted, ProjectStatus::DraftReady, ProjectStatus::Approved,

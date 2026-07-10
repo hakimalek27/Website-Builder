@@ -22,5 +22,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Templat handover di resources/handover/ (§16.D) — namespace 'handover'.
         View::addNamespace('handover', resource_path('handover'));
+        // Templat brief penuh (Fasa 12 W3) — namespace 'brief'.
+        View::addNamespace('brief', resource_path('brief'));
     }
 }

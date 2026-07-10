@@ -93,6 +93,23 @@
         @endforeach
     </div>
 
+    {{-- Butiran yang diisi (nilai) — bank bermask --}}
+    @if (! empty($stepBlocks))
+        <div class="mt-8">
+            <h3 class="mb-3 px-1 text-xs font-semibold tracking-wider text-ink/45 uppercase">Butiran yang anda isi</h3>
+            <div class="space-y-2">
+                @foreach ($stepBlocks as $block)
+                    <details class="rounded-2xl bg-white px-4 py-3 shadow-xs ring-1 ring-sand">
+                        <summary class="cursor-pointer text-sm font-medium text-brand-800">{{ $block['title'] }}</summary>
+                        <div class="mt-3 text-sm text-ink/75 [&_a]:text-brand-600 [&_strong]:font-semibold [&_strong]:text-ink [&_ul]:mt-1 [&_ul]:list-disc [&_ul]:space-y-0.5 [&_ul]:pl-5">
+                            {!! \Illuminate\Support\Str::markdown($block['markdown']) !!}
+                        </div>
+                    </details>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
     @if ($maskedBank)
         <p class="mt-4 flex items-center gap-2 text-xs text-ink/50">
             {!! \App\Support\Lucide::svg('Lock', 2, 'h-3.5 w-3.5') !!}

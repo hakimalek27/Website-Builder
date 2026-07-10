@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Projects\Tables;
 
 use App\Enums\ProjectStatus;
 use App\Models\Project;
+use App\Services\BriefBuilder;
 use App\Services\HandoverExporter;
 use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
@@ -33,6 +34,21 @@ class ProjectsTable
             ->defaultSort('updated_at', 'desc')
             ->recordActions([
                 ViewAction::make(),
+
+                // Fasa 12 W3 — Muat turun brief MD penuh (submitted+ sahaja).
+                Action::make('brief')
+                    ->label('Brief (MD)')
+                    ->icon('heroicon-o-document-text')
+                    ->color('gray')
+                    ->visible(fn (Project $r) => ! in_array($r->status, [
+                        ProjectStatus::Invited, ProjectStatus::InProgress, ProjectStatus::Cancelled, ProjectStatus::Expired,
+                    ], true))
+                    ->action(fn (Project $record): StreamedResponse => response()->streamDownload(
+                        fn () => print (app(BriefBuilder::class)->markdown($record)),
+                        app(BriefBuilder::class)->fileName($record),
+                        ['Content-Type' => 'text/markdown; charset=UTF-8'],
+                    )),
+
                 // §14 — Eksport Pakej Serahan (approved+ sahaja).
                 Action::make('exportHandover')
                     ->label('Eksport Pakej Serahan')
