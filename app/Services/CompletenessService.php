@@ -46,6 +46,12 @@ class CompletenessService
 
         $add('Nada penulisan', 2, 'mood', filled($get(2, 'mood')));
 
+        // §Fasa 16 — mod templat: templat rujukan ATAU link contoh wajib (gate submit).
+        if (DraftGenerationService::pipelineMode() === 'template') {
+            $add('Templat rujukan / link contoh', 2, 'template_choice',
+                filled($get(2, 'template_id')) || filled($get(2, 'template_custom_url')));
+        }
+
         $l9 = [
             'pic_name' => 'Nama PIC', 'pic_position' => 'Jawatan PIC', 'pic_phone' => 'Telefon PIC',
             'consent_pdpa' => 'Persetujuan PDPA', 'declare_truth_authority' => 'Perakuan kuasa',

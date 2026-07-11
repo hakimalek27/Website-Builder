@@ -11,7 +11,9 @@ use App\Models\Invitation;
 use App\Models\Project;
 use App\Models\ProjectPage;
 use App\Models\ProjectSection;
+use App\Models\TemplateCatalog;
 use App\Services\DesignResolver;
+use App\Services\DraftGenerationService;
 use App\Services\UploadService;
 use App\Support\FontPairs;
 use App\Support\Moods;
@@ -21,6 +23,7 @@ use App\Support\PresetMatrix;
 use App\Support\WizardSteps;
 use App\Support\ZoneLookup;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -57,6 +60,13 @@ class WizardStep extends Component
 
     public string $orgNoun = 'masjid';
 
+    /** §Fasa 16 — mod templat: galeri rujukan ganti reka bentuk AI (L2). */
+    public bool $templateMode = false;
+
+    public string $templateSearch = '';
+
+    public ?string $templateDetailId = null;
+
     public function mount(string $token, int $step): void
     {
         $this->token = $token;
@@ -67,6 +77,7 @@ class WizardStep extends Component
         $this->mosqueName = $project->mosque_name;
         $this->isNgo = $project->tier->isNgo();
         $this->orgNoun = $project->tier->orgNoun();
+        $this->templateMode = DraftGenerationService::pipelineMode() === 'template';
 
         // PIC membuka wizard buat kali pertama → in_progress.
         if ($project->status === ProjectStatus::Invited) {
@@ -79,6 +90,11 @@ class WizardStep extends Component
         // §Fasa 14 — normalkan animasi legasi (boolean) → varian string untuk radio L2.
         if ($this->step === 2 && is_bool($this->data['animations'] ?? null)) {
             $this->data['animations'] = $this->data['animations'] ? 'fade' : 'tiada';
+        }
+
+        // §Fasa 16 — mod templat: pastikan struktur nota wujud untuk wire:model bersarang.
+        if ($this->step === 2 && $this->templateMode) {
+            $this->data['template_notes'] ??= [];
         }
 
         if ($this->step === 3 && ! isset($this->data['pages'])) {
@@ -440,6 +456,11 @@ class WizardStep extends Component
 
     protected function afterStep2(Project $project): void
     {
+        // §Fasa 16 — mod templat tidak menggunakan ProjectDesign (DesignResolver null-safe).
+        if ($this->templateMode) {
+            return;
+        }
+
         $packageKey = $this->data['design_package'] ?? null;
         if (blank($packageKey)) {
             return;
@@ -559,7 +580,15 @@ class WizardStep extends Component
                 'email' => ['required', 'email', 'max:150'],
                 'logo_status' => ['required', 'in:ada,perlu_direka,teks_sahaja'],
             ],
-            2 => [
+            2 => $this->templateMode ? [
+                // §Fasa 16 — mod templat: pilihan templat/link + nota + nada (validasi lembut).
+                'mood' => ['required', Rule::in(Moods::keys())],
+                'template_id' => ['nullable', Rule::exists('template_catalog', 'id')],
+                'template_custom_url' => ['nullable', 'url', 'max:500'],
+                'template_notes.suka' => ['nullable', 'string', 'max:1000'],
+                'template_notes.ubah' => ['nullable', 'string', 'max:1000'],
+                'template_notes.tambah' => ['nullable', 'string', 'max:1000'],
+            ] : [
                 'design_package' => ['required', Rule::exists('design_packages', 'key')],
                 'mood' => ['required', Rule::in(Moods::keys())],
                 'font_pair' => ['nullable', Rule::in(FontPairs::keys())],
@@ -759,15 +788,81 @@ class WizardStep extends Component
         return $asset ? route('pic.aset', ['token' => $this->token, 'asset' => $asset->id]) : null;
     }
 
+    // --- §Fasa 16 mod templat (L2) ---
+
+    /** PIC pilih templat dari galeri — simpan snapshot supaya kekal walau katalog dipadam. */
+    public function selectTemplate(string $id): void
+    {
+        if ($this->resolveProject()->isFrozen()) {
+            return;
+        }
+
+        $tpl = TemplateCatalog::query()->active()->whereKey($id)->first();
+        if ($tpl === null) {
+            return;
+        }
+
+        $this->data['template_id'] = $tpl->id;
+        $this->data['template_snapshot'] = [
+            'name' => $tpl->name,
+            'url' => $tpl->url,
+            'demo_url' => $tpl->demo_url,
+        ];
+        $this->templateDetailId = null;
+        $this->save();
+    }
+
+    /** Buang pilihan templat (link sendiri kekal jika ada). */
+    public function clearTemplate(): void
+    {
+        if ($this->resolveProject()->isFrozen()) {
+            return;
+        }
+
+        unset($this->data['template_id'], $this->data['template_snapshot']);
+        $this->save();
+    }
+
+    /** Buka/tutup panel butiran templat (paparan sahaja). */
+    public function showTemplateDetail(?string $id): void
+    {
+        $this->templateDetailId = $id;
+    }
+
+    /**
+     * Templat aktif untuk galeri L2 (ditapis tier + carian nama/gaya).
+     *
+     * @return Collection<int, TemplateCatalog>
+     */
+    protected function templateOptions()
+    {
+        $templates = TemplateCatalog::forTier($this->resolveProject()->tier);
+
+        $q = trim(mb_strtolower($this->templateSearch));
+        if ($q !== '') {
+            $templates = $templates->filter(function (TemplateCatalog $t) use ($q): bool {
+                $hay = mb_strtolower($t->name.' '.implode(' ', $t->style_tags ?? []).' '.($t->description ?? ''));
+
+                return str_contains($hay, $q);
+            })->values();
+        }
+
+        return $templates;
+    }
+
     public function render()
     {
         $viewData = [
             'stepMeta' => WizardSteps::all()[$this->step],
             'totalSteps' => WizardSteps::count(),
-            'designPackages' => $this->step === 2
+            'designPackages' => $this->step === 2 && ! $this->templateMode
                 ? DesignPackage::where('is_active', true)->get()
                 : collect(),
         ];
+
+        if ($this->step === 2 && $this->templateMode) {
+            $viewData['templates'] = $this->templateOptions();
+        }
 
         if (in_array($this->step, [3, 4], true)) {
             $project = $this->resolveProject();
