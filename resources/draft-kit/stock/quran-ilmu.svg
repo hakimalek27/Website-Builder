@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="__PDEEP__"/><stop offset="1" stop-color="__PD__"/>
+</linearGradient>
+<radialGradient id="rays" cx="0.5" cy="0.42" r="0.55">
+<stop offset="0" stop-color="__AB__" stop-opacity="0.5"/><stop offset="1" stop-color="__AB__" stop-opacity="0"/>
+</radialGradient>
+</defs>
+<rect width="1600" height="900" fill="url(#bg)"/>
+<rect width="1600" height="900" fill="url(#rays)"/>
+<g stroke="__AB__" stroke-width="2" opacity="0.35"><path d="M800 360 V120 M800 360 L640 180 M800 360 L960 180 M800 360 L560 300 M800 360 L1040 300"/></g>
+<g fill="__AB__" opacity="0.9"><path d="M772 250 a28 28 0 1 0 22 46 a21 21 0 1 1 -22 -46 Z"/></g>
+<g transform="translate(800 560)">
+<path d="M0 -40 C -80 -110 -240 -110 -300 -70 L-300 150 C -240 110 -80 110 0 180 C 80 110 240 110 300 150 L300 -70 C 240 -110 80 -110 0 -40 Z" fill="__P__" stroke="__AB__" stroke-width="3"/>
+<path d="M0 -40 V180" stroke="__AB__" stroke-width="3" fill="none"/>
+<g stroke="__AB__" stroke-width="2" opacity="0.55" fill="none">
+<path d="M-260 -30 h180 M-260 10 h180 M-260 50 h180 M-260 90 h150"/>
+<path d="M80 -30 h180 M80 10 h180 M80 50 h180 M110 90 h150"/>
+</g>
+</g>
+</svg>

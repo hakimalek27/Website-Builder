@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="__PDEEP__"/><stop offset="1" stop-color="__PD__"/>
+</linearGradient>
+<pattern id="stars" width="200" height="200" patternUnits="userSpaceOnUse" patternTransform="translate(0 0)">
+<g fill="none" stroke="__A__" stroke-width="1.6" opacity="0.5">
+<path d="M100 30 L128 72 L100 114 L72 72 Z"/><path d="M100 30 L170 100 L100 170 L30 100 Z"/>
+<circle cx="100" cy="100" r="18"/>
+<path d="M0 100 L30 100 M170 100 L200 100 M100 0 L100 30 M100 170 L100 200"/>
+</g>
+</pattern>
+<radialGradient id="vig" cx="0.5" cy="0.5" r="0.7">
+<stop offset="0.35" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="__PDEEP__" stop-opacity="0.85"/>
+</radialGradient>
+</defs>
+<rect width="1600" height="900" fill="url(#bg)"/>
+<rect width="1600" height="900" fill="url(#stars)"/>
+<rect width="1600" height="900" fill="url(#vig)"/>
+<g transform="translate(800 450)" fill="none" stroke="__AB__" opacity="0.9">
+<path d="M0 -150 L44 -106 L106 -106 L106 -44 L150 0 L106 44 L106 106 L44 106 L0 150 L-44 106 L-106 106 L-106 44 L-150 0 L-106 -44 L-106 -106 L-44 -106 Z" stroke-width="3"/>
+<path d="M0 -110 L78 0 L0 110 L-78 0 Z" stroke-width="2.4"/>
+<circle cx="0" cy="0" r="48" stroke-width="2.4"/><circle cx="0" cy="0" r="14" fill="__AB__" stroke="none"/>
+</g>
+</svg>

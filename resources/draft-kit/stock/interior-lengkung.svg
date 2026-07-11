@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+<defs>
+<linearGradient id="hall" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="__PD__"/><stop offset="0.6" stop-color="__P__"/><stop offset="1" stop-color="__PDEEP__"/>
+</linearGradient>
+<radialGradient id="lamp" cx="0.5" cy="0.32" r="0.5">
+<stop offset="0" stop-color="__AB__" stop-opacity="0.5"/><stop offset="1" stop-color="__AB__" stop-opacity="0"/>
+</radialGradient>
+</defs>
+<rect width="1600" height="900" fill="url(#hall)"/>
+<rect width="1600" height="900" fill="url(#lamp)"/>
+<g fill="__PDEEP__" opacity="0.9">
+<path d="M120 900 V420 Q120 300 240 300 Q360 300 360 420 V900 Z"/>
+<path d="M1480 900 V420 Q1480 300 1360 300 Q1240 300 1240 420 V900 Z"/>
+</g>
+<g fill="none" stroke="__AB__" stroke-width="3" opacity="0.85">
+<path d="M470 820 V470 Q470 350 590 350 Q710 350 710 470 V820"/>
+<path d="M1130 820 V470 Q1130 350 1010 350 Q890 350 890 470 V820"/>
+<path d="M710 820 V520 Q710 430 800 430 Q890 430 890 520 V820"/>
+</g>
+<g fill="__AB__" opacity="0.9">
+<rect x="795" y="250" width="10" height="60"/>
+<path d="M770 310 h60 l-14 70 h-32 Z"/>
+<circle cx="800" cy="405" r="16"/>
+</g>
+<g opacity="0.15" stroke="__BG__" stroke-width="2" fill="none"><path d="M800 560 L840 620 L800 680 L760 620 Z"/></g>
+<rect y="820" width="1600" height="80" fill="__PDEEP__"/>
+<rect y="818" width="1600" height="3" fill="__AB__" opacity="0.4"/>
+</svg>

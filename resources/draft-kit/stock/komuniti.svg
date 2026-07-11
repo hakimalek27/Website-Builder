@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="__P__"/><stop offset="1" stop-color="__PD__"/>
+</linearGradient>
+</defs>
+<rect width="1600" height="900" fill="url(#bg)"/>
+<g fill="none" stroke="__BG__" opacity="0.1" stroke-width="2"><circle cx="800" cy="450" r="120"/><circle cx="800" cy="450" r="230"/><circle cx="800" cy="450" r="340"/></g>
+<g fill="__AB__" opacity="0.92">
+<g transform="translate(800 250)"><circle cx="0" cy="0" r="26"/><path d="M-34 76 a34 40 0 0 1 68 0 Z"/></g>
+<g transform="translate(986 336)"><circle cx="0" cy="0" r="24"/><path d="M-31 70 a31 37 0 0 1 62 0 Z"/></g>
+<g transform="translate(986 564)"><circle cx="0" cy="0" r="24"/><path d="M-31 70 a31 37 0 0 1 62 0 Z"/></g>
+<g transform="translate(800 650)"><circle cx="0" cy="0" r="26"/><path d="M-34 76 a34 40 0 0 1 68 0 Z"/></g>
+<g transform="translate(614 564)"><circle cx="0" cy="0" r="24"/><path d="M-31 70 a31 37 0 0 1 62 0 Z"/></g>
+<g transform="translate(614 336)"><circle cx="0" cy="0" r="24"/><path d="M-31 70 a31 37 0 0 1 62 0 Z"/></g>
+</g>
+<g transform="translate(800 450)" fill="none" stroke="__BG__" opacity="0.85">
+<path d="M0 -70 a70 70 0 0 1 0 140 a35 70 0 0 0 0 -140 Z" fill="__BG__" opacity="0.9" stroke="none"/>
+</g>
+<g fill="__AB__" opacity="0.5"><circle cx="800" cy="450" r="10"/></g>
+</svg>

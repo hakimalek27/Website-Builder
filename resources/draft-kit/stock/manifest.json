@@ -1,0 +1,12 @@
+{
+  "_nota": "Scene SVG crafted milik REKA (lesen CC0-setara) — bertema, boleh-warna ikut palet, TIADA isu lesen pihak ketiga. Token warna: __P__ __PD__ __PDEEP__ __A__ __AB__ __BG__ diganti StockLibrary.",
+  "scenes": [
+    {"file": "masjid-subuh.svg", "category": "masjid-eksterior", "tier": "semua", "tone": "gelap", "orientation": "landscape", "source": "reka-crafted", "author": "REKA", "license": "Milik REKA (CC0-setara)"},
+    {"file": "masjid-senja.svg", "category": "masjid-eksterior", "tier": "semua", "tone": "gelap", "orientation": "landscape", "source": "reka-crafted", "author": "REKA", "license": "Milik REKA (CC0-setara)"},
+    {"file": "interior-lengkung.svg", "category": "masjid-interior", "tier": "masjid", "tone": "gelap", "orientation": "landscape", "source": "reka-crafted", "author": "REKA", "license": "Milik REKA (CC0-setara)"},
+    {"file": "corak-bintang.svg", "category": "seni-bina", "tier": "semua", "tone": "gelap", "orientation": "landscape", "source": "reka-crafted", "author": "REKA", "license": "Milik REKA (CC0-setara)"},
+    {"file": "komuniti.svg", "category": "komuniti", "tier": "semua", "tone": "gelap", "orientation": "landscape", "source": "reka-crafted", "author": "REKA", "license": "Milik REKA (CC0-setara)"},
+    {"file": "kebajikan.svg", "category": "ngo-kebajikan", "tier": "ngo", "tone": "gelap", "orientation": "landscape", "source": "reka-crafted", "author": "REKA", "license": "Milik REKA (CC0-setara)"},
+    {"file": "quran-ilmu.svg", "category": "quran-ibadah", "tier": "masjid", "tone": "gelap", "orientation": "landscape", "source": "reka-crafted", "author": "REKA", "license": "Milik REKA (CC0-setara)"}
+  ]
+}

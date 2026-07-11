@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="__PDEEP__"/><stop offset="0.45" stop-color="__PD__"/><stop offset="0.78" stop-color="__P__"/><stop offset="1" stop-color="__A__"/>
+</linearGradient>
+<radialGradient id="sun" cx="0.5" cy="0.72" r="0.5">
+<stop offset="0" stop-color="__AB__" stop-opacity="0.95"/><stop offset="0.45" stop-color="__A__" stop-opacity="0.45"/><stop offset="1" stop-color="__A__" stop-opacity="0"/>
+</radialGradient>
+</defs>
+<rect width="1600" height="900" fill="url(#sky)"/>
+<circle cx="800" cy="640" r="420" fill="url(#sun)"/>
+<circle cx="800" cy="600" r="92" fill="__AB__" opacity="0.6"/>
+<g opacity="0.1" stroke="__BG__" stroke-width="2" fill="none"><circle cx="800" cy="600" r="150"/><circle cx="800" cy="600" r="220"/></g>
+<g fill="__PDEEP__" opacity="0.7">
+<path d="M0 720 h180 v-80 a24 24 0 0 1 48 0 v80 h130 v-120 a64 64 0 0 1 128 0 v120 h90 v-70 a20 20 0 0 1 40 0 v70 H0 Z"/>
+<path d="M1600 720 h-180 v-80 a24 24 0 0 0 -48 0 v80 h-130 v-120 a64 64 0 0 0 -128 0 v120 h-90 v-70 a20 20 0 0 0 -40 0 v70 H1600 Z"/>
+</g>
+<g fill="#0a1c14">
+<rect x="470" y="440" width="16" height="260"/><path d="M453 440 a25 25 0 0 0 50 0 a19 19 0 0 1 -50 0 Z" fill="__AB__"/><rect x="472" y="410" width="12" height="30"/>
+<rect x="1114" y="440" width="16" height="260"/><path d="M1097 440 a25 25 0 0 0 50 0 a19 19 0 0 1 -50 0 Z" fill="__AB__"/><rect x="1116" y="410" width="12" height="30"/>
+<rect x="560" y="480" width="480" height="220"/>
+<path d="M636 480 C636 372 706 320 800 320 C894 320 964 372 964 480 Z"/>
+<rect x="792" y="270" width="16" height="52"/><path d="M772 270 a28 28 0 0 0 56 0 a22 22 0 0 1 -56 0 Z" fill="__AB__"/>
+<path d="M560 480 a70 60 0 0 1 140 0 Z"/><path d="M900 480 a70 60 0 0 1 140 0 Z"/>
+<path d="M700 700 V600 a40 40 0 0 1 80 0 V700 Z" fill="__PDEEP__"/>
+<path d="M820 700 V600 a40 40 0 0 1 80 0 V700 Z" fill="__PDEEP__"/>
+</g>
+<rect y="698" width="1600" height="202" fill="#0a1c14"/>
+<rect y="696" width="1600" height="3" fill="__AB__" opacity="0.45"/>
+</svg>
