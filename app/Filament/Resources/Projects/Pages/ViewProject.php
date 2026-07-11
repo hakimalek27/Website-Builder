@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources\Projects\Pages;
 
+use App\Enums\ProjectStatus;
 use App\Filament\Resources\Projects\ProjectResource;
 use App\Models\Project;
+use App\Services\AssetZipper;
 use App\Services\BriefBuilder;
 use App\Services\Notifier;
 use Filament\Actions\Action;
@@ -12,6 +14,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Js;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -65,6 +68,26 @@ class ViewProject extends ViewRecord
                     app(BriefBuilder::class)->fileName($record),
                     ['Content-Type' => 'text/markdown; charset=UTF-8'],
                 )),
+
+            // §Fasa 16 — Muat turun semua aset PIC (ZIP): logo/hero/gambar AJK/QR/PDF (submitted+, tanpa approval).
+            Action::make('muatTurunAset')
+                ->label('Muat Turun Semua Aset (ZIP)')
+                ->icon('heroicon-o-photo')
+                ->color('gray')
+                ->visible(fn (Project $record): bool => ! in_array($record->status, [
+                    ProjectStatus::Invited, ProjectStatus::InProgress, ProjectStatus::Cancelled, ProjectStatus::Expired,
+                ], true))
+                ->action(function (Project $record) {
+                    try {
+                        $zip = app(AssetZipper::class)->zipFor($record);
+                    } catch (\RuntimeException $e) {
+                        Notification::make()->title('Tiada aset')->body($e->getMessage())->warning()->send();
+
+                        return null;
+                    }
+
+                    return response()->download(Storage::disk('local')->path($zip['path']), $zip['name'])->deleteFileAfterSend(true);
+                }),
 
             // Lihat draf terkini dalam panel.
             Action::make('lihatDraf')

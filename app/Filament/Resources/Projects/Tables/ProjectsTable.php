@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Projects\Tables;
 
 use App\Enums\ProjectStatus;
 use App\Models\Project;
+use App\Services\AssetZipper;
 use App\Services\BriefBuilder;
 use App\Services\HandoverExporter;
 use Filament\Actions\Action;
@@ -48,6 +49,26 @@ class ProjectsTable
                         app(BriefBuilder::class)->fileName($record),
                         ['Content-Type' => 'text/markdown; charset=UTF-8'],
                     )),
+
+                // §Fasa 16 — Muat turun semua aset PIC (ZIP) — submitted+ (tanpa perlu approval).
+                Action::make('muatTurunAset')
+                    ->label('Aset (ZIP)')
+                    ->icon('heroicon-o-photo')
+                    ->color('gray')
+                    ->visible(fn (Project $r) => ! in_array($r->status, [
+                        ProjectStatus::Invited, ProjectStatus::InProgress, ProjectStatus::Cancelled, ProjectStatus::Expired,
+                    ], true))
+                    ->action(function (Project $record) {
+                        try {
+                            $zip = app(AssetZipper::class)->zipFor($record);
+                        } catch (\RuntimeException $e) {
+                            Notification::make()->title('Tiada aset')->body($e->getMessage())->warning()->send();
+
+                            return null;
+                        }
+
+                        return response()->download(Storage::disk('local')->path($zip['path']), $zip['name'])->deleteFileAfterSend(true);
+                    }),
 
                 // §14 — Eksport Pakej Serahan (approved+ sahaja).
                 Action::make('exportHandover')

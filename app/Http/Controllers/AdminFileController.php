@@ -17,8 +17,9 @@ class AdminFileController extends Controller
 {
     public function asset(Asset $asset): StreamedResponse
     {
+        // §Fasa 16 — admin nampak SEMUA kind (gambar AJK/QR/PDF), bukan hanya hero/logo/gallery.
+        // Auth + path DB memadai; semua kind berasal dari UploadService yang tervalidasi.
         abort_unless(Auth::check(), 403);
-        abort_unless(in_array($asset->kind, ['hero', 'logo', 'gallery'], true), 404);
         abort_unless(Storage::disk('local')->exists($asset->path), 404);
 
         return Storage::disk('local')->response($asset->path, null, [
