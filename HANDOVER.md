@@ -9,9 +9,24 @@ Stack: **Laravel 13.19 · PHP 8.4 · Filament v4.11 · Livewire 3 · Tailwind 4 
 
 ## Status semasa
 
-- **Fasa 0–10** + **rombakan UI/UX** + **Fasa 11** + **pembetulan pasca-audit** (`eca8f80`, `d027778`) + **fix AiClient OpenAI moden** (`f61ddec`) + **Fasa 12** (7 commit: `806d17a`→`ca674c1`) + **Fasa 13** (7 commit: `22b159a`→`0a5a172`) + **Fasa 14** (6 commit: `02c3e5c`→`9c534eb`).
-- **260 ujian Pest hijau** (935 assertions) · `pint` bersih · `npm run build` bersih.
+- **Fasa 0–10** + **rombakan UI/UX** + **Fasa 11** + **pembetulan pasca-audit** (`eca8f80`, `d027778`) + **fix AiClient OpenAI moden** (`f61ddec`) + **Fasa 12** (7 commit: `806d17a`→`ca674c1`) + **Fasa 13** (7 commit: `22b159a`→`0a5a172`) + **Fasa 14** (6 commit: `02c3e5c`→`9c534eb`) + **Fasa 15** (6 commit: `05d2ef6`→`1da85aa`).
+- **317 ujian Pest hijau** (1203 assertions) · `pint` bersih · `npm run build` bersih.
 - Semua kerja **di-push ke `main`**.
+
+### Fasa 15 — "Kit Reka Premium": kualiti draf AI aras mamkl.my (11 Jul 2026)
+
+Menyelesaikan aduan owner: output draf "biasa-biasa, tiada wow" (siasatan forensik: 6.5/10 — 0 `clamp()`, 2 bayang, hero gradient kosong, logo/elemen Islamik TAK dirender, prompt hantar kata kunci enum kosong + 90% larangan). Sasaran: aras mamkl.my. Pelan: `~/.claude/plans/kemaskini-ui-ux-setiap-cozy-muffin.md`.
+
+1. **`05d2ef6` W1 asas kit** — `PaletteDeriver::ramp()` (palet 7-peranan WCAG: primaryDeep/Light + accentBright/Deep + shadowTint); **`resources/draft-kit/kit.css`** (~600 baris kelas `rk-*` premium: clamp type-scale, bayang 3-tier bertinta, hero overlay berlapis, kotak ayat berkaca, eyebrow pil, ornamen emas, kad hover-lift, grid auto-fit, corak SVG); `DraftKit` (suntik `<style id="reka-kit">` + corak data-URI, 0 token AI); `PackageDna` (14 DNA seni pakej).
+2. **`168d89c` W2 direktor+stok** — `DraftStyleDirector` (seed `crc32(project id)` → arahan variasi **anti-pendua**: olahan hero/motif/irama/CTA/blueprint); `StockLibrary` (7 **scene SVG crafted milik REKA** — masjid/interior/corak/komuniti/kebajikan/quran, boleh-warna palet, lesen bersih; re-encode hero muat naik >1.5MB); 11 blueprint seksyen; manifest lesen.
+3. **`5fd2041` W3 finisher** — suntik kit; **`[[LOGO]]`** (dulu logo TAK PERNAH dirender!); `[[HERO_IMAGE]]` diperluas (upload re-encode / stok bertema — **selesai gradient kosong**); `[[IMG_SECTION_1/2]]`, `[[VIDEO_LINK]]`; fix **© tahun direka** → tahun semasa; fix **jawatan berganda**; buang **tbody kosong**; 5 partial ditulis semula guna kelas kit (grid responsif — fix 3/6-lajur sesak).
+4. **`66df814` W4 prompt** — `designSpec` beri {nilai, kelas_kit, takrifan CSS} (bukan enum kosong) + `arahan_seni` positif; `engineerRequest` bawa DNA + keunikan; **`stage2Request` LAMPIR cheat-sheet kit + blueprint verbatim server** (K1 — bukan via P1, jimat token); fix arahan bercanggah animasi; guard P1 finish_reason terpotong.
+5. **`8ec8935` W5 QA+polish** — `DraftQaService` v2: issues struktural baharu (logo/hero/Islamik hilang, tahun salah, tbody, kit) + **suggestions estetik** (atas RAW, guard kit-usage elak false-flag); **auto-polish 1×** (`Setting qa_auto_polish`) bila bawah piawai — atas RAW bertoken, re-finish+re-QA, Throwable-safe, **TIDAK makan kuota**.
+6. **`1da85aa` W6 pratonton** — design-preview tunjuk corak Islamik + logo thumbnail + chip; step-6 nota foto stok premium (**janji ≈ hasil**).
+
+**Keputusan owner:** kit CSS + blueprint gabungan · foto = scene SVG crafted (lesen bersih, palet-adaptif) + corak Islamik · skop HTML+pratonton (shell tak disentuh) · auto-polish 1×. **Bukti E2E** (finisher sebenar, 2 palet): draf Arang Moden + Harapan Hijau — **box-shadow 17, clamp 27, rk-classes 481, scene+kit hadir, © diperbetul** (vs baseline 6.5/10). Draf palet-adaptif & anti-pendua disahkan visual.
+
+**⚠ Nota deploy Fasa 15:** `git add resources/draft-kit public/` (scene SVG + kit + blueprint); `php artisan db:seed --class=SettingsSeeder` (kunci baharu `qa_auto_polish`, idempoten); **TIADA migration**. Auto-polish tambah ~USD 0.10-0.15/jana bila tercetus (tak makan kuota PIC). **Gotcha kekal:** penyedia Jurutera Prompt (P1) perlu `max_tokens` cukup — prompt premium lebih panjang; kini ada guard finish_reason (gagal-terus bila terpotong).
 
 ### Fasa 14 — QA Auto, Salin Prompt, finish_reason, Varian Animasi & Audit Admin (11 Jul 2026)
 
@@ -120,7 +135,7 @@ Admin pilih vendor → base URL + driver auto → API key + model. OpenAI/Anthro
 ## Perintah penting
 
 ```bash
-php artisan test                 # 260 ujian Pest
+php artisan test                 # 317 ujian Pest
 php artisan migrate:fresh --seed # skema + seed (59 zon, 14 pakej, verse, 9 settings)
 npm run build                    # aset (guna ini untuk ujian browser tempatan)
 vendor/bin/pint --dirty          # format PHP

@@ -228,6 +228,45 @@ Kedua-dua: QA **LULUS**, 12 seksyen = tepat 12 halaman PIC pilih (prompt-ketat `
 
 ---
 
+## BAHAGIAN H — Fasa 15: "Kit Reka Premium" (kualiti draf aras mamkl.my, 11 Jul 2026)
+
+### Masalah (aduan owner)
+Output draf "biasa-biasa, tiada wow factor, macam budak baru belajar", tak setanding mamkl.my/laman masjid premium, risiko design pendua, rasa "tak ikut pilihan PIC".
+
+### Diagnosis forensik (3 agen Explore — bukti terhadap output PERKIB sebenar `01kx7c5r9x…`)
+- **Output = 6.5/10:** kod bersih TAPI **0 `clamp()`, 2 `box-shadow` remeh, 2 gradient, TIADA imej** (hero gradient kosong, logo = kotak teks), tiada pattern/ornament.
+- **Prompt data-centric:** `designSpec()` hantar **kata kunci enum kosong** (`kad: lembut`) tanpa takrifan CSS; 90% larangan, arahan estetik cuma "kemas, moden"; **arahan bercanggah** (efek skrol + larang JS).
+- **Janji-tak-tunai:** logo TAK PERNAH dirender · `islamic_elements` TAK dirender · `stok_sementara` senyap jadi gradient · hero >1.5MB senyap jatuh gradient · video_url tak dirender.
+- **Partial rata** (AJK 3-lajur/prayer 6-lajur TETAP) · pepijat © 2024 direka, jawatan berganda, tbody kosong.
+- **Jawapan:** salah prompt (sebahagian) + jurang imej/logo/kit; WordPress theme TIDAK sesuai (runtime WP, lesen GPL, tetap generik) → bina **kit milik sendiri** (DNA mamkl.my terbukti).
+
+### 6 commit (`05d2ef6`→`1da85aa`, 260 → 317 ujian)
+| Commit | Bidang | Ringkasan |
+|---|---|---|
+| `05d2ef6` | W1 asas kit | `PaletteDeriver::ramp()` 7-peranan WCAG; `kit.css` ~600 baris `rk-*` premium; `DraftKit` (suntik `<style>` + corak data-URI); `PackageDna` 14 DNA seni. |
+| `168d89c` | W2 direktor+stok | `DraftStyleDirector` (seed crc32 → anti-pendua); `StockLibrary` (**7 scene SVG crafted milik REKA**, palet-adaptif, re-encode hero >1.5MB); 11 blueprint; manifest lesen. |
+| `5fd2041` | W3 finisher | suntik kit; `[[LOGO]]`; hero stok/re-encode; `[[IMG_SECTION]]`/`[[VIDEO_LINK]]`; fix © tahun/jawatan berganda/tbody; 5 partial responsif kelas kit. |
+| `66df814` | W4 prompt | designSpec {nilai+kelas+takrifan}; DNA+keunikan (P1); **cheat-sheet+blueprint LAMPIR server P2** (K1); guard P1 terpotong. |
+| `8ec8935` | W5 QA+polish | QA v2 (issues struktural + suggestions estetik guard kit-usage); **auto-polish 1×** atas RAW (Throwable-safe, tak makan kuota). |
+| `1da85aa` | W6 pratonton | design-preview corak/logo/chip; step-6 nota foto stok (**janji ≈ hasil**). |
+
+### Keputusan seni bina
+- **K1:** blueprint/cheat-sheet dilampir **server pada P2** (bukan P1) — jimat token, elak P1 rosakkan blueprint.
+- **K5:** seed keunikan = `crc32(project id)` (TIADA storan; override `overrides['style_seed']`).
+- **Foto = scene SVG crafted** (bukan foto stok muat turun) — keputusan penting: ID Unsplash membuta = kandungan salah (uji: 1 ID "masjid" sebenarnya pemanjat batu). SVG crafted = bertema terjamin, palet-adaptif, lesen bersih, KB-saiz, robust.
+
+### Bukti E2E (finisher sebenar, 2 palet)
+Draf **Masjid Al-Hidayah** (Arang Moden gelap, hero-tengah) + **NGO Ummah Sejahtera** (Harapan Hijau, hero-penuh + corak Rub-el-Hizb). Metrik draf hijau: **box-shadow 17, clamp 27, gradient 7, rk-classes 481, images 4, scene+kit hadir, © diperbetul** — vs baseline 6.5/10 (0 clamp, 2 bayang). Palet-adaptif & anti-pendua disahkan visual (2 draf berbeza total).
+
+### Pelajaran
+1. **Namespace `rk-`** elak pertembungan dgn CSS AI; **`.rk-card{color:var(--rk-ink)}` WAJIB** — kad putih atas `rk-section--dark` mewarisi teks cerah → tak nampak (fix kritikal).
+2. **Suggestion QA guard kit-usage** — kira box-shadow/clamp mentah HANYA bila `rk-` rendah (else draf guna kit di-false-flag).
+3. **Intervention v4:** `encode(new JpegEncoder(quality))` — BUKAN `toJpeg()`/`encodeByExtension()` (tiada dlm versi ini).
+4. **Chrome headless render** untuk sahkan SVG/draf: `--headless=old --user-data-dir=UNIK` + `taskkill` (elak singleton lock); SVG kekal 1600×900 + kotak `overflow:hidden` (jangan sed dimensi — rosakkan `<rect>` latar).
+5. **Overlay hero** perlu cukup lut (scene nampak) tetapi cukup gelap (teks legible) — gradient bawah 88% deep → atas transparent.
+
+---
+
 ## Pelajaran teknikal utama (rujukan cepat)
 
 1. **Vite dev + CSP:** IPv6 `[::1]` bukan host-source CSP sah → `vite.config` `server.host:'127.0.0.1'`.
