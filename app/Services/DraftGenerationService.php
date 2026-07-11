@@ -34,6 +34,12 @@ class DraftGenerationService
      */
     public function request(Project $project, GenerationType $type, string $createdBy = 'pic', ?array $tweak = null, ?string $picBaseUrl = null): Generation
     {
+        // §Fasa 16 — mod templat: penjanaan draf AI dimatikan (pertahanan-dalam-lapisan;
+        // aliran submit mod templat tidak memanggil ini, tetapi laluan lain mungkin).
+        if (self::pipelineMode() === 'template') {
+            throw new GateException('Mod templat aktif — penjanaan draf AI dimatikan.');
+        }
+
         $generation = DB::transaction(function () use ($project, $type, $createdBy, $tweak) {
             /** @var Project $locked */
             $locked = Project::query()->whereKey($project->id)->lockForUpdate()->firstOrFail();
@@ -107,7 +113,7 @@ class DraftGenerationService
     {
         $mode = Setting::get('draft_pipeline') ?? 'shell';
 
-        return in_array($mode, ['shell', 'html'], true) ? $mode : 'shell';
+        return in_array($mode, ['shell', 'html', 'template'], true) ? $mode : 'shell';
     }
 
     private function assertCooldown(Project $project): void

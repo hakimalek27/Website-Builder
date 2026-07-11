@@ -81,11 +81,12 @@ class ManageSettings extends Page
                     ->schema([
                         Select::make('draft_pipeline')->label('Saluran draf')
                             ->options([
+                                'template' => 'Templat rujukan (galeri — tanpa AI)',
                                 'shell' => 'Shell (JSON + templat) — klasik',
                                 'html' => 'HTML dua-peringkat (GPT → GLM)',
                             ])
                             ->native(false)
-                            ->helperText('Peringkat 1 (Jurutera Prompt) & Peringkat 2 (Default) diset di Penyedia AI.'),
+                            ->helperText('Templat: PIC pilih rujukan reka bentuk dari galeri; admin bina manual (tiada penjanaan AI). Shell/HTML: penjanaan draf AI.'),
                         TextInput::make('html_max_tokens')->label('Had token draf HTML')
                             ->numeric()->minValue(1000)
                             ->helperText('Output HTML besar — 30000 disyorkan. Hanya untuk saluran HTML.'),
@@ -167,7 +168,7 @@ class ManageSettings extends Page
         Setting::put('admin_notify_email', ($s['admin_notify_email'] ?? null) ?: null);
 
         // Saluran draf — whitelist (nilai tak sah jatuh ke 'shell' selamat).
-        $pipeline = in_array($s['draft_pipeline'] ?? 'shell', ['shell', 'html'], true) ? $s['draft_pipeline'] : 'shell';
+        $pipeline = in_array($s['draft_pipeline'] ?? 'shell', ['shell', 'html', 'template'], true) ? $s['draft_pipeline'] : 'shell';
         Setting::put('draft_pipeline', $pipeline);
         Setting::put('html_max_tokens', (string) max(1000, (int) ($s['html_max_tokens'] ?? 30000)));
         Setting::put('qa_auto_polish', in_array($s['qa_auto_polish'] ?? '1', ['0', '1'], true) ? $s['qa_auto_polish'] : '1');

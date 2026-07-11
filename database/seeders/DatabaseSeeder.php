@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             DesignPackageSeeder::class,  // 5 pakej §7.2
             VerseLibrarySeeder::class,   // 1 entri §9.2
             SettingsSeeder::class,       // nilai lalai §5.3
+            TemplateCatalogSeeder::class, // §Fasa 16 — katalog templat rujukan
         ]);
 
         // Admin dev (satu-satunya pengguna berdaftar §3). 2FA dipaksa semasa login pertama.

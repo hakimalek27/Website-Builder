@@ -9,7 +9,7 @@ it('seeds all default settings on a fresh database', function () {
     $this->seed(SettingsSeeder::class);
 
     expect(Setting::get('gen_cooldown_minutes'))->toBe('5');
-    expect(Setting::get('draft_pipeline'))->toBe('html');
+    expect(Setting::get('draft_pipeline'))->toBe('template');
     expect(Setting::get('html_max_tokens'))->toBe('30000');
     expect(Setting::whereIn('key', [
         'gen_cooldown_minutes', 'default_ai_quota', 'default_design_quota',

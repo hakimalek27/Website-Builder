@@ -25,8 +25,9 @@ class SettingsSeeder extends Seeder
         Setting::putIfMissing('whatsapp_gateway_url', 'https://wassap.wehdah.my');
         Setting::putIfMissing('whatsapp_session_id', null);
 
-        // Saluran draf HTML dua-peringkat (§Fasa 13) — lalai untuk produksi/dev.
-        Setting::putIfMissing('draft_pipeline', 'html');
+        // Saluran draf (§Fasa 13 html, §Fasa 16 template) — lalai 'template' (galeri tanpa AI).
+        // putIfMissing: DB sedia ada TIDAK ditukar — aktifkan/tukar melalui Tetapan admin.
+        Setting::putIfMissing('draft_pipeline', 'template');
         Setting::putIfMissing('html_max_tokens', '30000');
         Setting::putIfMissing('qa_auto_polish', '1');   // §Fasa 15 — auto-polish 1× bila QA bawah piawai
 
