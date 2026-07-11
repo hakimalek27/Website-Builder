@@ -3,8 +3,14 @@
 @section('title', 'Status — ' . $project->mosque_name)
 
 @php
-    // Petakan 12 status enum → 5 pencapaian mesra-PIC (§4.2).
-    $milestones = [
+    // Petakan 12 status enum → 5 pencapaian mesra-PIC (§4.2). §Fasa 16: label ikut mod.
+    $milestones = ($templateMode ?? false) ? [
+        ['label' => 'Dijemput', 'icon' => 'Mail', 'states' => ['invited']],
+        ['label' => 'Sedang Diisi', 'icon' => 'BookOpen', 'states' => ['in_progress']],
+        ['label' => 'Telah Dihantar', 'icon' => 'Send', 'states' => ['submitted', 'draft_ready']],
+        ['label' => 'Dalam Pembinaan', 'icon' => 'Landmark', 'states' => ['approved', 'handover_exported', 'in_build', 'in_review']],
+        ['label' => 'Laman Live', 'icon' => 'Sparkles', 'states' => ['live']],
+    ] : [
         ['label' => 'Dijemput', 'icon' => 'Mail', 'states' => ['invited']],
         ['label' => 'Sedang Diisi', 'icon' => 'BookOpen', 'states' => ['in_progress']],
         ['label' => 'Draf Sedia', 'icon' => 'Sparkles', 'states' => ['submitted', 'draft_ready']],
@@ -42,6 +48,25 @@
             <p class="font-display text-2xl font-bold text-cream">{{ $project->status->label() }}</p>
         </div>
     </div>
+
+    {{-- §Fasa 16 — templat rujukan PIC (mod templat) --}}
+    @if (($templateMode ?? false) && (($step2['template_snapshot']['name'] ?? null) || ($step2['template_custom_url'] ?? null)))
+        <div class="mt-4 rounded-3xl bg-white p-5 shadow-soft ring-1 ring-sand">
+            <p class="text-xs tracking-wider text-ink/45 uppercase">Templat rujukan anda</p>
+            @if ($step2['template_snapshot']['name'] ?? null)
+                <p class="mt-1 font-semibold text-brand-800">{{ $step2['template_snapshot']['name'] }}</p>
+                @if ($step2['template_snapshot']['url'] ?? null)
+                    <a href="{{ $step2['template_snapshot']['url'] }}" target="_blank" rel="noopener noreferrer" class="text-xs text-brand-700 underline">Lihat rujukan ↗</a>
+                @endif
+            @endif
+            @if ($step2['template_custom_url'] ?? null)
+                <p class="mt-1 text-sm break-all text-ink/70">Pautan contoh anda:
+                    <a href="{{ $step2['template_custom_url'] }}" target="_blank" rel="noopener noreferrer" class="text-brand-700 underline">{{ $step2['template_custom_url'] }}</a>
+                </p>
+            @endif
+            <p class="mt-2 text-xs text-ink/50">Pasukan REKA sedang membina laman anda berdasarkan rujukan ini &amp; nota yang anda beri.</p>
+        </div>
+    @endif
 
     {{-- Timeline pencapaian --}}
     @unless ($isNegative)

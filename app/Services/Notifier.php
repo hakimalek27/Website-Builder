@@ -85,10 +85,20 @@ class Notifier
         $this->whatsapp($this->picPhone($project), "Borang laman {$project->mosque_name} menunggu — sambung di sini: {$link}", $project, 'wizard.reminder');
     }
 
-    public function submitted(Project $project): void
+    public function submitted(Project $project, ?string $templateName = null): void
     {
         $this->mail($this->adminEmail(), new SubmittedMail($project), $project, 'submitted');
-        // Fasa 11: makluman WA segera kepada admin (60189030363).
+
+        // §Fasa 16 — mod templat: admin bina manual dari brief; sahkan kepada PIC juga.
+        if ($templateName !== null) {
+            $adminMsg = "REKA: {$project->mosque_name} telah menghantar borang (MOD TEMPLAT). Templat rujukan: {$templateName}. Muat turun brief penuh di panel & mula bina.";
+            $this->whatsapp($this->adminPhoneOrNull(), $adminMsg, $project, 'submitted', new AdminAlertMail('Borang dihantar (templat)', $adminMsg), $this->adminEmail());
+            $this->whatsapp($this->picPhone($project), "Borang laman {$project->mosque_name} diterima. Pasukan REKA akan membina laman anda berdasarkan templat pilihan anda dan menghubungi anda. Terima kasih!", $project, 'submitted');
+
+            return;
+        }
+
+        // Mod AI (shell/html): makluman WA segera kepada admin (60189030363) — draf dijana automatik.
         $msg = "REKA: {$project->mosque_name} telah menghantar borang — draf dijana automatik.";
         $this->whatsapp($this->adminPhoneOrNull(), $msg, $project, 'submitted', new AdminAlertMail('Borang dihantar', $msg), $this->adminEmail());
     }

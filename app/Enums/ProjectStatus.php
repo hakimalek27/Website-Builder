@@ -33,7 +33,8 @@ enum ProjectStatus: string implements HasColor, HasLabel
         return match ($this) {
             self::Invited => [self::InProgress, self::Cancelled, self::Expired],
             self::InProgress => [self::Submitted, self::Cancelled, self::Expired],
-            self::Submitted => [self::DraftReady, self::Cancelled],
+            // §Fasa 16 — mod templat: Submitted → InBuild terus (tiada draf AI/kelulusan).
+            self::Submitted => [self::DraftReady, self::InBuild, self::Cancelled],
             // Tweak AI berjaya kekalkan draft_ready (versi generation baharu).
             self::DraftReady => [self::DraftReady, self::Approved, self::Cancelled],
             self::Approved => [self::HandoverExported],

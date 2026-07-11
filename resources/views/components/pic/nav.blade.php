@@ -2,10 +2,12 @@
 @php
     use App\Enums\ProjectStatus;
 
-    $showJana = ! in_array($project->status, [
+    // §Fasa 16 — mod templat: tiada Jana/Draf AI (admin bina manual).
+    $templateMode = \App\Services\DraftGenerationService::pipelineMode() === 'template';
+    $showJana = ! $templateMode && ! in_array($project->status, [
         ProjectStatus::Invited, ProjectStatus::InProgress, ProjectStatus::Cancelled, ProjectStatus::Expired,
     ], true);
-    $draft = $project->latestDraft;
+    $draft = $templateMode ? null : $project->latestDraft;
 
     $items = [
         ['label' => 'Utama', 'href' => route('pic.home', ['token' => $token]), 'active' => request()->routeIs('pic.home')],

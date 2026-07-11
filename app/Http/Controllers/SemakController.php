@@ -64,6 +64,19 @@ class SemakController extends Controller
             $project->transitionTo(ProjectStatus::Submitted, 'pic');
         }
 
+        // §Fasa 16 — mod templat: tiada penjanaan AI; pasukan bina manual dari brief.
+        if (DraftGenerationService::pipelineMode() === 'template') {
+            $sections = $project->sections()->get()->mapWithKeys(fn ($s) => [$s->section_key => $s->data])->all();
+            $templateName = data_get($sections, 'step_2.template_snapshot.name')
+                ?? (filled(data_get($sections, 'step_2.template_custom_url')) ? 'pautan sendiri' : 'reka bentuk pilihan');
+
+            app(Notifier::class)->submitted($project, templateName: $templateName);
+            AuditLog::record('pic', null, 'project.submitted', $project);
+
+            return redirect()->route('pic.status', ['token' => $request->route('token')])
+                ->with('success', 'Terima kasih! Maklumat dan templat rujukan anda diterima. Pasukan REKA akan membina laman anda dan menghubungi anda tidak lama lagi.');
+        }
+
         // Notifikasi admin (§13) — mel + WA (draf dijana automatik).
         app(Notifier::class)->submitted($project);
 

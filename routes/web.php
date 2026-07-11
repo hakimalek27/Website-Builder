@@ -10,6 +10,7 @@ use App\Http\Controllers\SemakController;
 use App\Http\Controllers\TweakController;
 use App\Http\Controllers\WizardController;
 use App\Models\Project;
+use App\Services\DraftGenerationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -42,6 +43,11 @@ Route::prefix('/b/{token}')->middleware('resolve.invitation')->name('pic.')->gro
 
     // P4 Hab penjanaan draf.
     Route::get('/jana', function (Request $request) {
+        // §Fasa 16 — mod templat: tiada penjanaan AI → alih ke Status.
+        if (DraftGenerationService::pipelineMode() === 'template') {
+            return redirect()->route('pic.status', ['token' => $request->route('token')]);
+        }
+
         return view('pic.jana', ['token' => $request->route('token')]);
     })->name('jana');
 
@@ -72,6 +78,8 @@ Route::prefix('/b/{token}')->middleware('resolve.invitation')->name('pic.')->gro
         return view('pic.status', [
             'token' => $request->route('token'),
             'notes' => $project->notes()->oldest()->get(),
+            'templateMode' => DraftGenerationService::pipelineMode() === 'template',
+            'step2' => $project->sections()->where('section_key', 'step_2')->first()?->data ?? [],
         ]);
     })->name('status');
     Route::post('/nota', [PicController::class, 'storeNote'])->name('nota');

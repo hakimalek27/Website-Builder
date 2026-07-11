@@ -18,13 +18,21 @@ use Illuminate\View\View;
 // §5.2 P7/P8 — tweak reka bentuk (percuma) & tweak kandungan (AI).
 class TweakController extends Controller
 {
-    public function reka(Request $request): View
+    public function reka(Request $request): View|RedirectResponse
     {
+        if ($r = $this->guardTemplateMode($request)) {
+            return $r;
+        }
+
         return view('pic.tweak-reka', ['token' => $request->route('token')]);
     }
 
     public function rekaRender(Request $request, DesignRerenderService $service): RedirectResponse
     {
+        if ($r = $this->guardTemplateMode($request)) {
+            return $r;
+        }
+
         $project = $request->attributes->get('project');
         try {
             $generation = $service->rerender($project, 'pic');
@@ -35,8 +43,12 @@ class TweakController extends Controller
         }
     }
 
-    public function kandungan(Request $request): View
+    public function kandungan(Request $request): View|RedirectResponse
     {
+        if ($r = $this->guardTemplateMode($request)) {
+            return $r;
+        }
+
         $project = $request->attributes->get('project');
 
         return view('pic.tweak-kandungan', [
@@ -47,6 +59,10 @@ class TweakController extends Controller
 
     public function kandunganSubmit(Request $request, DraftGenerationService $service): RedirectResponse
     {
+        if ($r = $this->guardTemplateMode($request)) {
+            return $r;
+        }
+
         $project = $request->attributes->get('project');
 
         $data = $request->validate([
@@ -82,6 +98,17 @@ class TweakController extends Controller
         } catch (GateException $e) {
             return back()->with('error', $e->getMessage());
         }
+    }
+
+    /** §Fasa 16 — mod templat tiada tweak AI/reka; alih PIC ke Status. */
+    private function guardTemplateMode(Request $request): ?RedirectResponse
+    {
+        if (DraftGenerationService::pipelineMode() === 'template') {
+            return redirect()->route('pic.status', ['token' => $request->route('token')])
+                ->with('info', 'Mod templat aktif — pasukan REKA sedang membina laman anda secara manual.');
+        }
+
+        return null;
     }
 
     /** Draf berjaya terkini (mana-mana saluran — ada rendered_path). */

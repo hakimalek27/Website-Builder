@@ -49,9 +49,11 @@
 
     {{-- Pintasan pasca-hantar --}}
     @if (! in_array($project->status, [\App\Enums\ProjectStatus::Invited, \App\Enums\ProjectStatus::InProgress], true))
+        @php $templateMode = \App\Services\DraftGenerationService::pipelineMode() === 'template'; @endphp
         <div class="mt-8">
-            <h3 class="mb-3 px-1 text-xs font-semibold tracking-wider text-ink/45 uppercase">Draf laman anda</h3>
+            <h3 class="mb-3 px-1 text-xs font-semibold tracking-wider text-ink/45 uppercase">{{ $templateMode ? 'Selepas hantar' : 'Draf laman anda' }}</h3>
             <div class="grid gap-3 sm:grid-cols-3">
+                @unless ($templateMode)
                 <a href="{{ route('pic.jana', ['token' => $token]) }}"
                     class="group flex items-center gap-3 rounded-2xl bg-white px-4 py-4 shadow-xs ring-1 ring-sand transition-all hover:-translate-y-0.5 hover:shadow-soft hover:ring-brand-600/30">
                     <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gold-400/15 text-gold-600">
@@ -70,6 +72,7 @@
                         {!! \App\Support\Lucide::svg('ChevronRight', 2, 'h-4 w-4 text-ink/25 transition group-hover:text-brand-600') !!}
                     </a>
                 @endif
+                @endunless
                 <a href="{{ route('pic.status', ['token' => $token]) }}"
                     class="group flex items-center gap-3 rounded-2xl bg-white px-4 py-4 shadow-xs ring-1 ring-sand transition-all hover:-translate-y-0.5 hover:shadow-soft hover:ring-brand-600/30">
                     <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-50 text-brand-600">
