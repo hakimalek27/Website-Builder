@@ -65,6 +65,29 @@ class DraftKit
         return '<style id="reka-kit">'.$root.self::kitCss().'</style>';
     }
 
+    /** Rujukan ringkas kelas kit untuk dilampir ke prompt penjana (P2). */
+    public static function cheatSheet(): string
+    {
+        return <<<'TXT'
+KELAS KIT REKA (disuntik pelayan — GUNA terus, JANGAN takrif semula pemboleh ubah --rk-*):
+• Kontena: .rk-container / .rk-container-narrow · Seksyen: .rk-section [+ .rk-section--alt latar selang | + .rk-section--dark latar GELAP kontras dramatik] · .rk-center
+• Tipografi (skala bendalir clamp sedia ada): .rk-heading-display (hero) .rk-heading-1/2/3 .rk-lede (perenggan intro besar) .rk-body .rk-dropcap (huruf pertama besar)
+• Hero: .rk-hero + SATU dari .rk-hero--tengah|belah|penuh|mihrab|klasik|grid. Foto penuh: tambah .rk-hero--foto .rk-hero-overlay dengan <img class="rk-hero__bg" src="[[HERO_IMAGE]]" alt="">. Kandungan dalam .rk-hero__inner.
+• Eyebrow pil: .rk-eyebrow (atas terang) / .rk-eyebrow--on-dark (atas latar gelap)
+• Ornamen: <div class="rk-ornament"><span class="rk-ornament-mark"></span></div> · Pembatas: .rk-divider--garis-emas|lengkung|arabesque
+• Butang: .rk-btn + .rk-btn--primary|emas|kaca|garis · Baris butang: .rk-btn-row
+• Kad: .rk-card + .rk-card--lembut|garis|terapung (+ .rk-card-hover untuk angkat bila hover) · Tajuk: .rk-card__title
+• Grid auto-responsif (tanpa media query): .rk-grid (atau .rk-grid--2 / .rk-grid--4) · Dua lajur: .rk-split
+• Statistik: <div class="rk-stat"><div class="rk-stat__value">…</div><div class="rk-stat__label">…</div></div>
+• Ikon bekas: <span class="rk-icon rk-icon--bulat-cair|bulat-penuh|kotak-lembut|kotak-tegas|heksagon|garis|tanpa-bekas"> …SVG inline… </span>
+• Kotak ayat: <div class="rk-verse-box"><p class="rk-arabic">[[AYAT_ARAB]]</p>…</div>
+• Corak Islamik latar: tambah .rk-pattern .rk-pattern--dots|rub|bintang|arabesque pada seksyen (hiasan halus)
+• Header lekat: .rk-header > .rk-header__inner (.rk-container) > .rk-header__brand + .rk-header__nav · Varian: --gradien | --tengah
+• Footer: .rk-footer + .rk-footer--ringkas|tengah-jenama|tiga-lajur (guna .rk-footer__cols untuk 3 lajur)
+• Bayang: .rk-shadow-soft|elev|deep · Animasi: letak kelas .rk-anim-fade atau .rk-anim-zoom pada <body>; tanda elemen dengan .rk-reveal
+TXT;
+    }
+
     /** Kit CSS (minified & dicache). */
     public static function kitCss(): string
     {

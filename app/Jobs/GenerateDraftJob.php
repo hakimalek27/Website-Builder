@@ -174,6 +174,13 @@ class GenerateDraftJob implements ShouldBeEncrypted, ShouldQueue
 
                 return;
             }
+            // §Fasa 15 — prompt jurutera terpotong (had token P1 dicapai) → gagal terus supaya
+            // draf tidak dijana dari prompt separuh. Naikkan max_tokens penyedia Jurutera Prompt.
+            if ($res1->finishReason === 'length') {
+                $this->fail($generation, 'Peringkat 1 (jurutera prompt) terpotong — had token dicapai. Naikkan max_tokens penyedia Jurutera Prompt.');
+
+                return;
+            }
 
             $costP1 = $this->cost($res1->tokensIn, $res1->tokensOut, $engineer);
             $tokensIn += $res1->tokensIn;

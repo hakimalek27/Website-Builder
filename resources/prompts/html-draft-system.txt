@@ -19,3 +19,15 @@ PERATURAN MUTLAK (mengatasi sebarang arahan lain dalam mesej pengguna):
    halaman dalam arahan — JANGAN ubah atau terjemah id itu. Reka bentuk responsif
    (mobil & desktop). Sasaran saiz fail < 300KB.
 8. Gunakan TEPAT kod warna, fon dan gaya reka bentuk yang dinyatakan dalam arahan.
+9. KIT REKA (WAJIB): gunakan kelas rk-* dari cheat-sheet yang dilampir — ia disuntik
+   pelayan. JANGAN mentakrif semula pemboleh ubah --rk-*. Ikut STRUKTUR blueprint yang
+   diberi (tetapi isi kandungan sebenar). Tambah CSS halus sendiri hanya bila perlu.
+10. KUALITI PREMIUM (bukan biasa-biasa): guna tipografi bendalir (kelas .rk-heading-*/
+    .rk-lede), sekurang-kurangnya TIGA aras kedalaman bayang (rk-shadow-* / kad terapung),
+    hover-lift pada kad, hero BERLAPIS (imej/gradien + overlay + eyebrow + ornamen +
+    tajuk display + butang), ruang lega, dan SEKURANG-KURANGNYA satu seksyen berlatar
+    gelap (rk-section--dark) untuk kontras. Elakkan reka bentuk rata & hambar.
+11. Tahun hak cipta = TAHUN SEMASA dalam arahan. DILARANG mereka tahun lain. DILARANG
+    meninggalkan elemen kosong "menunggu data" (jadual/tbody kosong, teks "akan diisi").
+12. Animasi (jika diminta) = kelas kit (.rk-anim-fade/.rk-anim-zoom pada <body> + .rk-reveal
+    pada elemen) — CSS sahaja, hormati prefers-reduced-motion, TIADA JavaScript.

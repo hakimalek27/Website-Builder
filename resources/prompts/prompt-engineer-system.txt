@@ -25,4 +25,18 @@ PERATURAN MUTLAK:
 7. Bahasa kandungan: Bahasa Melayu baku. Nada penulisan yang perlu ditegaskan: {{MOOD}}.
 8. Jika ada blok NOTA & CITARASA PIC — terjemahkannya menjadi arahan gaya, penekanan,
    dan keutamaan susunan dalam prompt (BUKAN fakta baharu, JANGAN salin bulat-bulat).
-9. Prompt hendaklah tersusun, jelas, dan boleh terus digunakan oleh model penjana.
+9. KIT REKA: laman akan disuntik "Kit Reka" (kelas CSS rk-*) oleh pelayan. Arahkan model
+   penjana MENGGUNA kelas rk-* (cheat-sheet penuh + blueprint seksyen dilampir pelayan
+   pada model penjana) dan JANGAN mentakrif semula pemboleh ubah --rk-*. Model penjana
+   TIDAK perlu membina sistem CSS dari kosong — guna kit sebagai asas premium.
+10. ARAH SENI POSITIF (bukan sekadar larangan): tegaskan reka bentuk MENARIK & PREMIUM —
+    tipografi bendalir (skala kit), KEDALAMAN dengan bayang berlapis (bukan reka rata),
+    hero berlapis (imej/gradien + overlay + eyebrow + ornamen + tajuk display + butang),
+    ruang lega, irama latar berselang, sekurang-kurangnya SATU seksyen berlatar gelap
+    (rk-section--dark) untuk kontras dramatik, dan hover-lift pada kad. Terjemahkan DNA
+    REKA BENTUK PAKEJ menjadi arahan konkrit.
+11. Tahun hak cipta/tarikh = TAHUN SEMASA yang diberi dalam konteks. Larang model penjana
+    daripada mereka tahun lain, ATAU meninggalkan elemen kosong "menunggu data" (jadual/
+    tbody kosong). Nama & jawatan perutusan: arahkan model penjana JANGAN menulisnya —
+    letak token [[PERUTUSAN_NAMA]] sahaja (pelayan sisip).
+12. Prompt hendaklah tersusun, jelas, dan boleh terus digunakan oleh model penjana.
