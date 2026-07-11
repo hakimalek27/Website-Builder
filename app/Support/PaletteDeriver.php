@@ -65,6 +65,64 @@ class PaletteDeriver
         return ['tokens' => $tokens, 'adjusted' => $adjusted];
     }
 
+    /**
+     * §Fasa 15 — terbitkan ramp warna lanjutan (palet 7-peranan) untuk Kit Reka Premium.
+     * Menjamin accentBright boleh-baca atas primaryDark & accentDeep atas bg (WCAG AA ≥ 4.5),
+     * meniru sistem token mamkl.my (primary/deep/light + accent/bright/deep). PHP tulen (CSP).
+     *
+     * @param  array<string,string>  $tokens  perlu primary, primaryDark, accent, bg
+     * @return array{primaryDeep:string, primaryLight:string, accentBright:string, accentDeep:string, shadowTint:string}
+     */
+    public static function ramp(array $tokens): array
+    {
+        $primary = self::isValidHex($tokens['primary'] ?? null) ? $tokens['primary'] : '#1B5E3F';
+        $primaryDark = self::isValidHex($tokens['primaryDark'] ?? null) ? $tokens['primaryDark'] : '#0F3D27';
+        $accent = self::isValidHex($tokens['accent'] ?? null) ? $tokens['accent'] : '#C9A961';
+        $bg = self::isValidHex($tokens['bg'] ?? null) ? $tokens['bg'] : '#FAF7F2';
+
+        // primaryDeep: lebih gelap dari primaryDark — untuk hero CTA / jubin gelap.
+        [$dh, $ds, $dl] = self::hexToHsl($primaryDark);
+        $primaryDeep = self::hslToHex($dh, min(1.0, $ds), max(0.05, $dl * 0.62));
+
+        // primaryLight: lebih cerah dari primary — aksen halus / keadaan hover.
+        [$ph, $ps, $pl] = self::hexToHsl($primary);
+        $primaryLight = self::hslToHex($ph, $ps, min(0.55, $pl + 0.12));
+
+        // accentBright: cerahkan accent (langkah 2% L, maks 50) sehingga boleh-baca ATAS primaryDark.
+        [$ah, $as] = self::hexToHsl($accent);
+        $al = self::hexToHsl($accent)[2];
+        $accentBright = $accent;
+        for ($i = 0, $l = $al; $i < 50; $i++) {
+            if (self::contrastRatio($accentBright, $primaryDark) >= self::MIN_CONTRAST) {
+                break;
+            }
+            $l = min(1.0, $l + 0.02);
+            $accentBright = self::hslToHex($ah, $as, $l);
+        }
+
+        // accentDeep: gelapkan accent sehingga boleh-baca ATAS bg (teks emas atas krim).
+        $accentDeep = $accent;
+        for ($i = 0, $l = $al; $i < 50; $i++) {
+            if (self::contrastRatio($accentDeep, $bg) >= self::MIN_CONTRAST) {
+                break;
+            }
+            $l = max(0.0, $l - 0.02);
+            $accentDeep = self::hslToHex($ah, $as, $l);
+        }
+
+        // shadowTint: RGB primaryDark untuk bayang bertinta jenama — rgb(<tint> / a).
+        [$r, $g, $b] = self::hexToRgb($primaryDark);
+        $shadowTint = "$r $g $b";
+
+        return [
+            'primaryDeep' => $primaryDeep,
+            'primaryLight' => $primaryLight,
+            'accentBright' => $accentBright,
+            'accentDeep' => $accentDeep,
+            'shadowTint' => $shadowTint,
+        ];
+    }
+
     /** Nisbah kontras WCAG 2.x antara dua warna hex (1.0–21.0). */
     public static function contrastRatio(string $hex1, string $hex2): float
     {
