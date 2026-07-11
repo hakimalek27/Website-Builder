@@ -209,6 +209,23 @@ Animasi = **naik taraf 3 varian** (bukan sekadar pratonton toggle) · QA = **lap
 7. **Audit admin 2 lapis:** boot-smoke automasi (`AdminAuditTest` — semua resource/page/widget tanpa 500 + regresi bug sebenar) mengesahkan tiada 500; audit **visual** (2FA) diserah owner. Pratonton animasi W5 disahkan **langsung dalam browser** (radio → `data-animation="zoom"` → 4 `rk-sec` → `<style> rkZoomIn`).
 8. **Salin Prompt perlu konteks selamat:** `navigator.clipboard` undefined atas HTTP bukan-localhost — guard `if (navigator.clipboard)` elak ralat; produksi WAJIB HTTPS.
 
+### Kadar kos penuh + demo E2E tukar penyedia (11 Jul 2026, `9666542`)
+
+Selepas Fasa 14 W6, jana PERKIB sebenar melalui saluran HTML → dedah 2 perkara + uji fleksibiliti penyedia:
+
+**(a) Kadar kos setiap model** — `ModelRates` dulu hanya ada model unggulan; jana pertama papar **USD 0.00** kerana `cost()` baca kadar HANYA dari `provider->meta` (bukan fallback ModelRates) dan penyedia demo tiada kadar. Betulkan: rujuk laman rasmi vendor (Groq/Mistral/Google/xAI/Z.ai/OpenRouter) → isi kadar SEMUA model dropdown; ujian jamin setiap model auto-isi. Kini admin pilih model → kadar terisi → kos jana dikira betul.
+
+**(b) Tukar penyedia disahkan** — owner minta uji GLM-5.2 (jurutera P1) + Gemini 2.5 Pro (penjana P2) menggantikan gpt-5.5 + glm-5.2. Routing disahkan: `AiProvider::promptEngineer()` → glm-5.2, `AiProvider::default()` → gemini-2.5-pro. Dua jana sebenar PERKIB:
+
+| Config | P1 jurutera | P2 penjana | Kos |
+|---|---|---|---|
+| Asal | gpt-5.5 ($0.19) | glm-5.2 ($0.07) | ~USD 0.26 |
+| Tukar | **glm-5.2 ($0.02)** | **gemini-2.5-pro ($0.13)** | **~USD 0.15** |
+
+Kedua-dua: QA **LULUS**, 12 seksyen = tepat 12 halaman PIC pilih (prompt-ketat `id={page_key}` W3 berkesan), data verbatim (bank/AJK/hubungi) server-inject, prompt+pecahan kos+HTML dalam DB admin (`input_snapshot`) + brief muat turun. **Semua ikut apa yang PIC isi & pilih.**
+
+**Pelajaran:** (1) penyedia Jurutera Prompt (P1) perlu `timeout_s` ≥ 180 bila model perlahan (GLM jana prompt > 90s → `cURL 28` → gagal-terus, kuota tak dicaj — gagal-terus berfungsi betul). (2) OpenRouter satu kunci melayani banyak model (GLM + Gemini kongsi kunci). (3) Config tukar lebih murah (~USD 0.15) kerana GLM jurutera jauh lebih murah dari gpt-5.5.
+
 ---
 
 ## Pelajaran teknikal utama (rujukan cepat)

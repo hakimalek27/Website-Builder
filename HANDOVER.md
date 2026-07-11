@@ -28,6 +28,13 @@ Empat ciri dari senarai "cadangan masa depan" Fasa 13 + fix bug + audit admin.
 
 **⚠ Audit admin LIVE (2FA) — untuk owner:** log masuk `/admin` + 2FA TOTP, kemudian semak setiap halaman/butang mengikut checklist W6 dalam pelan (`~/.claude/plans/kemaskini-ui-ux-setiap-cozy-muffin.md`). Audit peringkat-kod (boot-smoke) sudah lulus; ini pengesahan visual sahaja.
 
+### Kadar kos penuh + demo E2E saluran HTML sebenar (11 Jul 2026, `9666542`)
+
+- **`ModelRates` liputan penuh dropdown** (`9666542`) — kadar rasmi (rujuk laman vendor, Julai 2026) untuk SETIAP model dalam `AiVendor::models()`: Groq (5), Mistral (5), Google flash-lite/2.0, OpenRouter grok-4/llama-3.3-70b/qwen-2.5-72b, Zhipu glm-4.6/4.5-air/4.5-flash + anggaran glm-5.1/4.7/claude-fable-5. Ujian menjamin **setiap model dropdown auto-isi kadar**. Admin pilih model → kadar terisi → kos jana dikira.
+- **Kos dikira dari `provider->meta` sahaja** (`GenerateDraftJob::cost()`) — BUKAN fallback ke ModelRates. Jika penyedia dicipta tanpa kadar (meta kosong) → kos jana = **USD 0.00** walaupun model dikenali. Penyelesaian: buka-simpan borang penyedia (auto-isi dari ModelRates) atau isi manual `rate_in_per_mtok`/`rate_out_per_mtok`.
+- **Saluran boleh-tukar penyedia disahkan E2E** (jana PERKIB sebenar): mana-mana penyedia boleh jadi P1 (`is_prompt_engineer`) atau P2 (`is_default`). Diuji: **gpt-5.5→glm-5.2** (~USD 0.26) DAN **glm-5.2→gemini-2.5-pro** (~USD 0.15). Routing = `AiProvider::promptEngineer()` (P1) + `AiProvider::default()` (P2). QA lulus, 12/12 seksyen padan halaman PIC, prompt+kos+HTML dalam DB admin + brief.
+- **⚠ Penyedia Jurutera Prompt (P1) perlu `timeout_s` ≥ 180** bila guna model perlahan (cth GLM-5.2 sebagai jurutera). Default 90s cukup untuk gpt-5.5 tapi GLM jana prompt panjang > 90s → `cURL 28 timeout` → gagal-terus (kuota tak dicaj). Naikkan `timeout_s` penyedia jurutera bila tukar ke model lebih perlahan.
+
 ### Fasa 13 — Saluran Draf HTML Dua-Peringkat (12 Jul 2026)
 
 Saluran draf baharu: **Peringkat 1** penyedia "Jurutera Prompt" (OpenAI **gpt-5.5**) jana SATU prompt lengkap → **Peringkat 2** penyedia Default (OpenRouter **glm-5.2**) jana **draf HTML statik** (boleh klik). Mod boleh-tukar (`Setting draft_pipeline` shell/html) — saluran lama **kekal**.
