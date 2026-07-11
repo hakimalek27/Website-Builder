@@ -11,12 +11,18 @@
     'footer' => 'ringkas',
     'divider' => 'tiada',
     'animations' => 'tiada',
+    'islamic' => [],
+    'logoUrl' => null,
+    'stock' => false,
 ])
 @php
     $t = array_merge([
         'primary' => '#1B5E3F', 'primaryDark' => '#0F3D27', 'accent' => '#C9A961',
         'ink' => '#1A1A1A', 'bg' => '#FAF7F2', 'bgAlt' => '#EFE8DC',
     ], $tokens);
+    // §Fasa 15 — janji PIC ditunjuk dalam pratonton (corak Islamik, logo, foto stok).
+    $corak = (bool) data_get($islamic, 'corak_geometri', false);
+    $arabesque = (bool) data_get($islamic, 'pembatas_arabesque', false);
     $stroke = \App\Support\Lucide::strokeForWeight($iconWeight);
     // Gaya bekas ikon (6 pilihan).
     $containerStyle = match ($iconContainer) {
@@ -60,12 +66,24 @@
     @endif
     {{-- Header masjid (varian: padat / gradien / tengah) --}}
     <div @class(['px-4 py-3', 'flex items-center justify-between' => ! $headerCenter, 'text-center' => $headerCenter]) style="{{ $headerBg }}">
-        <span class="truncate font-bold" style="{{ $displayFont }}">{{ $mosqueName ?: 'Nama Masjid Anda' }}</span>
+        <span class="flex items-center gap-2 truncate font-bold" style="{{ $displayFont }}">
+            @if ($logoUrl)<img src="{{ $logoUrl }}" alt="Logo" class="h-5 w-auto shrink-0 rounded bg-white/90 p-0.5" style="max-height:1.4rem" data-preview-logo>@endif
+            {{ $mosqueName ?: 'Nama Masjid Anda' }}
+        </span>
         <span @class(['gap-3 text-xs opacity-80', 'hidden sm:flex' => ! $headerCenter, 'mt-1 flex justify-center' => $headerCenter])><span>Utama</span><span>Aktiviti</span><span>Hubungi</span></span>
     </div>
 
     {{-- Hero — berubah ikut susun atur pilihan (pratonton hidup) --}}
-    <div class="px-4 py-5">
+    <div class="px-4 py-5" @if ($corak) style="background-image:radial-gradient({{ $t['accent'] }}2e 1px,transparent 1.4px);background-size:14px 14px;" data-preview-corak @endif>
+        {{-- Eyebrow pil + chip janji (logo/foto stok/corak) --}}
+        <div class="mb-3 flex flex-wrap items-center gap-1.5">
+            <span class="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-widest"
+                  style="border-color:{{ $t['primary'] }}55;background:{{ $t['primary'] }}14;color:{{ $t['primaryDark'] }};">
+                <span style="width:5px;height:5px;border-radius:9999px;background:{{ $t['accent'] }};display:inline-block;"></span>Selamat Datang
+            </span>
+            @if ($stock)<span class="rounded-full px-2 py-0.5 text-[0.58rem] font-semibold" style="background:{{ $t['accent'] }}22;color:{{ $t['primaryDark'] }};" data-preview-stock>&#10022; Foto stok premium</span>@endif
+            @if ($corak)<span class="rounded-full px-2 py-0.5 text-[0.58rem] font-semibold" style="background:{{ $t['primary'] }}14;color:{{ $t['primaryDark'] }};">&#9670; Corak Islamik</span>@endif
+        </div>
         <div class="rk-sec">
         @switch($layout)
             @case('hero-belah')
@@ -126,6 +144,15 @@
             </div>
         @elseif ($divider === 'lengkung')
             <div class="my-2 h-3" style="background:{{ $t['bgAlt'] }};border-radius:0 0 50% 50%/0 0 100% 100%;" aria-hidden="true"></div>
+        @endif
+
+        {{-- Pembatas arabesque (elemen Islamik) --}}
+        @if ($arabesque)
+            <div class="my-3 flex justify-center" aria-hidden="true" data-preview-arabesque>
+                <svg width="120" height="14" viewBox="0 0 120 14" fill="none" stroke="{{ $t['accent'] }}" stroke-width="1.2">
+                    <path d="M0 7 Q10 0 20 7 T40 7 T60 7 T80 7 T100 7 T120 7"/>
+                </svg>
+            </div>
         @endif
 
         {{-- Kad waktu solat contoh (data HIASAN) --}}

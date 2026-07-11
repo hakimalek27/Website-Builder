@@ -41,6 +41,16 @@
                     <p class="mt-1 text-xs text-brand-600">✓ {{ count($heroFiles) }}/3 imej dimuat naik</p>
                 @endif
             </div>
+        @elseif (in_array($data['hero_mode'] ?? null, ['stok_sementara', 'perlu_fotografi'], true))
+            {{-- §Fasa 15 — janji foto stok premium (bukan gradien kosong). --}}
+            <div class="mt-3 rounded-xl border border-gold-300 bg-gold-50/50 p-3">
+                <p class="text-xs font-semibold text-brand-700">&#10022; Foto latar hero premium disediakan automatik</p>
+                <p class="mt-1 text-xs text-ink/65">
+                    Draf anda akan menggunakan <b>ilustrasi latar bertema masjid/komuniti</b> yang diwarnakan sepadan
+                    pakej pilihan anda — kemas &amp; berkelas, bukan latar kosong. Imej sebenar boleh dimuat naik kemudian
+                    untuk laman produksi.
+                </p>
+            </div>
         @endif
     </div>
 

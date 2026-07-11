@@ -751,6 +751,14 @@ class WizardStep extends Component
         ];
     }
 
+    /** §Fasa 15 — URL thumbnail logo untuk pratonton reka (bila logo dimuat naik). */
+    public function previewLogoUrl(): ?string
+    {
+        $asset = $this->resolveProject()->assets()->where('kind', 'logo')->orderBy('sort')->first();
+
+        return $asset ? route('pic.aset', ['token' => $this->token, 'asset' => $asset->id]) : null;
+    }
+
     public function render()
     {
         $viewData = [

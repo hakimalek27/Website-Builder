@@ -207,6 +207,8 @@
                 :footer="$data['footer_style'] ?? 'ringkas'"
                 :divider="$data['divider'] ?? 'tiada'"
                 :animations="$data['animations'] ?? 'tiada'"
+                :islamic="$data['islamic_elements'] ?? []"
+                :logo-url="$this->previewLogoUrl()"
             />
         </div>
     </div>
