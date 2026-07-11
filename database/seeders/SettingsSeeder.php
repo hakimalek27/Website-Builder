@@ -28,6 +28,7 @@ class SettingsSeeder extends Seeder
         // Saluran draf HTML dua-peringkat (§Fasa 13) — lalai untuk produksi/dev.
         Setting::putIfMissing('draft_pipeline', 'html');
         Setting::putIfMissing('html_max_tokens', '30000');
+        Setting::putIfMissing('qa_auto_polish', '1');   // §Fasa 15 — auto-polish 1× bila QA bawah piawai
 
         // Nilai sulit (kunci API gateway — ditampal melalui Tetapan admin, JANGAN commit).
         Setting::putIfMissing('whatsapp_api_key', null, encrypted: true);

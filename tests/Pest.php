@@ -149,3 +149,17 @@ function fakeTwoStage(string $html, int $glmStatus = 200, string $finishReason =
         'gw.test/*' => Http::response(['success' => true]),
     ]);
 }
+
+/**
+ * §Fasa 15 — dua-peringkat + auto-polish: panggilan glm.test PERTAMA pulang $html1 (draf awal
+ * lemah → cetus polish), panggilan KEDUA pulang $html2 (naik taraf). Guna Http::sequence.
+ */
+function fakeTwoStagePolish(string $html1, string $html2, string $finish2 = 'stop'): void
+{
+    $glm = fn (string $c, string $fr) => ['choices' => [['message' => ['content' => $c], 'finish_reason' => $fr]], 'usage' => ['prompt_tokens' => 3000, 'completion_tokens' => 20000]];
+    Http::fake([
+        'engineer.test/*' => Http::response(['choices' => [['message' => ['content' => 'PROMPT: bina draf HTML.'], 'finish_reason' => 'stop']], 'usage' => ['prompt_tokens' => 4000, 'completion_tokens' => 2000]]),
+        'glm.test/*' => Http::sequence()->push($glm($html1, 'stop'))->push($glm($html2, $finish2)),
+        'gw.test/*' => Http::response(['success' => true]),
+    ]);
+}

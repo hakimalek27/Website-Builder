@@ -53,6 +53,7 @@ class ManageSettings extends Page
             'admin_notify_email' => (string) (Setting::get('admin_notify_email') ?? ''),
             'draft_pipeline' => (string) (Setting::get('draft_pipeline') ?? 'shell'),
             'html_max_tokens' => (string) (Setting::get('html_max_tokens') ?? '30000'),
+            'qa_auto_polish' => (string) (Setting::get('qa_auto_polish') ?? '1'),
         ]);
     }
 
@@ -88,6 +89,10 @@ class ManageSettings extends Page
                         TextInput::make('html_max_tokens')->label('Had token draf HTML')
                             ->numeric()->minValue(1000)
                             ->helperText('Output HTML besar — 30000 disyorkan. Hanya untuk saluran HTML.'),
+                        Select::make('qa_auto_polish')->label('Auto-polish QA (§Fasa 15)')
+                            ->options(['1' => 'Hidup — 1 pusingan pembaikan automatik', '0' => 'Mati'])
+                            ->native(false)
+                            ->helperText('Bila QA kesan kualiti bawah piawai, sistem hantar 1 pusingan pembaikan ke penjana. Tidak makan kuota PIC (+1 panggilan P2).'),
                     ]),
                 Section::make('Penjanaan & Kuota')
                     ->description('Kawalan cooldown penjanaan draf & kuota lalai projek baharu.')
@@ -165,5 +170,6 @@ class ManageSettings extends Page
         $pipeline = in_array($s['draft_pipeline'] ?? 'shell', ['shell', 'html'], true) ? $s['draft_pipeline'] : 'shell';
         Setting::put('draft_pipeline', $pipeline);
         Setting::put('html_max_tokens', (string) max(1000, (int) ($s['html_max_tokens'] ?? 30000)));
+        Setting::put('qa_auto_polish', in_array($s['qa_auto_polish'] ?? '1', ['0', '1'], true) ? $s['qa_auto_polish'] : '1');
     }
 }

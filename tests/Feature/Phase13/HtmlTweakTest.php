@@ -19,6 +19,7 @@ beforeEach(function () {
     $this->seed(DesignPackageSeeder::class);
     $this->seed(VerseLibrarySeeder::class);
     Setting::put('draft_pipeline', 'html');
+    Setting::put('qa_auto_polish', '0');   // §Fasa 15 — determinisme (tweak juga lalui QA/polish)
 });
 
 it('applies a content tweak on an html draft as stage-2 only, without leaking PII', function () {

@@ -21,6 +21,7 @@ beforeEach(function () {
     $this->seed(VerseLibrarySeeder::class);
     Setting::put('draft_pipeline', 'html');
     Setting::put('html_max_tokens', '30000');
+    Setting::put('qa_auto_polish', '0');   // §Fasa 15 — determinisme kiraan token/kos/panggilan
 });
 
 it('generates an HTML draft via the two-stage pipeline', function () {

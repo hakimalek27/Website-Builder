@@ -14,7 +14,10 @@ use Illuminate\Support\Facades\Mail;
 
 // §Fasa 14 W3 — QA auto pasca-jana (seksyen + kontras). Helper dalam tests/Pest.php.
 
-beforeEach(fn () => $this->seed(DesignPackageSeeder::class));
+beforeEach(function () {
+    $this->seed(DesignPackageSeeder::class);
+    Setting::put('qa_auto_polish', '0');   // §Fasa 15 — determinisme (ujian pipeline QA legasi)
+});
 
 function qaHtml(string $body): string
 {
@@ -126,8 +129,8 @@ it('does not notify admin when QA passes', function () {
     $this->seed(VerseLibrarySeeder::class);
     Setting::put('draft_pipeline', 'html');
     htmlProviders();
-    // Kedua-dua seksyen utama+hubungi hadir.
-    fakeTwoStage(qaHtml('<section id="utama">Hi</section><section id="hubungi">[[CONTACT_STRIP]]</section>'));
+    // Kedua-dua seksyen utama+hubungi hadir + imej hero (stok_sementara) → QA lulus.
+    fakeTwoStage(qaHtml('<section id="utama"><img src="[[HERO_IMAGE]]">Hi</section><section id="hubungi">[[CONTACT_STRIP]]</section>'));
     [$project] = htmlReadyProject();
 
     app(DraftGenerationService::class)->request($project, GenerationType::Initial);

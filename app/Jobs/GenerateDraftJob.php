@@ -248,13 +248,51 @@ class GenerateDraftJob implements ShouldBeEncrypted, ShouldQueue
                 $path = "drafts/{$project->id}/{$generation->id}.html";
                 Storage::disk('local')->put($path, $final);
 
-                // QA auto (§Fasa 14) — WAJIB Throwable-safe: bug QA TIDAK boleh menggagalkan
-                // draf yang sudah sah/tersimpan atau membakar kuota. Dipanggil selepas fail disimpan.
+                // QA auto (§Fasa 14/15) — WAJIB Throwable-safe: bug QA TIDAK boleh menggagalkan
+                // draf yang sudah sah/tersimpan atau membakar kuota. Raw dihantar untuk semakan premium.
                 $qa = null;
                 try {
-                    $qa = app(DraftQaService::class)->analyse($project, $final);
+                    $qa = app(DraftQaService::class)->analyse($project, $final, $clean);
                 } catch (Throwable $e) {
                     report($e);
+                }
+
+                // §Fasa 15 — auto-polish SEKALI bila bawah piawai. Beroperasi atas RAW bertoken
+                // (tiada PII). Gagal/tak sah → draf asal kekal. Throwable-safe. Kuota TAK disentuh.
+                $polishSnap = null;
+                if ($qa !== null && Setting::get('qa_auto_polish', '1') === '1' && $this->qaNeedsPolish($qa)) {
+                    $issuesBefore = count($qa['issues']) + count($qa['suggestions'] ?? []);
+                    try {
+                        $reqP = $builder->stage2PolishRequest($project, $clean, $this->polishableIssues($qa), $qa['suggestions'] ?? []);
+                        $resP = $client->complete($reqP['system'], $reqP['user'], $provider, ['json' => false, 'max_tokens' => $maxTokens]);
+                        $tokensIn += $resP->tokensIn;
+                        $tokensOut += $resP->tokensOut;
+                        $costP = $this->cost($resP->tokensIn, $resP->tokensOut, $provider);
+                        $costTotal += $costP;
+
+                        $applied = false;
+                        $issuesAfter = null;
+                        if ($resP->finishReason !== 'length') {
+                            $cleanP = $validator->validate($resP->content);     // throws → draf asal kekal
+                            $finalP = $finisher->finish($project, $cleanP, $version);
+                            Storage::disk('local')->put($rawPath, $cleanP);
+                            Storage::disk('local')->put($path, $finalP);
+                            $clean = $cleanP;
+                            $final = $finalP;
+                            $qa = app(DraftQaService::class)->analyse($project, $final, $clean);
+                            $issuesAfter = count($qa['issues']) + count($qa['suggestions'] ?? []);
+                            $applied = true;
+                        }
+
+                        $polishSnap = [
+                            'triggered' => true, 'applied' => $applied, 'finish_reason' => $resP->finishReason,
+                            'tokens_in' => $resP->tokensIn, 'tokens_out' => $resP->tokensOut, 'cost' => $costP,
+                            'issues_before' => $issuesBefore, 'issues_after' => $issuesAfter,
+                        ];
+                    } catch (Throwable $e) {
+                        report($e);
+                        $polishSnap = ['triggered' => true, 'applied' => false, 'error' => Str::limit($e->getMessage(), 120)];
+                    }
                 }
 
                 $generation->update([
@@ -269,6 +307,7 @@ class GenerateDraftJob implements ShouldBeEncrypted, ShouldQueue
                 $this->snapshotMerge($generation, array_filter([
                     'raw_path' => $rawPath,
                     'stage2' => ['provider' => $provider->name, 'model' => $provider->model, 'tokens_in' => $res2->tokensIn, 'tokens_out' => $res2->tokensOut, 'attempts' => $attempt, 'finish_reason' => $res2->finishReason],
+                    'stage3_polish' => $polishSnap,
                     'qa' => $qa,
                 ], fn ($v) => $v !== null));
 
@@ -336,6 +375,24 @@ class GenerateDraftJob implements ShouldBeEncrypted, ShouldQueue
 
         // Notifier: mail + WA admin + NotificationLog (§Fasa 13).
         app(Notifier::class)->generationFailed($generation);
+    }
+
+    /** §Fasa 15 — polish dicetuskan oleh isu boleh-dibaiki-AI ATAU sebarang suggestion estetik. */
+    private function qaNeedsPolish(array $qa): bool
+    {
+        foreach ($qa['issues'] ?? [] as $i) {
+            if (($i['polishable'] ?? false) === true) {
+                return true;
+            }
+        }
+
+        return ! empty($qa['suggestions'] ?? []);
+    }
+
+    /** @return array<int,array<string,mixed>> */
+    private function polishableIssues(array $qa): array
+    {
+        return array_values(array_filter($qa['issues'] ?? [], fn ($i) => ($i['polishable'] ?? false) === true));
     }
 
     /** §8.8 — cost = tokensIn×rate_in + tokensOut×rate_out (kadar dari meta; JANGAN hard-code). */
