@@ -31,6 +31,9 @@ class ProjectDataPresenter
         'pwa' => 'PWA', 'wa_broadcast' => 'Siaran WhatsApp', 'add_to_calendar' => 'Tambah ke kalendar',
         'hero_mode' => 'Mod hero', 'video_url' => 'Video hero', 'hero_files' => 'Fail hero',
         'liked_refs' => 'Laman rujukan disukai', 'dislikes' => 'Perkara tidak disukai', 'url' => 'URL', 'what_liked' => 'Apa yang disukai',
+        // §Fasa 16 — mod templat
+        'template_id' => 'ID templat', 'template_snapshot' => 'Templat pilihan', 'template_custom_url' => 'Link laman contoh (PIC)',
+        'template_notes' => 'Nota templat', 'suka' => 'Suka', 'ubah' => 'Ubah / Buang', 'tambah' => 'Tambah', 'demo_url' => 'Demo', 'name' => 'Nama',
         'domain_status' => 'Status domain', 'domain_name' => 'Nama domain', 'registrar' => 'Pendaftar', 'dns_access' => 'Akses DNS',
         'existing_site' => 'Laman sedia ada', 'migrate_content' => 'Pindah kandungan', 'official_email_status' => 'Status e-mel rasmi',
         'hosting' => 'Hosting', 'maintenance' => 'Pakej penyelenggaraan', 'target_live' => 'Sasaran live',

@@ -3,12 +3,14 @@
 namespace App\Filament\Resources\Projects\Schemas;
 
 use App\Models\Project;
+use App\Models\TemplateCatalog;
 use App\Support\ProjectDataPresenter;
 use Closure;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
@@ -40,6 +42,12 @@ class ProjectInfolist
                 self::md('s7', fn (Project $record) => self::stepMd($record, 7)),
                 self::md('s9', fn (Project $record) => self::stepMd($record, 9)),
             ]),
+            // §Fasa 16 — templat rujukan pilihan PIC (mod templat).
+            Section::make('Templat Pilihan PIC')->collapsible()->collapsed()
+                ->visible(fn (Project $record) => self::hasTemplateChoice($record))
+                ->schema([
+                    self::md('template', fn (Project $record) => self::templateMd($record)),
+                ]),
             Section::make('Aset')->collapsible()->collapsed()->schema([
                 self::md('assets', fn (Project $record) => self::assetsMd($record)),
             ]),
@@ -199,6 +207,54 @@ class ProjectInfolist
         }
 
         return implode("\n", $lines);
+    }
+
+    /** @return array<string, mixed> */
+    private static function templateStep2(Project $r): array
+    {
+        $data = $r->sections()->where('section_key', 'step_2')->first()?->data ?? [];
+
+        return is_array($data) ? $data : [];
+    }
+
+    private static function hasTemplateChoice(Project $r): bool
+    {
+        $d = self::templateStep2($r);
+
+        return filled($d['template_id'] ?? null) || filled($d['template_custom_url'] ?? null) || filled($d['template_notes'] ?? null);
+    }
+
+    private static function templateMd(Project $r): string
+    {
+        $d = self::templateStep2($r);
+        $lines = [];
+
+        $snap = $d['template_snapshot'] ?? null;
+        if (is_array($snap) && filled($snap['name'] ?? null)) {
+            $url = $snap['url'] ?? null;
+            $lines[] = $url ? "- **Templat:** [{$snap['name']}]({$url})" : "- **Templat:** {$snap['name']}";
+            if (filled($snap['demo_url'] ?? null)) {
+                $lines[] = "- **Demo:** [{$snap['demo_url']}]({$snap['demo_url']})";
+            }
+            $tpl = filled($d['template_id'] ?? null) ? TemplateCatalog::find($d['template_id']) : null;
+            if ($tpl && filled($tpl->thumbnail_path)) {
+                $lines[] = "\n![thumbnail](".Storage::disk('public')->url($tpl->thumbnail_path).')';
+            }
+        }
+        if (filled($d['template_custom_url'] ?? null)) {
+            $lines[] = "- **Link laman contoh (PIC):** [{$d['template_custom_url']}]({$d['template_custom_url']})";
+        }
+
+        $notes = $d['template_notes'] ?? [];
+        if (is_array($notes)) {
+            foreach (['suka' => 'Suka', 'ubah' => 'Ubah / Buang', 'tambah' => 'Tambah'] as $k => $lbl) {
+                if (filled($notes[$k] ?? null)) {
+                    $lines[] = "- **{$lbl}:** ".str_replace("\n", ' ', (string) $notes[$k]);
+                }
+            }
+        }
+
+        return $lines === [] ? '_Tiada templat dipilih._' : implode("\n", $lines);
     }
 
     private static function invitationMd(Project $r): string

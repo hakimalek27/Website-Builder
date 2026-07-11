@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Project;
+use App\Models\TemplateCatalog;
 use App\Support\ProjectDataPresenter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
@@ -32,7 +33,25 @@ class BriefBuilder
             'generations' => $generations,
             'tweaks' => $project->tweakRequests()->oldest()->get(),
             'engineeredPrompt' => $engineeredPrompt,
+            'template' => $this->templateData($project),   // §Fasa 16
+            'assets' => $project->assets()->orderBy('kind')->orderBy('sort')->get(),
+            'step7' => $project->sections()->where('section_key', 'step_7')->first()?->data ?? [],
         ])->render();
+    }
+
+    /** §Fasa 16 — data templat rujukan (step_2 + katalog) untuk brief. @return array<string, mixed> */
+    private function templateData(Project $project): array
+    {
+        $d = $project->sections()->where('section_key', 'step_2')->first()?->data ?? [];
+        $d = is_array($d) ? $d : [];
+
+        return [
+            'snapshot' => $d['template_snapshot'] ?? null,
+            'custom_url' => $d['template_custom_url'] ?? null,
+            'notes' => $d['template_notes'] ?? [],
+            'catalog' => filled($d['template_id'] ?? null) ? TemplateCatalog::find($d['template_id']) : null,
+            'active' => filled($d['template_id'] ?? null) || filled($d['template_custom_url'] ?? null),
+        ];
     }
 
     public function fileName(Project $project): string

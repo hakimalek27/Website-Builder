@@ -19,6 +19,9 @@ Anda membina laman web **PENGELUARAN** untuk **{{ $spec['mosque']['official_name
 5. **Waktu solat** = JAKIM e-Solat SAHAJA. Zon `{{ $spec['mosque']['jakim_zone'] }}`. Endpoint: `GET https://www.e-solat.gov.my/index.php?r=esolatApi/takwimsolat&period=today&zone={{ $spec['mosque']['jakim_zone'] }}` — cache ≥ 6 jam; JANGAN panggil setiap tick countdown.
 @endif
 6. Item ditanda "✎ mod AI" ialah kandungan dijana AI daripada butir ringkas — SAHKAN dengan PIC.
+@if (! empty($template['active']))
+7. **Templat rujukan design:** bina mengikut rekaan templat rujukan (struktur, susun atur, mood visual) sebagai **INSPIRASI — BUKAN klon 1:1**. JANGAN salin kod/imej/aset berhak cipta dari templat WordPress. Lihat seksyen **TEMPLAT RUJUKAN & ARAHAN DESIGN** di bawah. **Stack sasaran: Next.js + Sanity CMS** (seperti mamkl.my).
+@endif
 
 ### Design tokens (salin ke Tailwind)
 
@@ -33,6 +36,10 @@ colors: {
 ```
 
 **Fonts:** body `{{ $spec['design']['fonts']['body'] ?? '' }}` · display `{{ $spec['design']['fonts']['display'] ?? '' }}` · **Nada:** {{ $spec['design']['mood'] ?? '—' }}
+@if ($project->design === null && ! empty($template['active']))
+
+> ⚠ Tiada pakej reka bentuk dipilih (mod templat) — token di atas ialah lalai selamat. Rujuk seksyen **TEMPLAT RUJUKAN & ARAHAN DESIGN** untuk hala tuju visual sebenar.
+@endif
 
 ---
 
@@ -59,6 +66,57 @@ colors: {
 @endforeach
 
 ---
+@if (! empty($template['active']))
+
+## TEMPLAT RUJUKAN & ARAHAN DESIGN
+
+@php $snap = $template['snapshot'] ?? null; $cat = $template['catalog'] ?? null; $tn = $template['notes'] ?? []; @endphp
+@if ($snap && ! empty($snap['name']))
+- **Templat pilihan PIC:** {{ $snap['name'] }}
+- **URL:** {{ $snap['url'] ?? '—' }}
+@if (! empty($snap['demo_url']))
+- **Demo penuh:** {{ $snap['demo_url'] }}
+@endif
+@endif
+@if ($cat)
+- **Kategori:** {{ implode(', ', $cat->categories ?? []) ?: '—' }}
+- **Gaya:** {{ implode(', ', $cat->style_tags ?? []) ?: '—' }}
+@if (! empty($cat->description))
+- **Nota katalog:** {{ $cat->description }}
+@endif
+@endif
+@if (! empty($template['custom_url']))
+- **Link laman contoh (PIC):** {{ $template['custom_url'] }}
+@endif
+
+**Nota reka bentuk PIC:**
+@if (! empty($tn['suka']))
+> **Suka:** {{ $tn['suka'] }}
+@endif
+@if (! empty($tn['ubah']))
+> **Ubah / buang:** {{ $tn['ubah'] }}
+@endif
+@if (! empty($tn['tambah']))
+> **Tambah:** {{ $tn['tambah'] }}
+@endif
+@if (! empty($step7['liked_refs']))
+
+**Laman rujukan lain (L7):**
+@foreach ($step7['liked_refs'] as $ref)
+@if (! empty($ref['url']))
+- {{ $ref['url'] }}@if (! empty($ref['what_liked'])) — {{ $ref['what_liked'] }}@endif
+
+@endif
+@endforeach
+@endif
+@if (! empty($step7['dislikes']))
+**Tidak disukai (L7):** {{ $step7['dislikes'] }}
+@endif
+
+> ⚠ **Hak cipta:** guna templat sebagai INSPIRASI reka bentuk sahaja. JANGAN salin kod sumber, imej, atau aset berlesen dari templat/laman rujukan. Bina dari awal dengan Next.js + Sanity.
+
+---
+@endif
 
 ## Nota PIC & Perbualan
 
@@ -115,6 +173,20 @@ _Tiada nota._
 
 @foreach ($tweaks as $tw)
 - {{ $tw->created_at->format('d/m/Y H:i') }} · **{{ implode(', ', $tw->categories ?? []) ?: 'umum' }}** — {{ $tw->message }}
+@endforeach
+@endif
+
+@if ($assets->isNotEmpty())
+---
+
+## SENARAI ASET PENUH (muat naik PIC)
+
+Fail disimpan pada pelayan REKA (`storage/app/private/`). Muat turun kesemua sebagai ZIP dari panel admin (butang **Muat Turun Semua Aset**).
+
+| Jenis | Nama asal | Path relatif | Saiz | Dimensi |
+|---|---|---|---|---|
+@foreach ($assets as $a)
+| {{ $a->kind }} | {{ $a->original_name ?? '—' }} | `{{ $a->path }}` | {{ $a->size ? round($a->size / 1024).' KB' : '—' }} | {{ ($a->width && $a->height) ? $a->width.'×'.$a->height : '—' }} |
 @endforeach
 @endif
 
