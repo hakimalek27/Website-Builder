@@ -54,6 +54,7 @@ final class ModelRates
         'anthropic' => [
             'claude-opus-4-8' => [5.0, 25.0],
             'claude-sonnet-5' => [3.0, 15.0],
+            'claude-fable-5' => [3.0, 15.0],   // anggaran (tiada harga rasmi disahkan) — setara Sonnet 5
             'claude-haiku-4-5' => [1.0, 5.0],
         ],
         // sumber: https://api-docs.deepseek.com/quick_start/pricing (2026-07) — chat/reasoner → V4 Flash
@@ -66,11 +67,18 @@ final class ModelRates
         // sumber: https://docs.z.ai/guides/overview/pricing (2026-07)
         'zhipu' => [
             'glm-5.2' => [1.40, 4.40],
+            'glm-5.1' => [1.20, 3.80],       // anggaran (tiada harga rasmi disahkan)
+            'glm-4.7' => [0.50, 2.00],       // anggaran (tiada harga rasmi disahkan)
+            'glm-4.6' => [0.43, 1.74],
+            'glm-4.5-air' => [0.20, 1.10],
+            'glm-4.5-flash' => [0.0, 0.0],   // percuma di API Z.ai
         ],
         // sumber: https://ai.google.dev/gemini-api/docs/pricing (2026-07) — kadar konteks ≤200k
         'google' => [
             'gemini-2.5-pro' => [1.25, 10.0],
             'gemini-2.5-flash' => [0.30, 2.50],
+            'gemini-2.5-flash-lite' => [0.10, 0.40],
+            'gemini-2.0-flash' => [0.10, 0.40],
         ],
         // sumber: https://openrouter.ai/models (2026-07) — cermin kadar vendor asal
         'openrouter' => [
@@ -80,6 +88,25 @@ final class ModelRates
             'google/gemini-2.5-pro' => [1.25, 10.0],
             'z-ai/glm-5.2' => [1.40, 4.40],
             'z-ai/glm-4.6' => [0.60, 2.20],
+            'x-ai/grok-4' => [3.0, 15.0],
+            'meta-llama/llama-3.3-70b-instruct' => [0.10, 0.32],
+            'qwen/qwen-2.5-72b-instruct' => [0.36, 0.40],
+        ],
+        // sumber: https://groq.com/pricing (2026-07)
+        'groq' => [
+            'llama-3.3-70b-versatile' => [0.59, 0.79],
+            'llama-3.1-8b-instant' => [0.05, 0.08],
+            'openai/gpt-oss-120b' => [0.15, 0.60],
+            'moonshotai/kimi-k2-instruct' => [1.0, 3.0],
+            'qwen/qwen3-32b' => [0.29, 0.59],
+        ],
+        // sumber: https://mistral.ai/pricing (2026-07)
+        'mistral' => [
+            'mistral-large-latest' => [2.0, 6.0],
+            'mistral-small-latest' => [0.10, 0.30],
+            'magistral-medium-latest' => [2.0, 5.0],
+            'ministral-8b-latest' => [0.10, 0.10],
+            'pixtral-large-latest' => [2.0, 6.0],
         ],
         // Ollama = tempatan (percuma).
         'ollama' => [

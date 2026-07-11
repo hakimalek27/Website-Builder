@@ -42,9 +42,10 @@ it('auto-fills USD rates when a known model is chosen (Fasa 12 W5)', function ()
 });
 
 it('leaves rates blank for an unpriced model (Fasa 12 W5)', function () {
+    // §Fasa 14 — guna model yang benar-benar tiada kadar (dropdown penuh kini berkadar).
     Livewire::test(CreateAiProvider::class)
         ->fillForm(['vendor' => 'mistral'])
-        ->fillForm(['model' => 'mistral-large-latest'])
+        ->fillForm(['model' => 'model-tersuai-tak-wujud'])
         ->assertFormSet([
             'meta' => ['rate_in_per_mtok' => '', 'rate_out_per_mtok' => '', 'currency' => 'USD'],
         ]);
