@@ -5,6 +5,7 @@ namespace App\Support;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\Encoders\JpegEncoder;
 use Intervention\Image\ImageManager;
 use Throwable;
 
@@ -100,7 +101,7 @@ class StockLibrary
 
             $data = '';
             foreach ([72, 60, 50, 42] as $q) {
-                $data = (string) $image->toJpeg($q);
+                $data = (string) $image->encode(new JpegEncoder(quality: $q));
                 if (strlen($data) <= $targetKb * 1024) {
                     break;
                 }

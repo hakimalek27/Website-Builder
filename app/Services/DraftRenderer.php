@@ -6,6 +6,7 @@ use App\Models\Generation;
 use App\Models\Project;
 use App\Models\Verse;
 use App\Support\PageCatalog;
+use App\Support\StockLibrary;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -93,6 +94,36 @@ class DraftRenderer
         $sections = $project->sections()->get()->mapWithKeys(fn ($s) => [$s->section_key => $s->data])->all();
 
         return $this->heroImage($project, $sections);
+    }
+
+    /**
+     * §Fasa 15 — SEMUA imej hero muat naik untuk saluran HTML, sebagai data-URI.
+     * Berbeza heroImage(): (a) re-encode aset >1.5MB (BUKAN jatuh ke gradien — punca hero
+     * senyap dahulu); (b) pulangkan kesemua (hero ke-2/3 → imej seksyen). Shell TIDAK guna
+     * ini (kekal byte-identik).
+     *
+     * @return array<int,string>
+     */
+    public function heroImagesForHtml(Project $project): array
+    {
+        $sections = $project->sections()->get()->mapWithKeys(fn ($s) => [$s->section_key => $s->data])->all();
+        if (data_get($sections, 'step_6.hero_mode') !== 'upload') {
+            return [];
+        }
+
+        $out = [];
+        foreach ($project->assets()->where('kind', 'hero')->orderBy('sort')->get() as $asset) {
+            if (! Storage::disk('local')->exists($asset->path)) {
+                continue;
+            }
+            if ((int) $asset->size <= 1_500_000) {
+                $out[] = 'data:'.($asset->mime ?: 'image/jpeg').';base64,'.base64_encode(Storage::disk('local')->get($asset->path));
+            } elseif (($uri = StockLibrary::reencodeToDataUri($asset->path, 1600, 300)) !== null) {
+                $out[] = $uri;   // >1.5MB → re-encode (bukan buang)
+            }
+        }
+
+        return $out;
     }
 
     /**

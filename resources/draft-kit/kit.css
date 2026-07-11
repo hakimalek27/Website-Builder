@@ -63,7 +63,8 @@
 .rk-hero--tengah .rk-btn-row,.rk-hero--penuh .rk-btn-row,.rk-hero--mihrab .rk-btn-row{justify-content:center}
 
 /* --- Kad + hover-lift (varian lembut/garis/terapung) --- */
-.rk-card{background:color-mix(in srgb,#fff 100%,var(--rk-bg) 0%);border-radius:var(--rk-radius);padding:clamp(1.25rem,2.5vw,1.75rem)}
+.rk-card{background:#fff;color:var(--rk-ink);border-radius:var(--rk-radius);padding:clamp(1.25rem,2.5vw,1.75rem)}
+.rk-card p{color:color-mix(in srgb,var(--rk-ink) 82%,transparent)}
 .rk-card--lembut{border:1px solid color-mix(in srgb,var(--rk-ink) 8%,transparent);box-shadow:0 1px 2px rgb(var(--rk-shadow-tint) / 0.05),0 8px 20px -8px rgb(var(--rk-shadow-tint) / 0.08)}
 .rk-card--garis{border:1.5px solid color-mix(in srgb,var(--rk-primary) 22%,transparent);box-shadow:none}
 .rk-card--terapung{border:0;box-shadow:0 2px 4px rgb(var(--rk-shadow-tint) / 0.06),0 22px 48px -16px rgb(var(--rk-shadow-tint) / 0.22)}
@@ -100,8 +101,8 @@
 .rk-hero{position:relative;isolation:isolate;overflow:hidden}
 .rk-hero__inner{position:relative;z-index:2}
 /* Overlay foto: gradient gelap dari bawah + vignette radial (keterbacaan teks putih) */
-.rk-hero-overlay::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(to top,var(--rk-primary-deep) 4%,color-mix(in srgb,var(--rk-primary-deep) 60%,transparent) 42%,color-mix(in srgb,var(--rk-ink) 20%,transparent) 100%)}
-.rk-hero-overlay::after{content:"";position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse at center,transparent 32%,rgb(var(--rk-shadow-tint) / 0.5))}
+.rk-hero-overlay::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(to top,color-mix(in srgb,var(--rk-primary-deep) 88%,transparent) 2%,color-mix(in srgb,var(--rk-primary-deep) 42%,transparent) 48%,transparent 100%)}
+.rk-hero-overlay::after{content:"";position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse at center,transparent 38%,rgb(var(--rk-shadow-tint) / 0.4))}
 .rk-hero img.rk-hero__bg,.rk-hero__bg{position:absolute;inset:0;z-index:0;width:100%;height:100%;object-fit:cover}
 .rk-hero--foto{color:#fff}
 .rk-hero--foto .rk-heading-display,.rk-hero--foto .rk-heading-1{color:#fff;text-shadow:0 2px 30px rgb(0 0 0 / 0.5)}
@@ -165,7 +166,7 @@
    BLOK DATA VERBATIM (partial pelayan) — kini responsif & sepadan kit
    ============================================================================ */
 /* Waktu solat — auto-fit (fix 6-lajur sesak mobile) */
-.rk-prayer{background:color-mix(in srgb,#fff 100%,transparent);border:1px solid color-mix(in srgb,var(--rk-ink) 8%,transparent);border-radius:var(--rk-radius);padding:1.25rem;margin-inline:auto;max-width:760px;box-shadow:0 8px 20px -10px rgb(var(--rk-shadow-tint) / 0.1)}
+.rk-prayer{background:#fff;color:var(--rk-ink);border:1px solid color-mix(in srgb,var(--rk-ink) 8%,transparent);border-radius:var(--rk-radius);padding:1.25rem;margin-inline:auto;max-width:760px;box-shadow:0 8px 20px -10px rgb(var(--rk-shadow-tint) / 0.1)}
 .rk-prayer__label{font-size:0.75rem;color:color-mix(in srgb,var(--rk-ink) 55%,transparent);text-align:center;margin-bottom:0.9rem}
 .rk-prayer__grid{display:grid;gap:0.6rem;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));text-align:center}
 .rk-prayer__name{display:block;font-size:0.72rem;opacity:0.6}
@@ -173,12 +174,12 @@
 /* AJK — auto-fit (fix 3-lajur tetap) */
 .rk-ajk{max-width:1080px;margin-inline:auto}
 .rk-ajk__grid{display:grid;gap:1.1rem;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr))}
-.rk-ajk__card{background:#fff;border:1px solid color-mix(in srgb,var(--rk-ink) 8%,transparent);border-radius:var(--rk-radius);padding:1.25rem;text-align:center;box-shadow:0 1px 2px rgb(var(--rk-shadow-tint) / 0.05),0 8px 18px -10px rgb(var(--rk-shadow-tint) / 0.1)}
+.rk-ajk__card{background:#fff;color:var(--rk-ink);border:1px solid color-mix(in srgb,var(--rk-ink) 8%,transparent);border-radius:var(--rk-radius);padding:1.25rem;text-align:center;box-shadow:0 1px 2px rgb(var(--rk-shadow-tint) / 0.05),0 8px 18px -10px rgb(var(--rk-shadow-tint) / 0.1)}
 .rk-ajk__name{font-weight:700;color:var(--rk-primary-dark)}
 .rk-ajk__role{opacity:0.65;font-size:0.85rem;margin-top:0.2rem}
 .rk-ajk__more{text-align:center;margin-top:1rem;opacity:0.6;font-size:0.85rem}
 /* Bank */
-.rk-bank{max-width:440px;margin:1.4rem auto 0;text-align:left;background:#fff;border:1px solid color-mix(in srgb,var(--rk-accent) 30%,transparent);border-radius:var(--rk-radius);padding:1.4rem;box-shadow:0 12px 28px -14px rgb(var(--rk-shadow-tint) / 0.16)}
+.rk-bank{max-width:440px;margin:1.4rem auto 0;text-align:left;background:#fff;color:var(--rk-ink);border:1px solid color-mix(in srgb,var(--rk-accent) 30%,transparent);border-radius:var(--rk-radius);padding:1.4rem;box-shadow:0 12px 28px -14px rgb(var(--rk-shadow-tint) / 0.16)}
 .rk-bank__title{font-weight:700;margin-bottom:0.5rem;color:var(--rk-primary-dark)}
 .rk-bank__acc{font-size:1.1rem;font-weight:700;color:var(--rk-primary);letter-spacing:0.03em}
 .rk-bank__holder{font-size:0.85rem;opacity:0.7;margin-top:0.2rem}
