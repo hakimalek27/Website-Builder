@@ -1,6 +1,6 @@
 # HANDOVER — REKA (Website Builder)
 
-Kemas kini terakhir: **11 Julai 2026** · Branch: `main` · Remote: `github.com/hakimalek27/Website-Builder`
+Kemas kini terakhir: **12 Julai 2026** · Branch: `main` · Remote: `github.com/hakimalek27/Website-Builder`
 
 REKA — platform tempahan & penjanaan draf laman web **masjid, surau & NGO/pertubuhan Islam**.
 Stack: **Laravel 13.19 · PHP 8.4 · Filament v4.11 · Livewire 3 · Tailwind 4 · Pest** (dev: SQLite).
@@ -9,9 +9,24 @@ Stack: **Laravel 13.19 · PHP 8.4 · Filament v4.11 · Livewire 3 · Tailwind 4 
 
 ## Status semasa
 
-- **Fasa 0–10** + **rombakan UI/UX** + **Fasa 11** + **pembetulan pasca-audit** (`eca8f80`, `d027778`) + **fix AiClient OpenAI moden** (`f61ddec`) + **Fasa 12** (7 commit: `806d17a`→`ca674c1`) + **Fasa 13** (7 commit: `22b159a`→`0a5a172`) + **Fasa 14** (6 commit: `02c3e5c`→`9c534eb`) + **Fasa 15** (6 commit: `05d2ef6`→`1da85aa`).
-- **317 ujian Pest hijau** (1203 assertions) · `pint` bersih · `npm run build` bersih.
+- **Fasa 0–10** + **rombakan UI/UX** + **Fasa 11** + **pembetulan pasca-audit** (`eca8f80`, `d027778`) + **fix AiClient OpenAI moden** (`f61ddec`) + **Fasa 12** (7 commit: `806d17a`→`ca674c1`) + **Fasa 13** (7 commit: `22b159a`→`0a5a172`) + **Fasa 14** (6 commit: `02c3e5c`→`9c534eb`) + **Fasa 15** (6 commit: `05d2ef6`→`1da85aa`) + **Fasa 16** (6 commit: `d89b7aa`→`f2d0c5e`).
+- **349 ujian Pest hijau** (1284 assertions) · `pint` bersih · `npm run build` bersih.
 - Semua kerja **di-push ke `main`**.
+
+### Fasa 16 — "Mod Templat": PIC pilih templat rujukan → admin + Claude Code bina (12 Jul 2026)
+
+**Pivot konsep** (owner: draf AI "tak capai kepuasan walau ditune berkali") — buang pergantungan AI jana draf; PIC pilih **templat rujukan** dari galeri terkurasi + tulis nota berstruktur → admin nampak semua + muat turun brief → admin bina laman sebenar guna **Claude Code (Next.js + Sanity)**. Saluran AI **kekal boleh-tukar** (`Setting draft_pipeline` +nilai `template`, default seed baharu; 317→349 ujian). Pelan: `~/.claude/plans/kemaskini-ui-ux-setiap-cozy-muffin.md`.
+
+1. **`d89b7aa` W1 katalog+setting** — jadual `template_catalog` (ULID, categories/style_tags/screenshots JSON, thumbnail); model `TemplateCatalog` (`forTier` tapis kategori dalam PHP); `TemplateCatalogResource` Filament CRUD (FileUpload disk `public` — **pertama dalam projek**); `TemplateCatalogSeeder` 14 entri URL sahih (ThemeForest masjid/NGO + laman Malaysia); `pipelineMode` whitelist +`template` (**fallback shell kekal**); `DraftGenerationService::request()` guard GateException; ManageSettings Select; seeder default `template`.
+2. **`1eff113` W2 wizard L2** — `step-2` dispatcher (design klasik verbatim / galeri templat); galeri kad thumbnail+placeholder inisial, carian, butiran modal, butang **demo tab baharu**, link laman sendiri, **3 nota berstruktur** (suka/ubah/tambah), mood kekal wajib; `selectTemplate`/`clearTemplate`/`showTemplateDetail`; CompletenessService mod templat = mood + (template_id ∨ custom_url); `afterStep2` guard (tiada ProjectDesign — DesignResolver null-safe).
+3. **`bf36a21` W3 aset admin** — `AdminFileController::asset()` buang had kind → admin buka **gambar AJK/QR/PDF**; `AssetZipper` (ZIP semua aset, entri `{kind}/{nn}-{slug}.{ext}`, submitted+ **tanpa approval**); action "Muat Turun Semua Aset" ViewProject + ProjectsTable.
+4. **`b222d8e` W4 submit** — `ProjectStatus` Submitted→InBuild; `SemakController::submit` mod templat (**tiada AI**, redirect pic.status); `Notifier::submitted(?templateName)` WA admin "MOD TEMPLAT" + WA pengesahan PIC; routes pic.jana guard; `TweakController::guardTemplateMode`; nav/home sembunyi Jana/Draf; status milestone mod templat + kad templat rujukan PIC.
+5. **`f2d0c5e` W5 admin+brief** — ProjectInfolist Section "Templat Pilihan PIC"; ProjectDataPresenter LABELS baharu; BriefBuilder +template/assets/step7; full-brief ARAHAN AI PEMBINA #7 (**inspirasi BUKAN klon 1:1, Next.js+Sanity**) + seksyen TEMPLAT RUJUKAN + SENARAI ASET PENUH.
+6. **W6 ujian+docs** — 32 ujian Phase16 (TemplateCatalog/WizardTemplateStep/AdminAssetAccess/SubmitTemplateMode/BriefTemplate/PipelineSettingTemplate); CompletenessAndSubmit + SubmitAutoGenerate tambah `Setting draft_pipeline=shell` eksplisit (kalis-masa-depan); HANDOVER + PERJALANAN Bahagian I.
+
+**Keputusan owner:** galeri dalam laman + demo tab baharu (**ThemeForest sekat iframe** — X-Frame-Options SAMEORIGIN + Cloudflare 403) · saluran AI kekal boleh-tukar · **skop setakat brief** (tiada aliran pratonton fasa ini) · seed 14 entri metadata, admin upload thumbnail sendiri.
+
+**⚠ Nota deploy Fasa 16:** `php artisan migrate` (jadual `template_catalog`); `php artisan db:seed --class=TemplateCatalogSeeder` (idempoten); **`php artisan storage:link`** (kali pertama disk `public` — untuk thumbnail katalog); **aktifkan mod templat via Tetapan admin → Saluran draf → "Templat rujukan"** (`putIfMissing` TIDAK menukar DB sedia ada; atau SQL `UPDATE settings SET value='template' WHERE key='draft_pipeline'`); `npm run build`. TIADA migration enum status (kolum sudah ada `in_build/in_review/live`).
 
 ### Fasa 15 — "Kit Reka Premium": kualiti draf AI aras mamkl.my (11 Jul 2026)
 
@@ -135,8 +150,9 @@ Admin pilih vendor → base URL + driver auto → API key + model. OpenAI/Anthro
 ## Perintah penting
 
 ```bash
-php artisan test                 # 317 ujian Pest
-php artisan migrate:fresh --seed # skema + seed (59 zon, 14 pakej, verse, 9 settings)
+php artisan test                 # 349 ujian Pest
+php artisan migrate:fresh --seed # skema + seed (59 zon, 14 pakej, verse, settings, 14 templat)
+php artisan storage:link         # kali pertama disk public (thumbnail katalog templat, Fasa 16)
 npm run build                    # aset (guna ini untuk ujian browser tempatan)
 vendor/bin/pint --dirty          # format PHP
 php artisan reka:demo-token --ngo # jana sesi NGO demo (dev sahaja)

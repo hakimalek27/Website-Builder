@@ -5,6 +5,7 @@ use App\Enums\Tier;
 use App\Jobs\GenerateDraftJob;
 use App\Mail\SubmittedMail;
 use App\Models\ProjectSection;
+use App\Models\Setting;
 use App\Services\CompletenessService;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
@@ -78,6 +79,7 @@ it('blocks submit below 100% (§6.12)', function () {
 it('submits, notifies admin, and auto-queues the first draft when complete (§4.4/§13/Fasa 11)', function () {
     Mail::fake();
     Queue::fake();
+    Setting::put('draft_pipeline', 'shell');   // §Fasa 16 — eksplisit mod AI (kalis-masa-depan)
     [$project, $token] = fillCompleteSurau();
     $project->update(['status' => ProjectStatus::InProgress]);
 

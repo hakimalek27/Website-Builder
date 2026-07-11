@@ -2,7 +2,7 @@
 
 > Catatan lengkap perjalanan projek **REKA** (platform tempahan & penjanaan draf laman web masjid, surau & NGO/pertubuhan Islam milik **Wehdah Solution**) — dari pembinaan awal, audit visual, sehingga demo hujung-ke-hujung mengisi wizard sebagai PIC untuk **PERKIB**.
 >
-> Kemas kini terakhir: **11 Julai 2026** (Fasa 14) · Branch `main` · Remote `github.com/hakimalek27/Website-Builder`
+> Kemas kini terakhir: **12 Julai 2026** (Fasa 16) · Branch `main` · Remote `github.com/hakimalek27/Website-Builder`
 > Stack: Laravel 13.19 · PHP 8.4 · Filament v4.11 · Livewire 3 · Tailwind 4 · Pest · Intervention Image v4 (dev: SQLite)
 
 ---
@@ -264,6 +264,37 @@ Draf **Masjid Al-Hidayah** (Arang Moden gelap, hero-tengah) + **NGO Ummah Sejaht
 3. **Intervention v4:** `encode(new JpegEncoder(quality))` — BUKAN `toJpeg()`/`encodeByExtension()` (tiada dlm versi ini).
 4. **Chrome headless render** untuk sahkan SVG/draf: `--headless=old --user-data-dir=UNIK` + `taskkill` (elak singleton lock); SVG kekal 1600×900 + kotak `overflow:hidden` (jangan sed dimensi — rosakkan `<rect>` latar).
 5. **Overlay hero** perlu cukup lut (scene nampak) tetapi cukup gelap (teks legible) — gradient bawah 88% deep → atas transparent.
+
+---
+
+## BAHAGIAN I — Fasa 16: "Mod Templat" (pivot jana-AI → pilih-templat, 12 Jul 2026)
+
+### Masalah (keputusan owner)
+Selepas Fasa 13–15 menaik taraf kualiti draf AI, owner tetap **tidak berpuas hati**: "kalau saya jadi customer pun saya sendiri tak puas hati". Tujuan produk = servis bina laman masjid/NGO. Keputusan: **ubah konsep** — buang pergantungan AI jana draf. Ganti: **PIC pilih templat rujukan** (ThemeForest masjid/NGO atau link laman lain) dari galeri dalam wizard + nota berstruktur → admin nampak semua + brief penuh → admin bina laman sebenar guna **Claude Code (Next.js + Sanity — rujuk design sahaja, BUKAN guna WordPress, BUKAN klon 1:1)**.
+
+### Kaedah — 3 agen Explore + 1 agen Plan + semakan CSP sendiri
+Tiga agen Explore (aliran wizard PIC · admin+brief+eksport · CSP/iframe/pratonton), 1 agen Plan. **Penemuan yang mengubah reka bentuk:** **ThemeForest sekat embed** (`curl -I`: `X-Frame-Options: SAMEORIGIN` + Cloudflare 403) → iframe demo luar mustahil → galeri terkurasi dalam laman + demo tab baharu. Sistem **sudah separuh menyokong**: L7 tangkap `liked_refs`; brief sudah "ARAHAN AI PEMBINA" + README "Jalankan Claude Code"; `ProjectStatus` sudah ada `InBuild/InReview/Live` (kolum enum 12 nilai — TIADA migration status); upload AJK/QR/PDF sudah wujud.
+
+### 6 commit (`d89b7aa`→`f2d0c5e`, 317 → 349 ujian)
+| Commit | Bidang | Ringkasan |
+|---|---|---|
+| `d89b7aa` | W1 katalog+setting | jadual `template_catalog` + `TemplateCatalogResource` (FileUpload pertama projek) + seeder 14 URL sahih + saluran `template` (fallback shell) + guard `request()` |
+| `1eff113` | W2 wizard L2 | dispatcher galeri/design; galeri kad + carian + modal + demo-tab-baharu + link-sendiri + 3-nota berstruktur; CompletenessService `template_choice` |
+| `bf36a21` | W3 aset admin | buang had kind (AJK/QR/PDF) + `AssetZipper` ZIP + action Muat Turun Semua Aset |
+| `b222d8e` | W4 submit | Submitted→InBuild; submit tanpa AI → pic.status; Notifier templat (WA admin+PIC); guard jana/tweak; nav/home/status mod templat |
+| `f2d0c5e` | W5 admin+brief | infolist Templat Pilihan PIC + brief TEMPLAT RUJUKAN (inspirasi BUKAN klon, Next.js+Sanity) + SENARAI ASET PENUH |
+| (dalam W1–W5) | W6 ujian+docs | 32 ujian Phase16 + kemas ujian sensitif (`Setting shell` eksplisit) + dokumentasi |
+
+### Keputusan owner direkod
+Galeri dalam laman + demo tab baharu · saluran AI **kekal boleh-tukar** (default `template`) · **skop setakat brief** (tiada pratonton preview_url fasa ini) · katalog 14 entri metadata, admin upload thumbnail sendiri (selamat hak cipta).
+
+### Nota teknikal Fasa 16
+1. **Fallback `pipelineMode()` MESTI kekal `'shell'`** — suite ujian tak seed settings; menukar fallback memecahkan berpuluh ujian sedia ada.
+2. **FileUpload Filament pertama** — disk `public` eksplisit + `php artisan storage:link`; CSP `img-src 'self'` (same-origin `/storage`) tanpa perubahan.
+3. **ThemeForest tak boleh iframe** — guna screenshot tempatan (admin upload) + `<a target="_blank" rel="noopener">` demo (precedent `video_url`, tidak pernah embed URL pengguna).
+4. **`rekaRender` tak lalu `request()`** — `TweakController::guardTemplateMode` sendiri wajib (jangan harap guard `request()` sahaja).
+5. **`step-2` dispatcher** — kandungan design lama dipindah **VERBATIM** ke `step-2-design.blade` supaya `Step2PreviewTest`/`WizardRenderSmokeTest` kekal (output DOM identik).
+6. **URL seeder disahkan sebenar** (WebSearch): Muezzin/Alquran/Tabligh (masjid) + Alone/Charity NGO + laman Malaysia (mamkl.my dll) — jangan reka URL.
 
 ---
 

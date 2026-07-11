@@ -4,6 +4,7 @@ use App\Enums\ProjectStatus;
 use App\Enums\Tier;
 use App\Jobs\GenerateDraftJob;
 use App\Models\ProjectSection;
+use App\Models\Setting;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
 
@@ -33,6 +34,7 @@ function fillCompleteFor(string $logoStatus = 'teks_sahaja', string $heroMode = 
 beforeEach(function () {
     Mail::fake();
     Queue::fake();
+    Setting::put('draft_pipeline', 'shell');   // §Fasa 16 — eksplisit mod AI (kalis-masa-depan)
 });
 
 it('auto-queues the first draft on submit when logo/hero are ready', function () {

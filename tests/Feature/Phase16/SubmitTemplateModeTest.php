@@ -59,6 +59,15 @@ it('reaches 100% completeness in template mode with mood + template', function (
     expect(app(CompletenessService::class)->compute($project)['score'])->toBe(100);
 });
 
+it('accepts a custom url alone to satisfy template choice (100%)', function () {
+    [$project] = fillCompleteTemplateProject();
+    // Ganti pilihan katalog dengan pautan sendiri sahaja.
+    ProjectSection::where('project_id', $project->id)->where('section_key', 'step_2')
+        ->update(['data' => ['mood' => 'tenang_khusyuk', 'template_custom_url' => 'https://laman-saya.test']]);
+
+    expect(app(CompletenessService::class)->compute($project)['score'])->toBe(100);
+});
+
 it('flags template choice as missing when neither template nor custom url is given', function () {
     Setting::put('draft_pipeline', 'template');
     [$project] = fillCompleteTemplateProject();
