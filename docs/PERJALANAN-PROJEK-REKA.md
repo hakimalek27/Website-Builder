@@ -186,7 +186,7 @@ Tiga agen Explore serentak (aliran AI + hook QA · admin Filament + inventori au
 - **"Varian animasi" tak wujud:** sistem sedia ada cuma **checkbox boolean** (satu efek fadeUp) dan pratonton **langsung tak menunjukkannya** — owner pilih **naik taraf 3 varian**.
 - **Kontras `accent/bg` akan false-flag 100% draf** (pakej default `warisan_hijau` skor ≈2.1:1) → guna pasangan yang benar-benar dirender `primaryDark/accent`.
 
-### 6 commit (`02c3e5c`→`9c534eb`, 258 ujian)
+### 6 commit (`02c3e5c`→`9c534eb`, 258 ujian; +2 ModelRates → 260 keseluruhan)
 | Commit | Bidang | Ringkasan |
 |---|---|---|
 | `02c3e5c` | **W1 fix bug** | `Setting::putIfMissing()` (guard `exists()`); `SettingsSeeder` idempoten (tidak tindih kunci API admin). Migration dijalankan → betulkan QueryException edit Penyedia AI. |

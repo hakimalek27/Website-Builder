@@ -10,7 +10,7 @@ Stack: **Laravel 13.19 · PHP 8.4 · Filament v4.11 · Livewire 3 · Tailwind 4 
 ## Status semasa
 
 - **Fasa 0–10** + **rombakan UI/UX** + **Fasa 11** + **pembetulan pasca-audit** (`eca8f80`, `d027778`) + **fix AiClient OpenAI moden** (`f61ddec`) + **Fasa 12** (7 commit: `806d17a`→`ca674c1`) + **Fasa 13** (7 commit: `22b159a`→`0a5a172`) + **Fasa 14** (6 commit: `02c3e5c`→`9c534eb`).
-- **258 ujian Pest hijau** (878 assertions) · `pint` bersih · `npm run build` bersih.
+- **260 ujian Pest hijau** (935 assertions) · `pint` bersih · `npm run build` bersih.
 - Semua kerja **di-push ke `main`**.
 
 ### Fasa 14 — QA Auto, Salin Prompt, finish_reason, Varian Animasi & Audit Admin (11 Jul 2026)
@@ -120,7 +120,7 @@ Admin pilih vendor → base URL + driver auto → API key + model. OpenAI/Anthro
 ## Perintah penting
 
 ```bash
-php artisan test                 # 258 ujian Pest
+php artisan test                 # 260 ujian Pest
 php artisan migrate:fresh --seed # skema + seed (59 zon, 14 pakej, verse, 9 settings)
 npm run build                    # aset (guna ini untuk ujian browser tempatan)
 vendor/bin/pint --dirty          # format PHP
