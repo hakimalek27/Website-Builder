@@ -34,7 +34,7 @@ Stack: **Laravel 13.19 · PHP 8.4 · Filament v4.11 · Livewire 3 · Tailwind 4 
 
 **Fix thumbnail Katalog Templat admin (12 Jul, `17191c4`):** ImageColumn admin dulu guna `->disk('public')` → Filament jana URL **mutlak APP_URL** (`http://localhost/storage/...`) → pecah bila serve pada host/port lain (dev :8237 → 0/10 muat). Fix: `->getStateUsing(fn ($r) => request()->getSchemeAndHttpHost().'/storage/'.$r->thumbnail_path)` — URL ikut **host permintaan sebenar**, kukuh dev & prod (selaras fix wizard `ec31cc7`). Disahkan browser: admin 10/10 thumbnail muat.
 
-**Pautan demo LANGSUNG setiap tema (12 Jul, `9ab5662`):** dulu "Lihat demo penuh" → halaman **jualan** ThemeForest (perlu klik "Live Preview" lagi). Kini `demo_url` = demo hidup sebenar, dikutip via Claude-in-Chrome (fetch same-origin halaman `full_screen_preview` ThemeForest → ekstrak iframe src = laman demo pengarang). **37 tema TF:** 31 → URL demo pengarang **langsung** (https, disahkan hidup), 4 → `full_screen_preview` TF (demo pengarang http:// — TF serve via https), 2 → `null`→halaman item (demo pengarang **mati** disahkan: incharity + womensfoundation). Laman gov/mamkl kekal demo=laman sendiri. `TemplateCatalogSeeder` kini baca `demo_url` dari manifest; `step-2-template.blade` banner guna `demo_url`. Nota: URL demo pengarang di-hos pihak ketiga — boleh berubah/mati; semak berkala.
+**Pautan demo LANGSUNG setiap tema (12 Jul, `9ab5662`):** dulu "Lihat demo penuh" → halaman **jualan** ThemeForest (perlu klik "Live Preview" lagi). Kini `demo_url` = demo hidup sebenar, dikutip via Claude-in-Chrome (fetch same-origin halaman `full_screen_preview` ThemeForest → ekstrak iframe src = laman demo pengarang). **37 tema TF:** 31 → URL demo pengarang **langsung** (https, disahkan hidup), 4 → `full_screen_preview` TF (demo pengarang http:// — TF serve via https), 2 → demo pengarang **MATI** (incharity `charity.sdemo.site` + womensfoundation `envato.kroxiedigital.com`) → **kedua-dua tema DIBUANG dari katalog** (JSON+DB+thumbnail) → katalog kini **38 tema (18 masjid + 20 NGO)**, semua demo hidup. Laman gov/mamkl kekal demo=laman sendiri. `TemplateCatalogSeeder` kini baca `demo_url` dari manifest; `step-2-template.blade` banner guna `demo_url`. Nota: URL demo pengarang di-hos pihak ketiga — boleh berubah/mati; semak berkala.
 
 ### Fasa 15 — "Kit Reka Premium": kualiti draf AI aras mamkl.my (11 Jul 2026)
 
@@ -159,7 +159,7 @@ Admin pilih vendor → base URL + driver auto → API key + model. OpenAI/Anthro
 
 ```bash
 php artisan test                 # 349 ujian Pest
-php artisan migrate:fresh --seed # skema + seed (59 zon, 14 pakej, verse, settings, 40 templat)
+php artisan migrate:fresh --seed # skema + seed (59 zon, 14 pakej, verse, settings, 38 templat)
 php artisan storage:link         # kali pertama disk public (thumbnail katalog templat, Fasa 16)
 npm run build                    # aset (guna ini untuk ujian browser tempatan)
 vendor/bin/pint --dirty          # format PHP

@@ -332,22 +332,6 @@
         "sort": 61
     },
     {
-        "name": "InCharity — Fundraising & Non-profit",
-        "url": "https://themeforest.net/item/incharity-wordpress-theme-for-charity-fundraising-nonprofit-organization/14802070",
-        "demo_url": null,
-        "source": "themeforest",
-        "categories": [
-            "ngo"
-        ],
-        "style_tags": [
-            "donation"
-        ],
-        "description": null,
-        "thumbnail": "incharity-fundraising-non-profit.jpg",
-        "is_active": true,
-        "sort": 62
-    },
-    {
         "name": "The Charity — Fundraising & Non-Profit (HTML5)",
         "url": "https://themeforest.net/item/the-charity-html-template-for-charity-non-profit-organization/19274730",
         "demo_url": "https://themeforest.net/item/the-charity-html-template-for-charity-non-profit-organization/full_screen_preview/19274730",
@@ -623,22 +607,6 @@
         "thumbnail": "heaven-hands-charity-fundraising.jpg",
         "is_active": true,
         "sort": 79
-    },
-    {
-        "name": "Women's Foundation — Non-Profit (Elementor)",
-        "url": "https://themeforest.net/item/womens-foundation-nonprofit-wordpress-elementor-template-kit/31865455",
-        "demo_url": null,
-        "source": "themeforest",
-        "categories": [
-            "ngo"
-        ],
-        "style_tags": [
-            "elementor"
-        ],
-        "description": null,
-        "thumbnail": "womens-foundation-non-profit-elementor.jpg",
-        "is_active": true,
-        "sort": 80
     },
     {
         "name": "DonateAlfa — Charity & Donation (Elementor)",
