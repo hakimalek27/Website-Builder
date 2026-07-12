@@ -19,7 +19,7 @@
             <div class="min-w-0">
                 <span class="text-xs font-medium text-brand-700">Templat dipilih</span>
                 <p class="truncate font-semibold text-brand-800">{{ $chosen['name'] }}</p>
-                <a href="{{ $chosen['url'] }}" target="_blank" rel="noopener noreferrer" class="text-xs text-brand-700 underline">Lihat ↗</a>
+                <a href="{{ $chosen['demo_url'] ?? $chosen['url'] }}" target="_blank" rel="noopener noreferrer" class="text-xs text-brand-700 underline">Lihat demo ↗</a>
             </div>
             <button type="button" wire:click="clearTemplate" class="shrink-0 rounded-lg border border-sand bg-white px-3 py-1.5 text-xs hover:border-brand-600/40">Buang pilihan</button>
         </div>

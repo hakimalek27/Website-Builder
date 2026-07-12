@@ -36,6 +36,7 @@ class TemplateCatalogSeeder extends Seeder
                 'categories' => $row['categories'] ?? [],
                 'style_tags' => $row['style_tags'] ?? [],
                 'description' => $row['description'] ?? null,
+                'demo_url' => $row['demo_url'] ?? null,
                 'is_active' => $row['is_active'] ?? true,
                 'sort' => $row['sort'] ?? 0,
             ];
