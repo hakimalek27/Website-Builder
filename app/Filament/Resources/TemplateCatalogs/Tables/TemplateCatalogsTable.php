@@ -16,7 +16,12 @@ class TemplateCatalogsTable
     {
         return $table
             ->columns([
-                ImageColumn::make('thumbnail_path')->label('Thumbnail')->disk('public')
+                // URL dibina dari host permintaan sebenar (bukan APP_URL disk 'public') —
+                // kukuh pada mana-mana port/host (dev serve port lain & prod). Selaras fix wizard `ec31cc7`.
+                ImageColumn::make('thumbnail_path')->label('Thumbnail')
+                    ->getStateUsing(fn ($record) => filled($record->thumbnail_path)
+                        ? request()->getSchemeAndHttpHost().'/storage/'.$record->thumbnail_path
+                        : null)
                     ->height(48),
                 TextColumn::make('name')->label('Nama')->searchable()->sortable()->weight('bold')->wrap(),
                 TextColumn::make('source')->label('Sumber')->badge(),
