@@ -51,54 +51,6 @@
         "sort": 3
     },
     {
-        "name": "Semua Tema Masjid (ThemeForest — browse)",
-        "url": "https://themeforest.net/category/wordpress?term=mosque",
-        "source": "themeforest",
-        "categories": [
-            "masjid"
-        ],
-        "style_tags": [
-            "browse",
-            "pelbagai"
-        ],
-        "description": "Layari puluhan tema masjid ThemeForest. Beritahu kami mana yang anda suka melalui nota.",
-        "thumbnail": null,
-        "is_active": true,
-        "sort": 10
-    },
-    {
-        "name": "Tema Islamic Center (ThemeForest — browse)",
-        "url": "https://themeforest.net/category/wordpress?term=islamic%20center",
-        "source": "themeforest",
-        "categories": [
-            "masjid"
-        ],
-        "style_tags": [
-            "browse",
-            "pelbagai"
-        ],
-        "description": "Koleksi tema pusat Islam / masjid ThemeForest untuk rujukan gaya.",
-        "thumbnail": null,
-        "is_active": true,
-        "sort": 11
-    },
-    {
-        "name": "Tema Masjid (ThemeForest — browse \"masjid\")",
-        "url": "https://themeforest.net/category/wordpress?term=masjid",
-        "source": "themeforest",
-        "categories": [
-            "masjid"
-        ],
-        "style_tags": [
-            "browse",
-            "pelbagai"
-        ],
-        "description": "Carian \"masjid\" di ThemeForest.",
-        "thumbnail": null,
-        "is_active": true,
-        "sort": 12
-    },
-    {
         "name": "Masjid Al-Muttaqin Wangsa Melawati (mamkl.my)",
         "url": "https://www.mamkl.my",
         "source": "laman",
@@ -128,7 +80,7 @@
             "tempatan"
         ],
         "description": "Laman rasmi masjid — rujukan struktur maklumat & waktu solat.",
-        "thumbnail": null,
+        "thumbnail": "masjid-wilayah-persekutuan.jpg",
         "is_active": true,
         "sort": 21
     },
@@ -144,7 +96,7 @@
             "tempatan"
         ],
         "description": "Laman rasmi Masjid Negara — rujukan tempatan.",
-        "thumbnail": null,
+        "thumbnail": "masjid-negara.jpg",
         "is_active": true,
         "sort": 22
     },
@@ -181,54 +133,6 @@
         "thumbnail": "charity-ngo-donation-nonprofit.jpg",
         "is_active": true,
         "sort": 31
-    },
-    {
-        "name": "Semua Tema NGO / Amal (ThemeForest — browse)",
-        "url": "https://themeforest.net/category/wordpress/nonprofit",
-        "source": "themeforest",
-        "categories": [
-            "ngo"
-        ],
-        "style_tags": [
-            "browse",
-            "pelbagai"
-        ],
-        "description": "Layari 400+ tema NGO & bukan-untung ThemeForest.",
-        "thumbnail": null,
-        "is_active": true,
-        "sort": 40
-    },
-    {
-        "name": "Tema Charity (ThemeForest — browse)",
-        "url": "https://themeforest.net/category/wordpress/nonprofit/charity",
-        "source": "themeforest",
-        "categories": [
-            "ngo"
-        ],
-        "style_tags": [
-            "browse",
-            "donation"
-        ],
-        "description": "Koleksi tema amal ThemeForest untuk rujukan gaya.",
-        "thumbnail": null,
-        "is_active": true,
-        "sort": 41
-    },
-    {
-        "name": "Tema NGO (ThemeForest — browse \"ngo\")",
-        "url": "https://themeforest.net/category/wordpress/nonprofit?term=ngo",
-        "source": "themeforest",
-        "categories": [
-            "ngo"
-        ],
-        "style_tags": [
-            "browse",
-            "pelbagai"
-        ],
-        "description": "Carian \"ngo\" dalam kategori bukan-untung ThemeForest.",
-        "thumbnail": null,
-        "is_active": true,
-        "sort": 42
     },
     {
         "name": "Shaha — Mosque, Church & Islamic Masjid",
