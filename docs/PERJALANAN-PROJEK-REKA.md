@@ -296,6 +296,9 @@ Galeri dalam laman + demo tab baharu · saluran AI **kekal boleh-tukar** (defaul
 5. **`step-2` dispatcher** — kandungan design lama dipindah **VERBATIM** ke `step-2-design.blade` supaya `Step2PreviewTest`/`WizardRenderSmokeTest` kekal (output DOM identik).
 6. **URL seeder disahkan sebenar** (WebSearch): Muezzin/Alquran/Tabligh (masjid) + Alone/Charity NGO + laman Malaysia (mamkl.my dll) — jangan reka URL.
 
+### Kembangan katalog + thumbnail (via Claude-in-Chrome, 12 Jul — `ae5f997`+`ec31cc7`)
+Owner minta lebih banyak pilihan tema. Guna **Claude-in-Chrome** kawal Chrome owner: scrape halaman carian ThemeForest (`/search/masjid` 17, `/search/non profit organization` 30) → **46 tema** (21 masjid + 25 NGO). **38 thumbnail imej pratonton tema** dimuat turun (og:image `s3.envato.com` — ThemeForest sekat `curl` Cloudflare tapi browser sebenar lepas; `market-resized` CDN sekat hotlink server tapi **ID = s3, tambah `.__large_preview`** → boleh). Seeder ditulis semula baca JSON manifest + salin 38 thumbnail (di-commit) ke disk public semasa seed. Wizard thumbnail **URL relatif `/storage/`** (kukuh port/host). Semua disahkan visual di browser: wizard PIC (46 tema+thumbnail), admin Katalog Templat + Tetapan (Saluran draf = "Templat rujukan"). **Gotcha:** MCP `javascript_tool` tapis nilai berquery-string (buang query dulu); MCP screenshot timeout halaman berat (guna `read_page`/`find`); TAK boleh taip kata laluan (owner log masuk, MCP tab kongsi sesi profil Chrome).
+
 ---
 
 ## Pelajaran teknikal utama (rujukan cepat)
