@@ -34,7 +34,8 @@
                 'border-sand hover:border-brand-600/40' => ($data['template_id'] ?? null) !== $t->id,
             ])>
                 @if ($t->thumbnail_path)
-                    <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($t->thumbnail_path) }}"
+                    {{-- URL relatif (same-origin) — kukuh pada mana-mana host/port + CSP img-src 'self'. --}}
+                    <img src="/storage/{{ $t->thumbnail_path }}"
                          alt="{{ $t->name }}" loading="lazy" class="aspect-video w-full object-cover">
                 @else
                     <div class="flex aspect-video w-full items-center justify-center bg-brand-50 text-4xl font-semibold text-brand-300" style="font-family: serif;">{{ \Illuminate\Support\Str::substr($t->name, 0, 1) }}</div>
@@ -75,7 +76,7 @@
                     @if (! empty($detail->screenshots))
                         <div class="mt-3 space-y-2">
                             @foreach ($detail->screenshots as $shot)
-                                <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($shot) }}" alt="" loading="lazy" class="w-full rounded-lg border border-sand">
+                                <img src="/storage/{{ $shot }}" alt="" loading="lazy" class="w-full rounded-lg border border-sand">
                             @endforeach
                         </div>
                     @endif
