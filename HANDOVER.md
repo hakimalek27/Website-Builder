@@ -32,6 +32,8 @@ Stack: **Laravel 13.19 · PHP 8.4 · Filament v4.11 · Livewire 3 · Tailwind 4 
 
 **Pembersihan katalog (12 Jul, `4a0291b`):** aduan "gambar kosong" dalam galeri PIC = 6 entri pautan **"browse"** ThemeForest (`/category/wordpress?term=...`, tag style `browse`) yang bukan templat rujukan sebenar → dipapar placeholder huruf. **Dibuang** → katalog kini **40 tema bersih (18 masjid + 22 NGO), SEMUA ada thumbnail, 0 placeholder**. 2 laman masjid gov (Masjid Wilayah + Masjid Negara) yang dulu tiada thumbnail kini ada **screenshot laman sebenar** (Chrome headless 800×450 q82, di-commit). Disahkan langsung di browser: wizard L2 kedua-dua tier (imej muat 100%), klik Butiran (modal + pautan demo `target=_blank rel=noopener`), Pilih (snapshot tersimpan). Baris browse dipadam dari DB dev; `migrate:fresh --seed` hasilkan 40 terus.
 
+**Fix thumbnail Katalog Templat admin (12 Jul, `17191c4`):** ImageColumn admin dulu guna `->disk('public')` → Filament jana URL **mutlak APP_URL** (`http://localhost/storage/...`) → pecah bila serve pada host/port lain (dev :8237 → 0/10 muat). Fix: `->getStateUsing(fn ($r) => request()->getSchemeAndHttpHost().'/storage/'.$r->thumbnail_path)` — URL ikut **host permintaan sebenar**, kukuh dev & prod (selaras fix wizard `ec31cc7`). Disahkan browser: admin 10/10 thumbnail muat.
+
 ### Fasa 15 — "Kit Reka Premium": kualiti draf AI aras mamkl.my (11 Jul 2026)
 
 Menyelesaikan aduan owner: output draf "biasa-biasa, tiada wow" (siasatan forensik: 6.5/10 — 0 `clamp()`, 2 bayang, hero gradient kosong, logo/elemen Islamik TAK dirender, prompt hantar kata kunci enum kosong + 90% larangan). Sasaran: aras mamkl.my. Pelan: `~/.claude/plans/kemaskini-ui-ux-setiap-cozy-muffin.md`.
