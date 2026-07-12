@@ -28,7 +28,9 @@ Stack: **Laravel 13.19 · PHP 8.4 · Filament v4.11 · Livewire 3 · Tailwind 4 
 
 **⚠ Nota deploy Fasa 16:** `php artisan migrate` (jadual `template_catalog`); `php artisan db:seed --class=TemplateCatalogSeeder` (idempoten); **`php artisan storage:link`** (kali pertama disk `public` — untuk thumbnail katalog); **aktifkan mod templat via Tetapan admin → Saluran draf → "Templat rujukan"** (`putIfMissing` TIDAK menukar DB sedia ada; atau SQL `UPDATE settings SET value='template' WHERE key='draft_pipeline'`); `npm run build`. TIADA migration enum status (kolum sudah ada `in_build/in_review/live`).
 
-**Kembangan katalog + thumbnail (12 Jul, `ae5f997`+`ec31cc7`):** katalog **14 → 46 tema** (21 masjid + 25 NGO) dari carian ThemeForest sebenar + **38 thumbnail imej pratonton tema** (diperoleh via Claude-in-Chrome: scrape senarai + `og:image` s3.envato). `TemplateCatalogSeeder` ditulis semula baca `database/seeders/template-catalog.json` (46 entri) + salin thumbnail dari `database/seeders/template-thumbnails/` (di-commit, 1.9MB) ke disk `public` semasa seed (idempoten; TIDAK menindih thumbnail upload admin). Wizard thumbnail guna **URL relatif `/storage/`** (bukan `Storage::url()` host-mutlak) — kukuh pada mana-mana port/host. **Deploy:** `storage:link` wajib; `db:seed --class=TemplateCatalogSeeder` salin 38 thumbnail. Nota: thumbnail = imej pratonton pengarang tema (rujukan dalaman katalog). 8 entri (6 pautan browse + 2 laman gov) tiada thumbnail — placeholder huruf; admin boleh upload via Katalog Templat.
+**Kembangan katalog + thumbnail (12 Jul, `ae5f997`+`ec31cc7`):** katalog **14 → 46 tema** dari carian ThemeForest sebenar + **38 thumbnail imej pratonton tema** (diperoleh via Claude-in-Chrome: scrape senarai + `og:image` s3.envato). `TemplateCatalogSeeder` ditulis semula baca `database/seeders/template-catalog.json` + salin thumbnail dari `database/seeders/template-thumbnails/` (di-commit) ke disk `public` semasa seed (idempoten; TIDAK menindih thumbnail upload admin). Wizard thumbnail guna **URL relatif `/storage/`** (bukan `Storage::url()` host-mutlak) — kukuh pada mana-mana port/host. **Deploy:** `storage:link` wajib; `db:seed --class=TemplateCatalogSeeder` salin thumbnail. Nota: thumbnail = imej pratonton pengarang tema (rujukan dalaman katalog).
+
+**Pembersihan katalog (12 Jul, `4a0291b`):** aduan "gambar kosong" dalam galeri PIC = 6 entri pautan **"browse"** ThemeForest (`/category/wordpress?term=...`, tag style `browse`) yang bukan templat rujukan sebenar → dipapar placeholder huruf. **Dibuang** → katalog kini **40 tema bersih (18 masjid + 22 NGO), SEMUA ada thumbnail, 0 placeholder**. 2 laman masjid gov (Masjid Wilayah + Masjid Negara) yang dulu tiada thumbnail kini ada **screenshot laman sebenar** (Chrome headless 800×450 q82, di-commit). Disahkan langsung di browser: wizard L2 kedua-dua tier (imej muat 100%), klik Butiran (modal + pautan demo `target=_blank rel=noopener`), Pilih (snapshot tersimpan). Baris browse dipadam dari DB dev; `migrate:fresh --seed` hasilkan 40 terus.
 
 ### Fasa 15 — "Kit Reka Premium": kualiti draf AI aras mamkl.my (11 Jul 2026)
 
@@ -153,7 +155,7 @@ Admin pilih vendor → base URL + driver auto → API key + model. OpenAI/Anthro
 
 ```bash
 php artisan test                 # 349 ujian Pest
-php artisan migrate:fresh --seed # skema + seed (59 zon, 14 pakej, verse, settings, 14 templat)
+php artisan migrate:fresh --seed # skema + seed (59 zon, 14 pakej, verse, settings, 40 templat)
 php artisan storage:link         # kali pertama disk public (thumbnail katalog templat, Fasa 16)
 npm run build                    # aset (guna ini untuk ujian browser tempatan)
 vendor/bin/pint --dirty          # format PHP
